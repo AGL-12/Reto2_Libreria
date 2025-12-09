@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane id="SignUpRoot" prefHeight="360.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.LogInWindowController">
+   <children>
+      <Button id="Button_LogIn" fx:id="Button_LogIn" layoutX="102.0" layoutY="224.0" mnemonicParsing="false" onAction="#logIn" prefHeight="28.0" prefWidth="61.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Log In " textAlignment="CENTER" />
+      <Button id="Button_SignUp" fx:id="Button_SignUp" layoutX="104.0" layoutY="268.0" mnemonicParsing="false" onAction="#signUp" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Sign Up" />
+      <PasswordField id="PasswordField_Password" fx:id="PasswordField_Password" layoutX="58.0" layoutY="178.0" promptText="Password" />
+      <TextField id="TextField_Username" fx:id="TextField_Username" layoutX="58.0" layoutY="117.0" promptText="Username" />
+      <ImageView layoutX="95.0" layoutY="25.0">
+         <image>
+            <Image url="@../images/person_celebrate_76dp_5084C1_FILL0_wght400_GRAD0_opsz48.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="25.0" layoutY="117.0">
+         <image>
+            <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="25.0" layoutY="178.0">
+         <image>
+            <Image url="@../images/lock_40dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="labelIncorrecto" layoutX="11.0" layoutY="315.0" prefHeight="17.0" prefWidth="255.0" textFill="RED" />
+   </children>
+</AnchorPane>

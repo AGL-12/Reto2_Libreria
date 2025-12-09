@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="padre" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.LibroItemController">
+   <children>
+      <ImageView fx:id="portada" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" VBox.vgrow="ALWAYS">
+         <image>
+            <Image url="@mood-heart.png" />
+         </image>
+      </ImageView>
+      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
+         <children>
+            <Label fx:id="titulo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" VBox.vgrow="ALWAYS" />
+            <Label fx:id="autor" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" VBox.vgrow="ALWAYS" />
+            <StackPane fx:id="valoracion" prefHeight="0.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <ImageView fitHeight="24.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER" />
+                  <ProgressBar maxWidth="1.7976931348623157E308" prefHeight="24.0" prefWidth="200.0" progress="0.0" StackPane.alignment="CENTER" />
+               </children>
+            </StackPane>
+         </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </VBox>
+   </children>
+</VBox>

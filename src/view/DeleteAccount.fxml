@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="360.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.DeleteAccountController">
+   
+    <children>
+      <Label layoutX="62.0" layoutY="73.0" prefHeight="17.0" prefWidth="56.0" text="Username" />
+      <Label layoutX="55.0" layoutY="14.0" text="DELETE ACCOUNT">
+         <font>
+            <Font size="20.0" />
+         </font></Label>
+      <Label layoutX="55.0" layoutY="137.0" text="Password" />
+      <TextField fx:id="TextFieldPassword" layoutX="124.0" layoutY="133.0" prefHeight="25.0" prefWidth="97.0" />
+      <Button fx:id="Button_Delete" layoutX="85.0" layoutY="203.0" mnemonicParsing="false" onAction="#delete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" />
+      <Button fx:id="Button_Cancel" layoutX="87.0" layoutY="260.0" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" />
+      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="32.0" layoutY="70.0" opacity="0.79">
+         <image>
+            <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="32.0" layoutY="133.0">
+         <image>
+            <Image url="@../images/verified_user_32dp_789DE5_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <Label fx:id="LabelUsername" layoutX="136.0" layoutY="73.0" prefHeight="17.0" prefWidth="79.0" text="Label" />
+   </children>
+</AnchorPane>

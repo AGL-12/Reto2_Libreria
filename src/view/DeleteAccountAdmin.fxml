@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="263.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1" fx:controller="view.DeleteAccountAdminController">
+   <children>
+      <Label layoutX="57.0" layoutY="94.0" prefHeight="17.0" prefWidth="56.0" text="Username" />
+      <Label layoutX="15.0" layoutY="14.0" prefHeight="30.0" prefWidth="240.0" text="DELETE ACCOUNT ADMIN">
+         <font>
+            <Font size="20.0" />
+         </font></Label>
+      <Label layoutX="60.0" layoutY="171.0" text="Password" />
+      <TextField fx:id="TextFieldPassword" layoutX="124.0" layoutY="168.0" prefHeight="25.0" prefWidth="117.0" />
+      <Button fx:id="Button_Delete" layoutX="85.0" layoutY="234.0" mnemonicParsing="false" onAction="#delete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" />
+      <Button fx:id="Button_Cancel" layoutX="86.0" layoutY="282.0" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" />
+      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="32.0" layoutY="90.0" opacity="0.79">
+         <image>
+            <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="32.0" layoutY="168.0">
+         <image>
+            <Image url="@../images/verified_user_32dp_789DE5_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+      </ImageView>
+      <ComboBox fx:id="ComboBoxUser" layoutX="124.0" layoutY="90.0" prefHeight="25.0" prefWidth="117.0" />
+      <Label layoutX="32.0" layoutY="64.0" prefHeight="17.0" prefWidth="81.0" text="Select a user" />
+   </children>
+
+</AnchorPane>
