@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="MenuRoot" prefHeight="400.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ModifyWindowController">
+<AnchorPane id="MenuRoot" prefHeight="400.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ModifyWindowController">
    <children>
       <Label layoutX="98.0" prefHeight="44.0" prefWidth="73.0" text="MODIFY">
          <font>

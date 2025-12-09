@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
+package controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +15,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Libro;
 
@@ -48,23 +47,13 @@ public class MainLibreriaController {
     }
 
     public void initialize() {
-
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reto2/Header.fxml"));
-            HBox headerBox = fxmlLoader.load();
-            
-            Padre.setTop(headerBox);
-        } catch (IOException ex) {
-            Logger.getLogger(MainLibreriaController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         libros.addAll(getDatos());
         int column = 0;
         int row = 1;
 
         try {
             for (Libro lib : libros) {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/reto2/LibroItem.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LibroItem.fxml"));
                 VBox libroBox = fxmlLoader.load();
                 LibroItemController libroItemController = fxmlLoader.getController();
                 libroItemController.setData(lib);

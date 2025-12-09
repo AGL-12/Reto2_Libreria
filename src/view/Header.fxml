@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 
-<HBox alignment="CENTER_LEFT" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.HeaderController">
+<HBox alignment="CENTER_LEFT" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HeaderController">
    <children>
       <TextField prefHeight="25.0" prefWidth="48.0" HBox.hgrow="ALWAYS" />
       <TextField prefHeight="25.0" prefWidth="111.0" HBox.hgrow="ALWAYS" />

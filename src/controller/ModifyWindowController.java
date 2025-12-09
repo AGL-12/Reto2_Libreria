@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
+package controller;
 
-import controller.Controller;
 import exception.passwordequalspassword;
 import java.io.IOException;
 import java.net.URL;
@@ -17,9 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import model.Profile;
 import model.User;
@@ -113,7 +110,7 @@ public class ModifyWindowController implements Initializable {
                     javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                     javafx.scene.Parent root = fxmlLoader.load();
 
-                    view.MenuWindowController controllerWindow = fxmlLoader.getController();
+                    controller.MenuWindowController controllerWindow = fxmlLoader.getController();
                     controllerWindow.setUsuario(profile);
                     controllerWindow.setCont(this.cont);
                     javafx.stage.Stage stage = new javafx.stage.Stage();
@@ -155,7 +152,7 @@ public class ModifyWindowController implements Initializable {
                         javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                         javafx.scene.Parent root = fxmlLoader.load();
 
-                        view.MenuWindowController controllerWindow = fxmlLoader.getController();
+                        controller.MenuWindowController controllerWindow = fxmlLoader.getController();
                         controllerWindow.setUsuario(profile);
                         controllerWindow.setCont(this.cont);
 
@@ -187,7 +184,7 @@ public class ModifyWindowController implements Initializable {
             javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
             javafx.scene.Parent root = fxmlLoader.load();
 
-            view.MenuWindowController controllerWindow = fxmlLoader.getController();
+            controller.MenuWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setUsuario(profile);
             controllerWindow.setCont(this.cont);
 

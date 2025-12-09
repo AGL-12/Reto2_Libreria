@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
+package controller;
 
-import controller.Controller;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import java.io.IOException;
@@ -61,7 +60,7 @@ public class LogInWindowController implements Initializable {
             stage.setScene(new Scene(root));
             stage.show();
 
-            view.SignUpWindowController controllerWindow = fxmlLoader.getController();
+            controller.SignUpWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setCont(cont);
 
             // Close current window
@@ -89,7 +88,7 @@ public class LogInWindowController implements Initializable {
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                     Parent root = fxmlLoader.load();
 
-                    view.MenuWindowController controllerWindow = fxmlLoader.getController();
+                    controller.MenuWindowController controllerWindow = fxmlLoader.getController();
                     controllerWindow.setUsuario(profile);
                     controllerWindow.setCont(cont);
 

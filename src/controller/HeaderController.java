@@ -1,4 +1,4 @@
-package view;
+package controller;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -14,7 +14,7 @@ public class HeaderController {
     @FXML
     private void abrirLogin() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/view/LoginWindow.fxml"));
             
             Scene scene = new Scene(root);
             Stage stage = new Stage();

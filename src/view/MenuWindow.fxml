@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="MenuRoot" prefHeight="270.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.MenuWindowController">
+<AnchorPane id="MenuRoot" prefHeight="270.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuWindowController">
    <children>
       <Button fx:id="Button_Delete" layoutX="66.0" layoutY="83.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="330.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete User" onAction="#delete">
          <font>

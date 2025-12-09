@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
+package controller;
 
-import controller.Controller;
 import javafx.scene.control.ToggleGroup;
 
 import exception.passwordequalspassword;
@@ -56,7 +55,7 @@ public class SignUpWindowController implements Initializable {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
             Parent root = fxmlLoader.load();
-            view.LogInWindowController controllerWindow = fxmlLoader.getController();
+            controller.LogInWindowController controllerWindow = fxmlLoader.getController();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -93,7 +92,7 @@ public class SignUpWindowController implements Initializable {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                 Parent root = fxmlLoader.load();
-                view.MenuWindowController controllerWindow = fxmlLoader.getController();
+                controller.MenuWindowController controllerWindow = fxmlLoader.getController();
                 controllerWindow.setUsuario(profile);
                 controllerWindow.setCont(this.cont);
                 Stage stage = new Stage();
