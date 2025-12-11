@@ -22,9 +22,7 @@ public class Admin extends Profile {
     }
 
     public String getCurrentAccount() { return currentAccount; }
-    public void setCurrentAccount(String currentAccount) { this.currentAccount = currentAccount; }
-
-    @Override
+    public void setCurrentAccount(String currentAccount) { this.currentAccount = currentAccount; }@Override
     public void logIn() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
