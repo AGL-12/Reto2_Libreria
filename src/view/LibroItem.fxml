@@ -2,7 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -16,8 +16,16 @@
             <Label fx:id="autor" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
             <StackPane fx:id="valoracion" prefHeight="0.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                <children>
-                  <ImageView fitHeight="24.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER" />
-                  <ProgressBar maxWidth="1.7976931348623157E308" prefHeight="24.0" prefWidth="200.0" progress="0.0" StackPane.alignment="CENTER" />
+                  <ImageView fx:id="estrallaFondo" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
+                     <image>
+                        <Image url="@../images/estrellas_vacio.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fx:id="estrellaFrente" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
+                     <image>
+                        <Image url="@../images/estrellas_relleno.png" />
+                     </image>
+                  </ImageView>
                </children>
             </StackPane>
          </children>
