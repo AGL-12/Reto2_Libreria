@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -15,13 +16,23 @@ import javafx.stage.Stage;
 public class HeaderController {
 
     @FXML
-    private Button login;
-    @FXML
-    private Button opcione;
-    @FXML
     private ImageView logo;
     @FXML
     private HBox padreHeader;
+    @FXML
+    private Label lblUserName;
+    @FXML
+    private Button logIn;
+    @FXML
+    private Button option;
+    @FXML
+    private Button logOut;
+    @FXML
+    private Button btnBuy;
+    @FXML
+    private Button btnAllPurchase;
+    @FXML
+    private Button btnBackMain;
 
     public void initialize() {
         logoResponsive();
