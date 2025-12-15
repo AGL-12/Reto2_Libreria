@@ -33,7 +33,7 @@ public class LibroItemController {
         // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
         recortarImagen(portada, imagenOriginal, 140, 210);
         // CONFIGURACIÓN:
-        estrellasController.setEditable(false); // BLOQUEADO
+        estrellasController.setEditable(true); // BLOQUEADO
         estrellasController.setNota(libro.getAvgValuation()); // PINTAR NOTA
     }
 
