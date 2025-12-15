@@ -5,6 +5,7 @@
  */
 package model;
 
+
 /**
  * Abstract class representing a general profile in the system.
  * Contains common attributes such as username, password, email, and personal information.
@@ -12,11 +13,14 @@ package model;
  * 
  * @author acer
  */
+
 public abstract class Profile {
+
+    private int userCode;
     private String username;
     private String password;
     private String email;
-    private int userCode;
+    
     private String name;
     private String telephone;
     private String surname;
