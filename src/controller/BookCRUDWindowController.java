@@ -5,9 +5,22 @@
  */
 package controller;
 
+import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import model.Profile;
 
 /**
  * FXML Controller class
@@ -16,12 +29,109 @@ import javafx.fxml.Initializable;
  */
 public class BookCRUDWindowController implements Initializable {
 
+    @FXML
+    private Button btnConfirmar;
+    @FXML
+    private Button btnVolver;
+    @FXML
+    private TextField txtISBN;
+    @FXML
+    private TextField txtTitulo;
+    @FXML
+    private TextField txtIdAutor;
+    @FXML
+    private TextField txtHojas;
+    @FXML
+    private TextField txtStock;
+    @FXML
+    private TextField txtSinopsis;
+    @FXML
+    private TextField txtPrecio;
+    @FXML
+    private TextField txtEditorial;
+    @FXML
+    private ImageView idPortada;
+    @FXML
+    private Button btnSubirArchivo;
+
+    private File archivoPortada;
+    private Controller cont; // Controller to handle business logic
+    private Profile profile;
+    private String modo;
+
     /**
      * Initializes the controller class.
      */
+    public void setModo(String opcion) {
+        this.modo = opcion;
+    }
+    public void setCont(Controller cont) {
+        this.cont = cont;
+    }
+
+    // Set the current admin profile
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-    
+        archivoPortada = null;
+        
+    }
+
+    @FXML
+    private void arrastrarSobre(DragEvent event) {
+        Dragboard db = event.getDragboard();
+
+        if (db.hasFiles()) {
+            event.acceptTransferModes(TransferMode.COPY);
+        }
+
+        event.consume();
+    }
+
+    @FXML
+    private void soltarImagen(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+
+        if (db.hasFiles()) {
+            List<File> files = db.getFiles();
+            File file = files.get(0); // Solo una imagen
+
+            // Validar que sea imagen
+            if (file.getName().matches(".*\\.(png|jpg|jpeg)$")) {
+                archivoPortada = file;
+                Image imagen = new Image(file.toURI().toString());
+                idPortada.setImage(imagen);
+                success = true;
+            }
+        }
+
+        event.setDropCompleted(success);
+        event.consume();
+    }
+
+    @FXML
+
+    private void subirPortada() {
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleccionar portada del libro");
+
+        // Filtros solo para imágenes
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
+        );
+
+        Stage stage = (Stage) btnSubirArchivo.getScene().getWindow();
+
+        archivoPortada = fileChooser.showOpenDialog(stage);
+
+        if (archivoPortada != null) {
+            Image imagen = new Image(archivoPortada.toURI().toString());
+            idPortada.setImage(imagen);
+        }
+    }
+
 }
