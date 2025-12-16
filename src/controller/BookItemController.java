@@ -6,42 +6,42 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import model.Book;
 
-public class LibroItemController {
+public class BookItemController {
 
     @FXML
-    private Label autor;
+    private VBox rootBookItem;
     @FXML
-    private ImageView portada;
+    private ImageView cover;
     @FXML
-    private Label titulo;
+    private Label title;
     @FXML
-    private VBox padre;
+    private Label author;
     @FXML
-    private EstrellaPuntuacionController estrellasController;
+    private StarRateController starsController;
+
     //
-    private Book libro;
+    private Book book;
 
-    public void setData(Book libro) {
-        this.libro = libro;
-        titulo.setText(libro.getTitulo());
-        autor.setText(String.valueOf(libro.getIdAuthor()));
-        Image imagenOriginal = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
+    public void setData(Book book) {
+        this.book = book;
+        title.setText(book.getTitulo());
+        author.setText(String.valueOf(book.getIdAuthor()));
+        Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
 
         // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
-        recortarImagen(portada, imagenOriginal, 140, 210);
+        cutOutImage(cover, originalImage, 140, 210);
         // CONFIGURACIÓN:
-        estrellasController.setEditable(false); // BLOQUEADO
-        estrellasController.setNota(libro.getAvgValuation()); // PINTAR NOTA
+        starsController.setEditable(false); // BLOQUEADO
+        starsController.setValueStars(book.getAvgValuation()); // PINTAR NOTA
     }
 
     /**
      * 1. Calcula cuánto hay que escalar la imagen para llenar el hueco. 2.
      * Calcula el centro de la imagen (Viewport). 3. Aplica el recorte.
      */
-    private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
+    private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView
         imageView.setFitWidth(targetWidth);
         imageView.setFitHeight(targetHeight);

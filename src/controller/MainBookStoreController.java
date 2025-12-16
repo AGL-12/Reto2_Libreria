@@ -21,13 +21,12 @@ import model.Book;
  *
  * @author Alexander
  */
-public class MainLibreriaController {
+public class MainBookStoreController {
 
     @FXML
-    private BorderPane Padre;
-
+    private BorderPane root;
     @FXML
-    private TilePane tileLibros;
+    private TilePane tileBooks;
 
     List<Book> libros = new ArrayList<>();
 
@@ -51,14 +50,14 @@ public class MainLibreriaController {
 
         try {
             for (Book lib : libros) {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LibroItem.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookItem.fxml"));
                 VBox libroBox = fxmlLoader.load();
-                LibroItemController libroItemController = fxmlLoader.getController();
+                BookItemController libroItemController = fxmlLoader.getController();
                 libroItemController.setData(lib);
-                tileLibros.getChildren().add(libroBox);
+                tileBooks.getChildren().add(libroBox);
             }
         } catch (IOException ex) {
-            Logger.getLogger(MainLibreriaController.class.getName()).log(Level.SEVERE, "Error al cargar el FXML", ex);
+            Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, "Error al cargar el FXML", ex);
         }
 
     }

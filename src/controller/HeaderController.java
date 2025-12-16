@@ -16,9 +16,9 @@ import javafx.stage.Stage;
 public class HeaderController {
 
     @FXML
-    private ImageView logo;
+    private HBox rootHeader;
     @FXML
-    private HBox padreHeader;
+    private ImageView logo;
     @FXML
     private Label lblUserName;
     @FXML
@@ -54,7 +54,7 @@ public class HeaderController {
 
     private void logoResponsive() {
         // 1. Vinculamos el ancho de la imagen al 25% (0.25) del ancho del contenedor
-        logo.fitWidthProperty().bind(padreHeader.widthProperty().multiply(0.25));
+        logo.fitWidthProperty().bind(rootHeader.widthProperty().multiply(0.25));
     }
 
 }

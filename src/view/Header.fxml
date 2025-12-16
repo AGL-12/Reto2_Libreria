@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 
-<HBox fx:id="padreHeader" alignment="CENTER" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HeaderController">
+<HBox fx:id="rootHeader" alignment="CENTER" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HeaderController">
    <children>
       <ImageView fx:id="logo" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
          <image>
@@ -19,7 +19,7 @@
       <HBox alignment="CENTER" prefHeight="57.0" prefWidth="348.0" HBox.hgrow="ALWAYS">
          <children>
             <TextField promptText="ISBN,TITULO O AUTOR" HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" text="Button" HBox.hgrow="ALWAYS" />
+            <Button mnemonicParsing="false" text="🔍" HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <Button fx:id="logIn" mnemonicParsing="false" onAction="#abrirLogin" text="Iniciar Sesión" HBox.hgrow="ALWAYS" />
