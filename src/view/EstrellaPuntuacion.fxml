@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane fx:id="root" maxWidth="120.0" onMouseClicked="#manejarClic" onMouseExited="#manejarSalida" onMouseMoved="#manejarMovimiento" prefHeight="24.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.EstrellaPuntuacionController">
+   <children>
+      <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
+         <image>
+            <Image url="@../images/estrellas_vacio.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="estrellaFrente" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
+         <image>
+            <Image url="@../images/estrellas_relleno.png" />
+         </image>
+      </ImageView>
+   </children>
+</StackPane>
