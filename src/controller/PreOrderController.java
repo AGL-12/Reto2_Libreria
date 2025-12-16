@@ -33,7 +33,7 @@ public class PreOrderController {
     private Label precio;
     @FXML
     private Label cantidadLabel;
-    
+
     private Book libro;
 
     public void setData(Book libro) {
@@ -46,8 +46,7 @@ public class PreOrderController {
         recortarImagen(portada, imagenOriginal, 80, 80);
     }
 
-        
-     private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
+    private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView
         imageView.setFitWidth(targetWidth);
         imageView.setFitHeight(targetHeight);
@@ -80,5 +79,5 @@ public class PreOrderController {
         imageView.setSmooth(true); // Suavizado para mejor calidad
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
-    
+
 }
