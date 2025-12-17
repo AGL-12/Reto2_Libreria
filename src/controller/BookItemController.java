@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.stream.Collectors;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
@@ -27,7 +28,21 @@ public class BookItemController {
     public void setData(Book book) {
         this.book = book;
         title.setText(book.getTitulo());
-        author.setText(String.valueOf(book.getIdAuthor()));
+        // 1. Verificamos que la lista no sea null ni esté vacía para evitar errores
+        if (book.getListAuthors() != null && !book.getListAuthors().isEmpty()) {
+
+            // 2. Magia de Java Streams:
+            String textoAutores = book.getListAuthors().stream()
+                    // Aquí tomamos el nombre (o nombre + apellido) de cada autor
+                    .map(a -> a.getNombre() + " " + a.getApellido())
+                    // Aquí los unimos todos separados por una coma y un espacio
+                    .collect(Collectors.joining(", "));
+
+            author.setText(textoAutores);
+
+        } else {
+            author.setText("Anónimo"); // O déjalo vacío ""
+        }
         Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
 
         // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)

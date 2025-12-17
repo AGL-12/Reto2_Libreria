@@ -16,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import model.Author;
 import model.Book;
 
 /**
@@ -54,12 +55,15 @@ public class ShoppingCartController implements Initializable {
     /*Metodo prueba para tener libros cargados*/
     private List<Book> cargarLibros() {
         Book libro;
+        List<Author> listAuthors = new ArrayList<>();
+        Author a = new Author(1, "Alex", "Boss");
+        listAuthors.add(a);
 
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
             libro.setTitulo("carita wee");
-            libro.setIdAuthor(1);
+            libro.setListAuthors(listAuthors);
             libro.setAvgValuation(1.2f);
             libros.add(libro);
         }

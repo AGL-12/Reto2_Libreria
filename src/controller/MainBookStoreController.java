@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import model.Author;
 import model.Book;
 
 /**
@@ -32,12 +33,19 @@ public class MainBookStoreController {
 
     private List<Book> getDatos() {
         Book libro;
+        List<Author> listAuthors = new ArrayList<>();
+        Author a = new Author(1, "Alex", "Boss");
+        listAuthors.add(a);
+        listAuthors.add(a);
+        listAuthors.add(a);
+        listAuthors.add(a);
+        listAuthors.add(a);
 
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
-            libro.setTitulo("carita wee");
-            libro.setIdAuthor(1);
+            libro.setTitulo("HARRY POTTER Y EL CÁLIZ DE FUEGO (HARRY POTTER [EDICIONES ILUSTRA DAS INTERACTIVAS] 4");
+            libro.setListAuthors(listAuthors);
             libro.setAvgValuation(1.2f);
             libros.add(libro);
         }

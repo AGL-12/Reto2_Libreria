@@ -10,7 +10,7 @@
       <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="5.0" VBox.vgrow="ALWAYS">
          <children>
             <Label fx:id="title" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
-            <Label fx:id="author" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" textAlignment="CENTER" wrapText="true" VBox.vgrow="ALWAYS" />
+            <Label fx:id="author" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Label" textAlignment="CENTER" VBox.vgrow="ALWAYS" />
             <fx:include fx:id="stars" source="StarRate.fxml" VBox.vgrow="ALWAYS" />
          </children>
       </VBox>

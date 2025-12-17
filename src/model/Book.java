@@ -1,11 +1,13 @@
 package model;
 
+import java.util.List;
+
 public class Book {
 
     private int ISBN;
     private String cover;
     private String titulo;
-    private int idAuthor;
+    private List<Author> listAuthors;
     private int sheets;
     private int stock;
     private String sypnosis;
@@ -13,11 +15,11 @@ public class Book {
     private String editorial;
     private float avgValuation; //calculado
 
-    public Book(int ISBN, String cover, String titulo, int idAuthor, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
+    public Book(int ISBN, String cover, String titulo, List<Author> listAuthors, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
         this.ISBN = ISBN;
         this.cover = cover;
         this.titulo = titulo;
-        this.idAuthor = idAuthor;
+        this.listAuthors = listAuthors;
         this.sheets = sheets;
         this.stock = stock;
         this.sypnosis = sypnosis;
@@ -54,12 +56,12 @@ public class Book {
         this.titulo = titulo;
     }
 
-    public int getIdAuthor() {
-        return idAuthor;
+    public List<Author> getListAuthors() {
+        return listAuthors;
     }
 
-    public void setIdAuthor(int idAuthor) {
-        this.idAuthor = idAuthor;
+    public void setListAuthors(List<Author> listAuthors) {
+        this.listAuthors = listAuthors;
     }
 
     public int getSheets() {
