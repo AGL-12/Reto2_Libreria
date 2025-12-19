@@ -33,19 +33,13 @@ public class MainBookStoreController {
 
     private List<Book> getDatos() {
         Book libro;
-        List<Author> listAuthors = new ArrayList<>();
-        Author a = new Author(1, "Alex", "Boss");
-        listAuthors.add(a);
-        listAuthors.add(a);
-        listAuthors.add(a);
-        listAuthors.add(a);
-        listAuthors.add(a);
+        Author a = new Author(1, "Alex", "Boss", null);
 
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
             libro.setTitulo("HARRY POTTER Y EL CÁLIZ DE FUEGO (HARRY POTTER [EDICIONES ILUSTRA DAS INTERACTIVAS] 4");
-            libro.setListAuthors(listAuthors);
+            libro.setAuthor(a);
             libro.setAvgValuation(1.2f);
             libros.add(libro);
         }

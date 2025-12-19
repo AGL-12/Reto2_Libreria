@@ -7,7 +7,7 @@ public class Book {
     private int ISBN;
     private String cover;
     private String titulo;
-    private List<Author> listAuthors;
+    private Author author;
     private int sheets;
     private int stock;
     private String sypnosis;
@@ -15,11 +15,11 @@ public class Book {
     private String editorial;
     private float avgValuation; //calculado
 
-    public Book(int ISBN, String cover, String titulo, List<Author> listAuthors, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
+    public Book(int ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
         this.ISBN = ISBN;
         this.cover = cover;
         this.titulo = titulo;
-        this.listAuthors = listAuthors;
+        this.author = author;
         this.sheets = sheets;
         this.stock = stock;
         this.sypnosis = sypnosis;
@@ -56,12 +56,12 @@ public class Book {
         this.titulo = titulo;
     }
 
-    public List<Author> getListAuthors() {
-        return listAuthors;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setListAuthors(List<Author> listAuthors) {
-        this.listAuthors = listAuthors;
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
     public int getSheets() {

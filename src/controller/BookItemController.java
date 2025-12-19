@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -29,16 +30,16 @@ public class BookItemController {
         this.book = book;
         title.setText(book.getTitulo());
         // 1. Verificamos que la lista no sea null ni esté vacía para evitar errores
-        if (book.getListAuthors() != null && !book.getListAuthors().isEmpty()) {
+        if (book.getAuthor() != null) {
 
-            // 2. Magia de Java Streams:
-            String textoAutores = book.getListAuthors().stream()
-                    // Aquí tomamos el nombre (o nombre + apellido) de cada autor
-                    .map(a -> a.getNombre() + " " + a.getApellido())
-                    // Aquí los unimos todos separados por una coma y un espacio
-                    .collect(Collectors.joining(", "));
+            String textoAutor = book.getAuthor().toString();
 
-            author.setText(textoAutores);
+            author.setText(textoAutor);
+            
+            // 3. Crear y asignar el Tooltip con el texto COMPLETO
+            Tooltip tooltip = new Tooltip(textoAutor);
+
+            author.setTooltip(tooltip);
 
         } else {
             author.setText("Anónimo"); // O déjalo vacío ""

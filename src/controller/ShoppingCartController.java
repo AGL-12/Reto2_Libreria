@@ -26,9 +26,8 @@ import model.Book;
  */
 public class ShoppingCartController implements Initializable {
 
-    
     private TilePane tileLibros;
-    
+
     List<Book> libros = new ArrayList<>();
 
     /**
@@ -36,7 +35,7 @@ public class ShoppingCartController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         libros.addAll(cargarLibros());
 
         try {
@@ -55,21 +54,18 @@ public class ShoppingCartController implements Initializable {
     /*Metodo prueba para tener libros cargados*/
     private List<Book> cargarLibros() {
         Book libro;
-        List<Author> listAuthors = new ArrayList<>();
-        Author a = new Author(1, "Alex", "Boss");
-        listAuthors.add(a);
+        Author a = new Author(1, "Alex", "Boss", null);
 
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
             libro.setTitulo("carita wee");
-            libro.setListAuthors(listAuthors);
+            libro.setAuthor(a);
             libro.setAvgValuation(1.2f);
             libros.add(libro);
         }
 
         return libros;
-        
 
     }
 
