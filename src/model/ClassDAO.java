@@ -5,9 +5,7 @@
  */
 package model;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Data Access Object interface for database operations.

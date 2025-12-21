@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import utilities.HibernateUtil;
 
 public class Main extends Application {
 
@@ -30,7 +31,19 @@ public class Main extends Application {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        // --- PRUEBA DE CONEXIÓN ---
+        System.out.println("Intentando conectar con Hibernate...");
+
+        // Al llamar a getSessionFactory, Hibernate leerá el XML y creará las tablas
+        HibernateUtil.getSessionFactory();
+
+        System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
+
+        // Una vez comprobado, ya puedes lanzar la app
         launch(args);
+
+        // Al cerrar la app
+        HibernateUtil.shutdown();
     }
 
 }

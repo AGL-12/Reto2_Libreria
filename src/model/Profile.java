@@ -5,22 +5,34 @@
  */
 package model;
 
+import java.io.Serializable;
+import javax.persistence.*;
 
 /**
- * Abstract class representing a general profile in the system.
- * Contains common attributes such as username, password, email, and personal information.
- * All profile types (User, Admin) extend this class.
- * 
+ * Abstract class representing a general profile in the system. Contains common
+ * attributes such as username, password, email, and personal information. All
+ * profile types (User, Admin) extend this class.
+ *
  * @author acer
  */
+@Entity
+@Table(name = "profile")
+@Inheritance(strategy = InheritanceType.JOINED) // Crea tablas separadas unidas por ID
+public abstract class Profile implements Serializable {
 
-public abstract class Profile {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_code")
     private int userCode;
+
+    @Column(nullable = false, unique = true)
     private String username;
+
     private String password;
+
+    @Column(nullable = false, unique = true)
     private String email;
-    
+
     private String name;
     private String telephone;
     private String surname;
@@ -51,31 +63,70 @@ public abstract class Profile {
         this.surname = "";
     }
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getEmail() { return email; }
-    public int getUserCode() { return userCode; }
-    public String getName() { return name; }
-    public String getTelephone() { return telephone; }
-    public String getSurname() { return surname; }
+    public String getUsername() {
+        return username;
+    }
 
-    public void setUsername(String username) { this.username = username; }
-    public void setPassword(String password) { this.password = password; }
-    public void setEmail(String email) { this.email = email; }
-    public void setUserCode(int userCode) { this.userCode = userCode; }
-    public void setName(String name) { this.name = name; }
-    public void setTelephone(String telephone) { this.telephone = telephone; }
-    public void setSurname(String surname) { this.surname = surname; }
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public int getUserCode() {
+        return userCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setUserCode(int userCode) {
+        this.userCode = userCode;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
 
     @Override
     public String toString() {
-        return "Profile{" + "username=" + username + ", password=" + password + ", email=" + email +
-                ", userCode=" + userCode + ", name=" + name + ", telephone=" + telephone + ", surname=" + surname + '}';
+        return "Profile{" + "username=" + username + ", password=" + password + ", email=" + email
+                + ", userCode=" + userCode + ", name=" + name + ", telephone=" + telephone + ", surname=" + surname + '}';
     }
 
     /**
-     * Performs login logic for the profile.
-     * Must be implemented by subclasses.
+     * Performs login logic for the profile. Must be implemented by subclasses.
      */
     public abstract void logIn();
 }

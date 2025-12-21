@@ -1,19 +1,26 @@
 package model;
 
 import java.util.List;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "author")
 public class Author {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idAuthor;
     private String nombre;
     private String apellido;
-    private List<Book> booksList;
+    
+    @OneToMany(mappedBy = "author")
+    private List<Book> books;
 
-    public Author(int idAuthor, String nombre, String apellido, List<Book> booksList) {
+    public Author(int idAuthor, String nombre, String apellido, List<Book> books) {
         this.idAuthor = idAuthor;
         this.nombre = nombre;
         this.apellido = apellido;
-        this.booksList = booksList;
+        this.books = books;
     }
 
     public int getIdAuthor() {
@@ -40,12 +47,12 @@ public class Author {
         this.apellido = apellido;
     }
 
-    public List<Book> getBooksList() {
-        return booksList;
+    public List<Book> getBooks() {
+        return books;
     }
 
-    public void setBooksList(List<Book> booksList) {
-        this.booksList = booksList;
+    public void setBooks(List<Book> books) {
+        this.books = books;
     }
 
     @Override

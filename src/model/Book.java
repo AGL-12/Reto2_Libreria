@@ -1,19 +1,29 @@
 package model;
 
-import java.util.List;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "book")
 public class Book {
 
-    private int ISBN;
+    @Id
+    @Column(name = "isbn")
+    private int ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
     private String cover;
     private String titulo;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_author")
     private Author author;
     private int sheets;
     private int stock;
+    @Column(length = 1000) // Para textos largos
     private String sypnosis;
     private float price;
     private String editorial;
-    private float avgValuation; //calculado
+    // CAMPO CALCULADO: No se guarda en BD
+    @Transient
+    private float avgValuation;
 
     public Book(int ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
         this.ISBN = ISBN;
@@ -31,7 +41,6 @@ public class Book {
     public Book() {
     }
 
-    
     public int getISBN() {
         return ISBN;
     }
@@ -40,7 +49,7 @@ public class Book {
         this.ISBN = ISBN;
     }
 
-   public String getCover() {
+    public String getCover() {
         return cover;
     }
 
@@ -111,5 +120,5 @@ public class Book {
     public void setAvgValuation(float avgValuation) {
         this.avgValuation = avgValuation;
     }
-    
+
 }
