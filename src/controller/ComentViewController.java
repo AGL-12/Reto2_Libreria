@@ -43,7 +43,7 @@ public class ComentViewController implements Initializable {
         
     } 
     
-    public void setDatos(String usuario, String fecha, String texto, int puntuacion){
+    public void setDatos(String usuario, String fecha, String texto, float puntuacion){
         this.lblUsuario.setText(usuario);
         this.lblFecha.setText(fecha);
         this.comentario.setText(texto);
