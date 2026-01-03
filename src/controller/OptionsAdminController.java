@@ -85,10 +85,10 @@ public class OptionsAdminController implements Initializable {
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/EliminarCoentario.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteComentWindow.fxml"));
             javafx.scene.Parent root = fxmlLoader.load();
 
-            controller.EliminarComentarioWindowController controllerWindow = fxmlLoader.getController();
+            controller.DeleteComentWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
             controllerWindow.setCont(this.cont);
 
@@ -129,10 +129,10 @@ public class OptionsAdminController implements Initializable {
     @FXML
     private void opcionesLibroWindow(ActionEvent event) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LibroOptionWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookOptionWindow.fxml"));
             javafx.scene.Parent root = fxmlLoader.load();
 
-            controller.LibroOptionWindowController controllerWindow = fxmlLoader.getController();
+            controller.BookOptionWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
             controllerWindow.setCont(this.cont);
 

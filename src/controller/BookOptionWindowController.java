@@ -22,20 +22,20 @@ import model.Profile;
  *
  * @author uazko
  */
-public class LibroOptionWindowController implements Initializable {
+public class BookOptionWindowController implements Initializable {
 
     @FXML
-    private Button btnVolver;
+    private Button btnReturn;
     @FXML
-    private Button btnAñadirLibro;
+    private Button btnAdd;
     @FXML
-    private Button btnModificarLibro;
+    private Button btnModify;
     @FXML
-    private Button btnEliminarLibro;
+    private Button btnDelete;
 
     private Controller cont; // Controller to handle business logic
     private Profile profile; // Currently logged-in admin
-    private String modo;
+    private String mod;
 
     /**
      * Initializes the controller class.
@@ -55,52 +55,52 @@ public class LibroOptionWindowController implements Initializable {
     }
 
     @FXML
-    private void volver(ActionEvent event) {
+    private void Return(ActionEvent event) {
     }
 
     @FXML
     private void createBook(ActionEvent event) {
-        modo = "create";
+        mod = "create";
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
         try {
             javafx.scene.Parent root = fxmlLoader.load();
             controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
             controllerWindow.setCont(this.cont);
-            controllerWindow.setModo(modo);
+            controllerWindow.setMod(mod);
         } catch (IOException ex) {
-            Logger.getLogger(LibroOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
     @FXML
     private void modifyBook(ActionEvent event) {
-        modo = "modify";
+        mod = "modify";
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
         try {
             javafx.scene.Parent root = fxmlLoader.load();
             controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
             controllerWindow.setCont(this.cont);
-            controllerWindow.setModo(modo);
+            controllerWindow.setMod(mod);
         } catch (IOException ex) {
-            Logger.getLogger(LibroOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @FXML
     private void deleteBook(ActionEvent event) {
-        modo = "modify";
+        mod = "modify";
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
         try {
             javafx.scene.Parent root = fxmlLoader.load();
             controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
             controllerWindow.setCont(this.cont);
-            controllerWindow.setModo(modo);
+            controllerWindow.setMod(mod);
         } catch (IOException ex) {
-            Logger.getLogger(LibroOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

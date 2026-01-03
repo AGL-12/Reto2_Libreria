@@ -30,40 +30,40 @@ import model.Profile;
 public class BookCRUDWindowController implements Initializable {
 
     @FXML
-    private Button btnConfirmar;
+    private Button btnConfirm;
     @FXML
-    private Button btnVolver;
+    private Button btnReturn;
     @FXML
     private TextField txtISBN;
     @FXML
-    private TextField txtTitulo;
+    private TextField txtTitle;
     @FXML
-    private TextField txtIdAutor;
+    private TextField txtIdAuthor;
     @FXML
-    private TextField txtHojas;
+    private TextField txtPages;
     @FXML
     private TextField txtStock;
     @FXML
     private TextField txtSinopsis;
     @FXML
-    private TextField txtPrecio;
+    private TextField txtPrice;
     @FXML
     private TextField txtEditorial;
     @FXML
-    private ImageView idPortada;
+    private ImageView idFrontPage;
     @FXML
-    private Button btnSubirArchivo;
+    private Button btnUploadFile;
 
-    private File archivoPortada;
+    private File frontPageFile;
     private Controller cont; // Controller to handle business logic
     private Profile profile;
-    private String modo;
+    private String mod;
 
     /**
      * Initializes the controller class.
      */
-    public void setModo(String opcion) {
-        this.modo = opcion;
+    public void setMod(String option) {
+        this.mod = option;
     }
     public void setCont(Controller cont) {
         this.cont = cont;
@@ -75,12 +75,12 @@ public class BookCRUDWindowController implements Initializable {
     }
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        archivoPortada = null;
-        
+        frontPageFile = null;
+        btnConfirm.setText(mod);
     }
 
     @FXML
-    private void arrastrarSobre(DragEvent event) {
+    private void dragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
 
         if (db.hasFiles()) {
@@ -91,7 +91,7 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     @FXML
-    private void soltarImagen(DragEvent event) {
+    private void dropImage(DragEvent event) {
         Dragboard db = event.getDragboard();
         boolean success = false;
 
@@ -101,9 +101,9 @@ public class BookCRUDWindowController implements Initializable {
 
             // Validar que sea imagen
             if (file.getName().matches(".*\\.(png|jpg|jpeg)$")) {
-                archivoPortada = file;
+                frontPageFile = file;
                 Image imagen = new Image(file.toURI().toString());
-                idPortada.setImage(imagen);
+                idFrontPage.setImage(imagen);
                 success = true;
             }
         }
@@ -114,7 +114,7 @@ public class BookCRUDWindowController implements Initializable {
 
     @FXML
 
-    private void subirPortada() {
+    private void uploadFrontPage() {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar portada del libro");
@@ -124,13 +124,13 @@ public class BookCRUDWindowController implements Initializable {
                 new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
         );
 
-        Stage stage = (Stage) btnSubirArchivo.getScene().getWindow();
+        Stage stage = (Stage) btnUploadFile.getScene().getWindow();
 
-        archivoPortada = fileChooser.showOpenDialog(stage);
+        frontPageFile = fileChooser.showOpenDialog(stage);
 
-        if (archivoPortada != null) {
-            Image imagen = new Image(archivoPortada.toURI().toString());
-            idPortada.setImage(imagen);
+        if (frontPageFile != null) {
+            Image imagen = new Image(frontPageFile.toURI().toString());
+            idFrontPage.setImage(imagen);
         }
     }
 

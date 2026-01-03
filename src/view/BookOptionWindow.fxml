@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="279.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.LibroOptionWindowController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="279.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookOptionWindowController">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -19,9 +19,9 @@
     <RowConstraints maxHeight="306.0000518798828" minHeight="10.0" prefHeight="41.59998779296876" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <Button fx:id="btnReturn" mnemonicParsing="false" onAction="#volver" text="Volver" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-      <Button fx:id="btnAddBook" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createBook" text="Añadir Libro" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-      <Button fx:id="btnModifyBook" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#modifyBook" text="Modificar Libro" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <Button fx:id="btnDeleteBook" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#deleteBook" text="Eliminar Libro" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Button fx:id="btnReturn" mnemonicParsing="false" onAction="#Return" text="Volver" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+      <Button fx:id="btnAdd" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createBook" text="Añadir Libro" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <Button fx:id="btnModify" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#modifyBook" text="Modificar Libro" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Button fx:id="btnDelete" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#deleteBook" text="Eliminar Libro" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    </children>
 </GridPane>

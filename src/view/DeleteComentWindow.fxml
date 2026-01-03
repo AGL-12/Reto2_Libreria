@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="431.0" prefWidth="827.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="431.0" prefWidth="827.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteComentWindowController">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="343.20001220703125" minWidth="10.0" prefWidth="300.79998779296875" />
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="343.20001220703125" minWidth="10.0" prefWidth="300.79998779296875" />
@@ -28,15 +28,15 @@
   </rowConstraints>
    <children>
       <Button fx:id="btnVolver" mnemonicParsing="false" text="Volver" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-      <TextField fx:id="txtNomUsu" text="Nombre de usuario" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
+      <TextField fx:id="txtNameUsu" text="Nombre de usuario" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1" />
       <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3">
         <columns>
-          <TableColumn fx:id="columnTitulo" prefWidth="113.59997254610062" text="Titulo" />
-          <TableColumn fx:id="columnComentario" prefWidth="131.2000732421875" text="Comentario" />
-            <TableColumn fx:id="columnFecha" prefWidth="118.39997863769531" text="Fecha" />
+          <TableColumn fx:id="columnTitle" prefWidth="113.59997254610062" text="Titulo" />
+          <TableColumn fx:id="columnComent" prefWidth="131.2000732421875" text="Comentario" />
+            <TableColumn fx:id="columnDate" prefWidth="118.39997863769531" text="Fecha" />
         </columns>
       </TableView>
-      <Button fx:id="btnEliminarComentario" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="358.0" text="Eliminar comentario" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+      <Button fx:id="btnDeleteComent" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="358.0" text="Eliminar comentario" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
       <ScrollBar orientation="VERTICAL" GridPane.columnIndex="4" GridPane.rowIndex="3" />
       <fx:include source="Header.fxml" GridPane.columnSpan="5" />
    </children>
