@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.TilePane?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ComentViewController">
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ComentViewController" stylesheets="@../css/style.css" styleClass="comment-card">
    <children>
       <GridPane HBox.hgrow="ALWAYS">
         <columnConstraints>
@@ -29,7 +29,7 @@
             </TilePane>
             <TextArea fx:id="comentario" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                <GridPane.margin>
-                  <Insets bottom="20.0" left="100.0" right="100.0" top="20.0" />
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </GridPane.margin>
             </TextArea>
          </children>
