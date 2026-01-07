@@ -1,5 +1,6 @@
 package main;
 
+import controller.MainBookStoreController;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -18,7 +19,10 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/MainBookStore.fxml"));
+        FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
+        Parent root = fxmlloader.load();
+        MainBookStoreController main = fxmlloader.getController();
+        main.headerMode("NO_USER");
         Scene scene = new Scene(root);
         stage.setTitle("Libreria che");
         stage.setScene(scene);
