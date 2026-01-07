@@ -17,8 +17,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import model.Admin;
 import model.Profile;
 import model.User;
@@ -127,8 +129,33 @@ public class MenuWindowController implements Initializable {
      */
     @FXML
     private void cerrarVentana(ActionEvent event) {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.close();
+        try {
+        // 1. Cargamos la vista GRANDE (Main)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
+            Parent root;
+            root = loader.load();
+            
+            // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
+            // HeaderController mainController = loader.getController();
+            // mainController.setControl(Control);
+
+            Stage oldStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage newStage = new Stage();
+
+            // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
+            newStage.initStyle(StageStyle.DECORATED); 
+            
+            newStage.setScene(new Scene(root));
+            newStage.sizeToScene();
+            
+            // 3. Centramos en pantalla
+            newStage.centerOnScreen();
+            
+            newStage.show();
+            oldStage.close();
+        } catch (IOException ex) {
+            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
