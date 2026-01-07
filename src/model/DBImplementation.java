@@ -7,25 +7,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import threads.HiloConnection;
 
 /**
- * Implementation of ClassDAO using database operations.
- * Handles all database interactions for users and admins.
- * Provides login, signup, deletion, modification, and retrieval of usernames.
- * 
+ * Implementation of ClassDAO using database operations. Handles all database
+ * interactions for users and admins. Provides login, signup, deletion,
+ * modification, and retrieval of usernames.
+ *
  * Author: acer
  */
 public class DBImplementation implements ClassDAO {
 
     private PreparedStatement stmt;
-
-    // Configuration for database connection
-    private ResourceBundle configFile;
-    private String driverDB;
-    private String urlDB;
-    private String userDB;
-    private String passwordDB;
 
     // SQL statements
     private final String SQLSINGUPPROFILE = "INSERT INTO PROFILE_ (USERNAME, PASSWORD_, EMAIL, NAME_, TELEPHONE, SURNAME) VALUES (?,?,?,?,?,?);";
@@ -46,11 +41,7 @@ public class DBImplementation implements ClassDAO {
      * Default constructor that loads DB configuration.
      */
     public DBImplementation() {
-        this.configFile = ResourceBundle.getBundle("model.configClass");
-        this.driverDB = this.configFile.getString("Driver");
-        this.urlDB = this.configFile.getString("Conn");
-        this.userDB = this.configFile.getString("DBUser");
-        this.passwordDB = this.configFile.getString("DBPass");
+
     }
 
     /**
@@ -61,102 +52,23 @@ public class DBImplementation implements ClassDAO {
      * @return Profile object (User or Admin) if found, null otherwise
      */
     @Override
-    public Profile logIn(String username, String password) {
-        Connection con = null;
-        try {
-            con = ConnectionPool.getConnection();
-            stmt = con.prepareStatement(SLQLOGINUSER);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet result = stmt.executeQuery();
-            if (!(result.next())) {
-                stmt = con.prepareStatement(SLQLOGINADMIN);
-                stmt.setString(1, username);
-                stmt.setString(2, password);
-                result = stmt.executeQuery();
-                if (result.next()) {
-                    Admin profile_admin = new Admin();
-                    profile_admin.setUsername(result.getString("USERNAME"));
-                    profile_admin.setPassword(result.getString("PASSWORD_"));
-                    profile_admin.setEmail(result.getString("EMAIL"));
-                    profile_admin.setUserCode(result.getInt("USER_CODE"));
-                    profile_admin.setName(result.getString("NAME_"));
-                    profile_admin.setTelephone(result.getString("TELEPHONE"));
-                    profile_admin.setSurname(result.getString("SURNAME"));
-                    profile_admin.setCurrentAccount(result.getString("CURRENT_ACCOUNT"));
-                    return profile_admin;
-                } else {
-                    System.out.println("Usuario encontrado en la base de datos");
-                }
-            } else {
-                User profile_user = new User();
-                profile_user.setUsername(result.getString("USERNAME"));
-                profile_user.setPassword(result.getString("PASSWORD_"));
-                profile_user.setEmail(result.getString("EMAIL"));
-                profile_user.setUserCode(result.getInt("USER_CODE"));
-                profile_user.setName(result.getString("NAME_"));
-                profile_user.setTelephone(result.getString("TELEPHONE"));
-                profile_user.setSurname(result.getString("SURNAME"));
-                profile_user.setGender(result.getString("GENDER"));
-                profile_user.setCardNumber(result.getString("CARD_NUMBER"));
-                return profile_user;
-            }
-        } catch (SQLException e) {
-            System.out.println("Database query error");
-            e.printStackTrace();
-        } finally {
-            try {
-                if (stmt != null) stmt.close();
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                System.out.println("Error closing database connection");
-                e.printStackTrace();
-            }
-        }
-        return null;
+    public Profile logIn(Session session, String username, String password) {
+        String hql = "FROM Profile p WHERE p.username = :user AND p.password = :pass";
+        // Simplemente ejecutamos la consulta usando la sesión prestada
+        Query<Profile> query = session.createQuery(hql, Profile.class);
+        query.setParameter("user", username);
+        query.setParameter("pass", password);
+        
+        return query.uniqueResult();
     }
-
     /**
      * Signs up a new user in the database.
      *
      * @return true if signup was successful, false otherwise
      */
     @Override
-    public Boolean signUp(String gender, String cardNumber, String username, String password, String email, String name, String telephone, String surname) {
-        HiloConnection connectionThread = new HiloConnection(30);
-        connectionThread.start();
-        boolean success = false;
-        try {
-            Connection con = waitForConnection(connectionThread);
-            stmt = con.prepareStatement(SQLSINGUPPROFILE);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.setString(3, email);
-            stmt.setString(4, name);
-            stmt.setString(5, telephone);
-            stmt.setString(6, surname);
-            int rowsUpdated = stmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                stmt = con.prepareStatement(SQLSIGNUPUSER);
-                stmt.setString(1, username);
-                stmt.setString(2, gender);
-                stmt.setString(3, cardNumber);
-                rowsUpdated = stmt.executeUpdate();
-                success = rowsUpdated > 0;
-            }
-        } catch (SQLException | InterruptedException e) {
-            System.out.println("Database error on signup");
-            e.printStackTrace();
-        } finally {
-            try {
-                if (stmt != null) stmt.close();
-                connectionThread.releaseConnection();
-            } catch (SQLException e) {
-                System.out.println("Error closing DB connection after signup");
-                e.printStackTrace();
-            }
-        }
-        return success;
+    public void signUp(Session session, Profile profile) {
+        session.save(profile);
     }
 
     /**
@@ -170,13 +82,13 @@ public class DBImplementation implements ClassDAO {
         PreparedStatement stmtUser = null;
         try {
             Connection con = waitForConnection(connectionThread);
-            
+
             // verificar password
             String checkPassword = "SELECT PASSWORD_ FROM PROFILE_ WHERE USERNAME = ?";
             stmt = con.prepareStatement(checkPassword);
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 String dbPassword = rs.getString("PASSWORD_");
                 if (!dbPassword.equals(password)) {
@@ -187,14 +99,14 @@ public class DBImplementation implements ClassDAO {
             }
             rs.close();
             stmt.close();
-            
+
             // eliminar de USER_ primero
             String deleteUser = "DELETE FROM USER_ WHERE USERNAME = ?";
             stmtUser = con.prepareStatement(deleteUser);
             stmtUser.setString(1, username);
             stmtUser.executeUpdate();
             stmtUser.close();
-            
+
             // eliminar de PROFILE_
             stmt = con.prepareStatement(SLQDELETEPROFILE);
             stmt.setString(1, username);
@@ -232,13 +144,13 @@ public class DBImplementation implements ClassDAO {
         PreparedStatement stmtDeleteAdmin = null;
         try {
             Connection con = waitForConnection(connectionThread);
-            
+
             // verificar password del admin logueado
             String checkAdminPassword = "SELECT PASSWORD_ FROM PROFILE_ WHERE USERNAME = ?";
             stmt = con.prepareStatement(checkAdminPassword);
             stmt.setString(1, adminUsername);
             ResultSet rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 String dbPassword = rs.getString("PASSWORD_");
                 if (!dbPassword.equals(adminPassword)) {
@@ -249,21 +161,21 @@ public class DBImplementation implements ClassDAO {
             }
             rs.close();
             stmt.close();
-            
+
             // eliminar de USER_ si existe
             String deleteUser = "DELETE FROM USER_ WHERE USERNAME = ?";
             stmtDeleteUser = con.prepareStatement(deleteUser);
             stmtDeleteUser.setString(1, usernameToDelete);
             stmtDeleteUser.executeUpdate();
             stmtDeleteUser.close();
-            
+
             // eliminar de ADMIN_ si existe
             String deleteAdmin = "DELETE FROM ADMIN_ WHERE USERNAME = ?";
             stmtDeleteAdmin = con.prepareStatement(deleteAdmin);
             stmtDeleteAdmin.setString(1, usernameToDelete);
             stmtDeleteAdmin.executeUpdate();
             stmtDeleteAdmin.close();
-            
+
             // eliminar de PROFILE_
             String deleteProfile = "DELETE FROM PROFILE_ WHERE USERNAME = ?";
             stmt = con.prepareStatement(deleteProfile);
@@ -304,7 +216,7 @@ public class DBImplementation implements ClassDAO {
 
         try {
             Connection con = waitForConnection(connectionThread);
-            
+
             // actualizar PROFILE_
             stmt = con.prepareStatement(SQLMODIFYPROFILE);
             stmt.setString(1, password);
@@ -322,7 +234,7 @@ public class DBImplementation implements ClassDAO {
                 stmtUser.setString(2, username);
                 stmtUser.executeUpdate();
                 stmtUser.close();
-                
+
                 success = true;
             } else {
                 System.out.println("Usuario no encontrado en la base de datos");
@@ -370,8 +282,12 @@ public class DBImplementation implements ClassDAO {
             e.printStackTrace();
         } finally {
             try {
-                if (stmt != null) stmt.close();
-                if (con != null) con.close();
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing DB connection after retrieving usernames");
                 e.printStackTrace();
@@ -394,5 +310,24 @@ public class DBImplementation implements ClassDAO {
             attempts++;
         }
         return thread.getConnection();
+    }
+
+    @Override
+    public List<Book> buscarLibros(Session session, String busqueda) {
+        // Si la búsqueda está vacía, devolvemos TODOS los libros
+        if (busqueda == null || busqueda.trim().isEmpty()) {
+            return session.createQuery("FROM Book", Book.class).list();
+        }
+
+        // HQL: Busca si el título coincide O si el nombre del autor coincide O si el ISBN coincide
+        // Usamos str(b.ISBN) para convertir el numero a texto y poder buscar trozos (ej: buscar "978")
+        String hql = "FROM Book b WHERE " +
+                     "lower(b.title) LIKE :q OR " +
+                     "lower(b.author.name) LIKE :q OR " +
+                     "str(b.ISBN) LIKE :q";
+
+        return session.createQuery(hql, Book.class)
+                      .setParameter("q", "%" + busqueda.toLowerCase() + "%") // Los % son los comodines
+                      .list();
     }
 }
