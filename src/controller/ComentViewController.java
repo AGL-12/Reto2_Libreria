@@ -1,4 +1,4 @@
-    /*
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -9,8 +9,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 
 /**
  * FXML Controller class
@@ -24,33 +26,46 @@ public class ComentViewController implements Initializable {
     @FXML
     private Label lblFecha;
     @FXML
-    private TextArea comentario;
+    private TextArea txtComentario;
     @FXML
-    private EstrellaPuntuacionController estrellasController;
+    private HBox buttonBox;
+    @FXML
+    private StarRateController estrellasController;
+    @FXML
+    private Button btnEditar;
+    @FXML
+    private Button btnBorrar;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        estrellasController.setEditable(true);
-        comentario.setEditable(false);
-        comentario.setWrapText(true);
-        
-        
-        if(estrellasController != null){
+        buttonBox.setVisible(false);
+        buttonBox.setManaged(false);
+        if (estrellasController != null) {
             estrellasController.setEditable(false);
         }
-        
-    } 
-    
-    public void setDatos(String usuario, String fecha, String texto, float puntuacion){
+
+    }
+
+    public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
         this.lblUsuario.setText(usuario);
         this.lblFecha.setText(fecha);
-        this.comentario.setText(texto);
-        
-        if(estrellasController != null){
-            estrellasController.setNota(puntuacion);
+        this.txtComentario.setText(texto);
+
+        if (estrellasController != null) {
+            estrellasController.setValueStars(puntuacion);
         }
     }
-    
+
+    public void activeEditable() {
+        // 1. Mostrar los botones
+        buttonBox.setVisible(true);
+        buttonBox.setManaged(true);
+
+        // 2. Habilitar edición
+        txtComentario.setEditable(true);
+        txtComentario.requestFocus();
+    }
 }

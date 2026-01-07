@@ -5,177 +5,77 @@
  */
 package controller;
 
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ListView;
-import model.Commentate;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.scene.Parent;
-import javafx.fxml.FXMLLoader;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.collections.FXCollections;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.MenuItem;
-import javafx.util.Callback;
-import model.CommentModelImplementation;
-import model.ICommentModel;
-
-
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
 
 /**
  * FXML Controller class
  *
- * @author mikel
+ * @author Alexander
  */
-public class BookController implements Initializable {
-
-    private static final Logger LOGGER = Logger.getLogger("BookController");
+public class BookController {
 
     @FXML
-    private ListView<Commentate> listViewComments;
+    private Button btnAddComment;
     @FXML
-    private Button btnCreate;
+    private VBox commentsContainer;
     @FXML
-    private Button btnModify;
+    private Button btnSaveComment;
+
     @FXML
-    private Button btnDelete;
-
-    private ICommentModel model;
-
-@Override
-    public void initialize(URL url, ResourceBundle rb) {
-        model = new CommentModelImplementation();
-
-        listViewComments.setCellFactory(new Callback<ListView<Commentate>, ListCell<Commentate>>() {
-            @Override
-            public ListCell<Commentate> call(ListView<Commentate> param) {
-                return new CommentCell();
-            }
-        });
-
-        refreshList();
-
-        initContextMenu();
+    public void initialize() {
+        // Cargar comentarios existentes (simulado)
+        cargarComentarioExistente("Juan", "Muy buen libro", false);
+        cargarComentarioExistente("Maria", "No me gustó el final", false);
     }
 
-    /**
-     * Configura el menú de clic derecho (Context Menu).
-     * Requerido para el 100% en controles avanzados.
-     */
-    private void initContextMenu() {
-        ContextMenu contextMenu = new ContextMenu();
-
-        MenuItem itemEditar = new MenuItem("Modificar Comentario");
-        itemEditar.setOnAction(this::handleModify);
-
-        MenuItem itemBorrar = new MenuItem("Eliminar Comentario");
-        itemBorrar.setOnAction(this::handleDelete);
-
-        contextMenu.getItems().addAll(itemEditar, itemBorrar);
-        listViewComments.setContextMenu(contextMenu);
-    }
-
-    /**
-     * Refresca la lista visual pidiendo los datos actualizados al modelo.
-     */
-    private void refreshList() {
+    @FXML
+    private void handleNewComment() {
         try {
-            listViewComments.setItems(FXCollections.observableArrayList(model.getComments()));
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error crítico al refrescar la lista", e);
-            showAlert("Error al cargar los datos.", Alert.AlertType.ERROR);
+            // 1. Cargamos el FXML del comentario
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ComentViewController.fxml"));
+            Parent newCommentNode = loader.load();
+
+            // 2. Obtenemos el controlador de ese comentario específico
+            ComentViewController controller = loader.getController();
+
+            // 3. Configuramos para "CREAR" (Modo Edición)
+            // Aquí usas el método que creamos antes
+            controller.activeEditable();
+
+            // Opcional: Configurar datos iniciales del usuario actual
+            // controller.setUsuario("Yo (Usuario Actual)");
+            // 4. Añadimos el nodo al PRINCIPIO de la lista (índice 0)
+            // Así aparece justo debajo del título "Comentarios"
+            commentsContainer.getChildren().add(0, newCommentNode);
+
+            // 5. (Opcional) Enfocar el editor o hacer scroll hacia él si es necesario
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    @FXML
-    private void handleCreate(ActionEvent event) {
-        showCommentForm(null);
-    }
-
-    @FXML
-    private void handleModify(ActionEvent event) {
-        Commentate selected = listViewComments.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            showCommentForm(selected);
-        } else {
-            showAlert("Seleccione un comentario para modificar", Alert.AlertType.INFORMATION);
-        }
-    }
-
-    @FXML
-    private void handleDelete(ActionEvent event) {
-        Commentate selectedComment = listViewComments.getSelectionModel().getSelectedItem();
-        
-        if (selectedComment == null) {
-            showAlert("Por favor, selecciona un comentario de la lista", Alert.AlertType.WARNING);
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Borrar comentario");
-        confirm.setHeaderText(null);
-        confirm.setContentText("¿Estás seguro de que quieres eliminar el comentario?");
-
-        Optional<ButtonType> result = confirm.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            model.deleteComment(selectedComment);
-            
-            refreshList();
-            
-            LOGGER.info("Comentario borrado correctamente por usuario.");
-            showAlert("Comentario borrado con éxito.", Alert.AlertType.INFORMATION);
-        }
-    }
-
-    private void showCommentForm(Commentate comment) {
+    // Método auxiliar para cargar comentarios de la base de datos (solo lectura)
+    private void cargarComentarioExistente(String user, String texto, boolean esMio) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentFormView.fxml"));
-            Parent root = loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ComentViewController.fxml"));
+            Node node = loader.load();
+            ComentViewController controller = loader.getController();
 
-            CommentFormViewController controller = loader.getController();
-            controller.setComment(comment);
-
-            Stage stage = new Stage();
-            stage.setTitle(comment == null ? "Nuevo Comentario" : "Editar Comentario");
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(listViewComments.getScene().getWindow());
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-
-            if (controller.isSaveClicked()) {
-                Commentate result = controller.getComment();
-                if (comment == null) {
-                    model.addComment(result);
-                } 
-                // MODIFICAR: Como pasamos el objeto por referencia, el modelo ya tiene los cambios en memoria.
-                // Solo necesitamos refrescar la vista.
-                
-                refreshList();
-            }
+            // Configurar datos
+            // controller.setDatos(user, texto, ...);
+            // Modo lectura por defecto
+            // (El initialize del ComentViewController ya lo hace, pero por seguridad...)
+            // controller.activarModoLectura(); 
+            commentsContainer.getChildren().add(node);
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error IO al abrir formulario", e);
-            showAlert("Error al abrir la ventana: " + e.getMessage(), Alert.AlertType.ERROR);
+            e.printStackTrace();
         }
-    }
-
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

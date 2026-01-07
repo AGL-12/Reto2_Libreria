@@ -1,17 +1,46 @@
 package model;
 
-public class Book {
+import java.io.Serializable;
+import javax.persistence.*;
 
-    private int ISBN;
+@Entity
+@Table(name = "book")
+public class Book implements Serializable {
+
+    @Id
+    @Column(name = "isbn")
+    private int ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
     private String cover;
-    private String titulo;
-    private int idAuthor;
+    private String title;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_author")
+    private Author author;
     private int sheets;
     private int stock;
+    @Column(length = 1000) // Para textos largos
     private String sypnosis;
     private float price;
     private String editorial;
-    private float avgValuation; //calculado
+    // CAMPO CALCULADO: No se guarda en BD
+    @Transient
+    private float avgValuation;
+
+    public Book(int ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
+        this.ISBN = ISBN;
+        this.cover = cover;
+        this.title = titulo;
+        this.author = author;
+        this.sheets = sheets;
+        this.stock = stock;
+        this.sypnosis = sypnosis;
+        this.price = price;
+        this.editorial = editorial;
+        this.avgValuation = avgValuation;
+    }
+
+    public Book() {
+    }
 
     public int getISBN() {
         return ISBN;
@@ -29,20 +58,20 @@ public class Book {
         this.cover = cover;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public int getIdAuthor() {
-        return idAuthor;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setIdAuthor(int idAuthor) {
-        this.idAuthor = idAuthor;
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
     public int getSheets() {
@@ -92,5 +121,5 @@ public class Book {
     public void setAvgValuation(float avgValuation) {
         this.avgValuation = avgValuation;
     }
-    
+
 }

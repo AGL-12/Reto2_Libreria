@@ -1,46 +1,51 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package controller;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import model.Book;
 
-public class LibroItemController {
+/**
+ * FXML Controller class
+ *
+ * @author ander
+ */
+public class PreOrderController {
 
     @FXML
-    private Label autor;
+    private VBox padre;
     @FXML
     private ImageView portada;
     @FXML
     private Label titulo;
     @FXML
-    private VBox padre;
+    private Label precio;
     @FXML
-    private EstrellaPuntuacionController estrellasController;
-    //
+    private Label cantidadLabel;
+
     private Book libro;
 
     public void setData(Book libro) {
         this.libro = libro;
-        titulo.setText(libro.getTitulo());
-        autor.setText(String.valueOf(libro.getIdAuthor()));
+        titulo.setText(libro.getTitle());
+        precio.setText(String.valueOf(libro.getPrice()));
         Image imagenOriginal = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
 
         // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
-        recortarImagen(portada, imagenOriginal, 140, 210);
-        // CONFIGURACIÓN:
-        estrellasController.setEditable(false); // BLOQUEADO
-        estrellasController.setNota(libro.getAvgValuation()); // PINTAR NOTA
+        recortarImagen(portada, imagenOriginal, 80, 80);
     }
 
-    /**
-     * 1. Calcula cuánto hay que escalar la imagen para llenar el hueco. 2.
-     * Calcula el centro de la imagen (Viewport). 3. Aplica el recorte.
-     */
     private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView
         imageView.setFitWidth(targetWidth);

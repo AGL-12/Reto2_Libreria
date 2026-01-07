@@ -1,46 +1,69 @@
 package model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import javax.persistence.*;
 
-public class Commentate {
+@Entity
+@Table(name = "commentate")
+public class Commentate implements Serializable {
 
-    private int idUser;
-    private int idBook;
+    @EmbeddedId
+    private CommentateId id;
+
+    @Column(columnDefinition = "TEXT")
     private String commentary;
+
+    @Column(name = "date_creation")
     private Timestamp dateCreation;
     private float valuation;
-    private String tempUsername;
     
+    @ManyToOne
+    @MapsId("userCode") // Conecta con el campo userCode del ID
+    @JoinColumn(name = "id_user") // Nombre de la columna en BD
+    private User user;
+
+    @ManyToOne
+    @MapsId("isbnBook") // Conecta con el campo isbnBook del ID
+    @JoinColumn(name = "id_book") // Nombre de la columna en BD
+    private Book book;
+
     public Commentate() {
     }
-
-    public Commentate(int idUser, int idBook, String commentary, Timestamp dateCreation, float valuation, String tempUsername) {
-        this.idUser = idUser;
-        this.idBook = idBook;
+    public Commentate(User user, Book book, String commentary, float valuation) {
+        this.user = user;
+        this.book = book;
         this.commentary = commentary;
-        this.dateCreation = dateCreation;
         this.valuation = valuation;
-        this.tempUsername = tempUsername;
-    }
-    
-    
-    
+        this.dateCreation = new Timestamp(System.currentTimeMillis());
 
-    public int getIdUser() {
-        return idUser;
+        // Instanciamos el ID al crear el objeto
+        this.id = new CommentateId(user.getUserCode(), book.getISBN());
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public CommentateId getId() {
+        return id;
     }
 
-    public int getIdBook() {
-        return idBook;
+    public void setId(CommentateId id) {
+        this.id = id;
     }
 
-    public void setIdBook(int idBook) {
-        this.idBook = idBook;
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getCommentary() {
@@ -67,15 +90,6 @@ public class Commentate {
         this.valuation = valuation;
     }
 
-    public String getTempUsername() {
-        return tempUsername;
-    }
-
-    public void setTempUsername(String tempUsername) {
-        this.tempUsername = tempUsername;
-    }
-    
-    
     public String getFormattedDate() {
         if (dateCreation != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");

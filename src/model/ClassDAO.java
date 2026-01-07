@@ -5,9 +5,8 @@
  */
 package model;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import org.hibernate.Session;
 
 /**
  * Data Access Object interface for database operations.
@@ -15,12 +14,18 @@ import java.util.Map;
  */
 public interface ClassDAO {
 
-    public Profile logIn(String username, String password);
-    public Boolean signUp(String gender, String cardNumber, String username, String password, String email, String name, String telephone, String surname);
+    public Profile logIn(Session session, String username, String password);
+    public void signUp(Session session, Profile profile);
     public Boolean dropOutUser(String username, String password);
     public Boolean dropOutAdmin(String usernameToDelete, String adminUsername, String adminPassword);
     public Boolean modificarUser (String password, String email, String name, String telephone, String surname, String username, String gender);
-
+    
+    public List<Book> buscarLibros(Session session, String busqueda);
   
+    
+    public List<Commentate> getComments();
+    public void addComment(Commentate comment);
+    public void deleteComment(Commentate comment);
+    
     List comboBoxInsert();
 }

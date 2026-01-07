@@ -1,69 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookController">
-    <children>
-        <fx:include source="Header.fxml" />
-      <StackPane VBox.vgrow="ALWAYS">
-         <children>
-            <VBox maxWidth="1.7976931348623157E308" spacing="15.0" styleClass="book-sheet" stylesheets="@../css/style.css">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookController">
+   <children>
+      <fx:include source="Header.fxml" />
+
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox spacing="20.0" styleClass="book-sheet">
+               <padding>
+                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               </padding>
                <children>
                   
-                                    <GridPane hgap="10.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="NEVER" minWidth="220.0" />
-                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                            </columnConstraints>
-                    
-                                        <rowConstraints>
-                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                            </rowConstraints>
-                     
-                                        <children>
-                                <VBox alignment="TOP_CENTER" spacing="10.0">
-                                    <children>
-                                        <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                                            <image>
-                                                <Image url="@../images/mood-heart.png" />
-                                            </image>
-                                        </ImageView>
-                                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Añadir al carrito" />
-                                    </children>
-                                </VBox>
-                        
-                                            <VBox spacing="5.0" styleClass="panel-info" GridPane.columnIndex="1">
-                                    <children>
-                                        <Label text="Titulo" textFill="WHITE" />
-                                        <Label text="Stock" />
-                                        <Label text="Sipnosis" wrapText="true" /> 
-                                        <Label text="Precio" />
-                                        <Label text="Editorial" />
-                                    </children>
-                                </VBox>
-                            </children>
-                        </GridPane>
-                  <ListView fx:id="listViewComments" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-                  <HBox prefHeight="100.0" prefWidth="200.0">
+                  <GridPane hgap="20.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="220.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
                      <children>
-                        <Button id="btnCreate" fx:id="btnCreate" mnemonicParsing="false" onAction="#handleCreate" text="Crear" />
-                        <Button fx:id="btnModify" mnemonicParsing="false" onAction="#handleModify" text="Modificar" />
-                        <Button fx:id="btnDelete" mnemonicParsing="false" onAction="#handleDelete" text="Borrar" />
+                        <VBox alignment="TOP_CENTER" spacing="10.0">
+                           <children>
+                              <ImageView fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/mood-heart.png" />
+                                 </image>
+                              </ImageView>
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-base: #4CAF50;" text="Añadir al carrito" textFill="WHITE" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="10.0" styleClass="panel-info" GridPane.columnIndex="1">
+                           <children>
+                              <Label text="El Título del Libro">
+                                 <font>
+                                    <Font name="System Bold" size="24.0" />
+                                 </font>
+                              </Label>
+                              <Label text="Autor: Nombre Autor" />
+                              <Label text="Precio: 19.99 €" textFill="#2e7d32">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Separator prefWidth="200.0" />
+                              <Label text="Sinopsis:" underline="true" />
+                              <Label text="Aquí va la sinopsis larga que hará que el contenido crezca..." wrapText="true" />
+                              <Label text="Stock: 5 unidades" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </GridPane>
+
+                  <Separator prefWidth="200.0" />
+
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Comentarios">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnSaveComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Guardar opinión" />
+                        <Button fx:id="btnAddComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Escribir opinión" />
                      </children>
                   </HBox>
+
+                  <VBox fx:id="commentsContainer" spacing="15.0">
+                     </VBox>
+
                </children>
             </VBox>
-         </children>
-      </StackPane>
-    </children>
+         </content>
+      </ScrollPane>
+   </children>
 </VBox>

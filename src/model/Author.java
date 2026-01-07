@@ -1,16 +1,30 @@
 package model;
 
-public class Author {
+import java.io.Serializable;
+import java.util.List;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "author")
+public class Author implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idAuthor;
-    private String nombre;
-    private String apellido;
+    private String name;
+    private String surname;
+    
+    @OneToMany(mappedBy = "author")
+    private List<Book> books;
 
-    public Author(int idAuthor, String nombre, String apellido) {
+    public Author(int idAuthor, String nombre, String apellido, List<Book> books) {
         this.idAuthor = idAuthor;
-        this.nombre = nombre;
-        this.apellido = apellido;
+        this.name = nombre;
+        this.surname = apellido;
+        this.books = books;
     }
+
+    public Author() {}
 
     public int getIdAuthor() {
         return idAuthor;
@@ -20,20 +34,33 @@ public class Author {
         this.idAuthor = idAuthor;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getApellido() {
-        return apellido;
+    public String getSurname() {
+        return surname;
     }
 
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
+    }
+
+    @Override
+    public String toString() {
+        return name + " " + surname;
     }
 
 }
