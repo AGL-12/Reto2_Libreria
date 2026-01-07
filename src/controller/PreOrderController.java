@@ -38,7 +38,7 @@ public class PreOrderController {
 
     public void setData(Book libro) {
         this.libro = libro;
-        titulo.setText(libro.getTitulo());
+        titulo.setText(libro.getTitle());
         precio.setText(String.valueOf(libro.getPrice()));
         Image imagenOriginal = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
 
