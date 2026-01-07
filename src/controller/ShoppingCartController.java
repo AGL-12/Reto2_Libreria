@@ -15,9 +15,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -30,8 +33,12 @@ import model.Book;
  *
  * @author ander
  */
-public class ShoppingCartController implements Initializable {
+public class ShoppingCartController implements Initializable, EventHandler<ActionEvent> {
 
+    @FXML
+    private VBox vBoxContenedorLibros;
+    @FXML
+    private Label lblTotal;
     
     private TilePane tileLibros;
     
@@ -49,15 +56,59 @@ public class ShoppingCartController implements Initializable {
             for (Book lib : libros) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
                 VBox libroBox = fxmlLoader.load();
+                
+                CheckBox cb = new CheckBox("Seleccionar");
+                cb.setId("checkDinámico");
+                cb.setSelected(true);
+                cb.setOnAction(this);
+                libroBox.getChildren().add(cb);
+                
                 PreOrderController preOrderController = fxmlLoader.getController();
                 preOrderController.setData(lib);
-                tileLibros.getChildren().add(libroBox);
+                
+                // 2. Lo agregas al contenedor que sí existe en el FXML
+                vBoxContenedorLibros.getChildren().add(libroBox);
+                
+                actualizarPrecioTotal();
             }
         } catch (IOException ex) {
-            Logger.getLogger(MainLibreriaController.class.getName()).log(Level.SEVERE, "Error al cargar el FXML", ex);
+            Logger.getLogger(ShoppingCartController.class.getName()).log(Level.SEVERE, "Error al cargar PreOrder.fxml", ex);
         }
     }
 
+    private void actualizarPrecioTotal() {
+        double total = 0;
+        int libro = 0;
+
+        // Recorremos los hijos del VBox (cada libroBox)
+        for (Node nodoLibro : vBoxContenedorLibros.getChildren()) {
+            if (nodoLibro instanceof VBox) {
+                VBox libroVBox = (VBox) nodoLibro;
+                
+                // Buscamos el CheckBox dentro de ese libro
+                for (Node hijo : libroVBox.getChildren()) {
+                    if (hijo instanceof CheckBox) {
+                        CheckBox cb = (CheckBox) hijo;
+                        if (cb.isSelected()) {
+                            // Sumamos el precio del libro correspondiente a esta posición
+                            total += libros.get(libro).getPrice();
+                        }
+                    }
+                }
+                libro++;
+            }
+        }
+        
+        // Actualizamos el Label
+        lblTotal.setText("Total: $" + String.format("%.2f", total));
+    }
+    
+    public void handle(ActionEvent event) {
+        // Cada vez que se pulse CUALQUIER checkbox, se ejecutará esto
+        actualizarPrecioTotal();
+    }
+    
+    
     /*Metodo prueba para tener libros cargados*/
     private List<Book> cargarLibros() {
         Book libro;
@@ -68,6 +119,7 @@ public class ShoppingCartController implements Initializable {
             libro.setTitulo("carita wee");
             libro.setIdAuthor(1);
             libro.setAvgValuation(1.2f);
+            libro.setPrice(20);
             libros.add(libro);
         }
 
