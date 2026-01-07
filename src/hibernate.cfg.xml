@@ -7,7 +7,7 @@
 
         <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
 
-        <property name="connection.url">jdbc:mysql://localhost:3306/probando_hibernate?serverTimezone=Europe/Madrid&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/BookStore?serverTimezone=Europe/Madrid&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</property>
 
         <property name="connection.username">root</property>
 
