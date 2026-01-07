@@ -1,0 +1,183 @@
+/* =================================================================================
+ * ESTILO VISUAL - LIBRERÍA 2DAM (DI/JavaFX)
+ * =================================================================================
+ * Descripción: Tema limpio, moderno y responsivo con soporte para Tarjetas.
+ * ================================================================================= */
+
+/* ---------------------------------------------------------------------------------
+ * 1. VARIABLES Y CONFIGURACIÓN RAÍZ
+ * --------------------------------------------------------------------------------- */
+.root {
+    /* Paleta de Colores Unificada */
+    -fx-base-color: #F4F6F8;
+    -fx-surface-color: #FFFFFF;
+    
+    /* Colores de Acción */
+    -fx-accent-color: #2E86C1;  /* Azul Principal */
+    -fx-accent-hover: #21618C;  /* Azul Oscuro (Hover) */
+    -fx-danger-color: #E74C3C;  /* Rojo (Borrar) */
+    -fx-success-color: #27AE60; /* Verde (Stock) */
+    
+    /* Texto */
+    -fx-text-primary: #2C3E50;
+    -fx-text-secondary: #7F8C8D;
+
+    /* Tipografía Global */
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica", sans-serif;
+    -fx-font-size: 14px;
+    
+    /* Wallpaper de Fondo */
+    -fx-background-image: url("../images/fondo_libro.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: -fx-base-color; /* Fallback */
+}
+
+/* ---------------------------------------------------------------------------------
+ * 2. LISTAS Y CELDAS (EL EFECTO TARJETA)
+ * Esto es clave para que tu ComentView se vea flotando.
+ * --------------------------------------------------------------------------------- */
+
+/* La Lista en sí: Fondo transparente para ver el wallpaper o color suave */
+.list-view {
+    -fx-background-color: rgba(244, 246, 248, 0.8); /* Semi-transparente */
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+    -fx-border-color: transparent;
+}
+
+/* La Celda contenedora: Debe ser invisible para que solo se vea la tarjeta */
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5; /* Espacio vertical entre tarjetas */
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* LA TARJETA (Aplica esta clase a tu HBox en el FXML) */
+.comment-card {
+    -fx-background-color: -fx-surface-color;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    
+    /* Sombra suave (Elevation) */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);
+    
+    -fx-padding: 15;
+}
+
+/* Efecto cuando seleccionas una tarjeta en la lista */
+.list-cell:filled:selected .comment-card {
+    -fx-border-color: -fx-accent-color;
+    -fx-background-color: #F0F8FF; /* Azul muy clarito */
+    -fx-effect: dropshadow(three-pass-box, rgba(46, 134, 193, 0.4), 10, 0, 0, 4);
+}
+
+/* Eliminamos el color azul por defecto de JavaFX en la selección */
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------------
+ * 3. BOTONES (MODERNIZADOS)
+ * --------------------------------------------------------------------------------- */
+
+.button {
+    -fx-background-color: -fx-surface-color;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #BDC3C7;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 3, 0, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: #ECF0F1;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Botón Primario (Crear/Guardar/Acción Principal) */
+.button-primary {
+    -fx-background-color: -fx-accent-color;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.button-primary:hover {
+    -fx-background-color: -fx-accent-hover;
+    -fx-effect: dropshadow(three-pass-box, rgba(46, 134, 193, 0.4), 8, 0, 0, 2);
+}
+
+/* Botón de Peligro (Borrar) */
+.button-danger {
+    -fx-background-color: -fx-surface-color;
+    -fx-text-fill: -fx-danger-color;
+    -fx-border-color: -fx-danger-color;
+}
+
+.button-danger:hover {
+    -fx-background-color: -fx-danger-color;
+    -fx-text-fill: white;
+}
+
+/* ---------------------------------------------------------------------------------
+ * 4. TEXTOS Y LABELS
+ * --------------------------------------------------------------------------------- */
+
+.label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+.lbl-titulo {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.8), 2, 0, 0, 0); /* Lectura sobre fondo */
+}
+
+/* Ajustes para TextAreas dentro de tarjetas */
+.comment-card .text-area {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-font-size: 13px;
+}
+.comment-card .text-area .content {
+    -fx-background-color: transparent;
+}
+.comment-card .text-area:focused {
+    -fx-background-color: transparent;
+}
+
+
+/* BUSCA ESTE BLOQUE EN TU CSS Y REEMPLÁZALO */
+.book-sheet {
+    /* ANTES: rgba(255, 255, 255, 0.96);  <- Muy opaco */
+    /* AHORA: Le damos un 15% de transparencia */
+    -fx-background-color: rgba(255, 255, 255, 0.15); 
+    
+    -fx-background-radius: 10;
+    
+    /* Mantenemos la sombra fuerte para que "flote" */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.7), 50, 0, 0, 10);
+    
+    -fx-padding: 30;
+}
+
+
+/* Panel de información del libro (Título, Stock, Sinopsis...) */
+.panel-info {
+    /* El fondo blanco semitransparente que te gustó */
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    
+    /* Bordes redondeados y espacio interno */
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    
+    /* Una sombra suave extra para que destaque más */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);
+}

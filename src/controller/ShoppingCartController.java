@@ -5,8 +5,6 @@
  */
 package controller;
 
-import controller.LibroItemController;
-import controller.MainLibreriaController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,16 +14,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import model.Author;
 import model.Book;
 
 /**
@@ -41,7 +38,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private Label lblTotal;
     
     private TilePane tileLibros;
-    
+
     List<Book> libros = new ArrayList<>();
 
     /**
@@ -49,7 +46,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         libros.addAll(cargarLibros());
 
         try {
@@ -112,19 +109,19 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     /*Metodo prueba para tener libros cargados*/
     private List<Book> cargarLibros() {
         Book libro;
+        Author a = new Author(1, "Alex", "Boss", null);
 
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
-            libro.setTitulo("carita wee");
-            libro.setIdAuthor(1);
+            libro.setTitle("carita wee");
+            libro.setAuthor(a);
             libro.setAvgValuation(1.2f);
             libro.setPrice(20);
             libros.add(libro);
         }
 
         return libros;
-        
 
     }
 

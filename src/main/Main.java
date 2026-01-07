@@ -1,14 +1,13 @@
-
 package main;
+
+import controller.MainBookStoreController;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-
-
+import utilities.HibernateUtil;
 
 public class Main extends Application {
 
@@ -20,7 +19,10 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/ShoppingCart.fxml"));
+        FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
+        Parent root = fxmlloader.load();
+        //MainBookStoreController main = fxmlloader.getController();
+        //main.headerMode("NO_USER");
         Scene scene = new Scene(root);
         stage.setTitle("Libreria che");
         stage.setScene(scene);
@@ -33,7 +35,19 @@ public class Main extends Application {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        // --- PRUEBA DE CONEXIÓN ---
+        System.out.println("Intentando conectar con Hibernate...");
+
+        // Al llamar a getSessionFactory, Hibernate leerá el XML y creará las tablas
+        HibernateUtil.getSessionFactory();
+
+        System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
+
+        // Una vez comprobado, ya puedes lanzar la app
         launch(args);
+
+        // Al cerrar la app
+        HibernateUtil.shutdown();
     }
 
 }

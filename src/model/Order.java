@@ -2,14 +2,28 @@ package model;
 
 import java.sql.Timestamp;
 import java.util.List;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "orders") // "order" es reservada en SQL
 public class Order {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_order")
     private int idOrder;
-    private int idUsuer;
+    @ManyToOne
+    @JoinColumn(name = "id_user", nullable = false)
+    private User user; // Hibernate creará la columna id_user (FK)
+    @Transient
     private float total;
-    private Timestamp fechaComp;
+    @Column(name = "purchase_date")
+    private Timestamp purchaseDate;
     private boolean bought;
+    // Relación 1 Pedido -> Muchos "Contain" (Líneas de pedido)
+    // 'mappedBy' indica que la clase Contain es la dueña de la relación
+    // CascadeType.ALL: Si guardas el Pedido, se guardan sus líneas automáticamente.
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contain> listPreBuy;
 
     public int getIdOrder() {
@@ -20,12 +34,12 @@ public class Order {
         this.idOrder = idOrder;
     }
 
-    public int getIdUsuer() {
-        return idUsuer;
+    public User getUsuer() {
+        return user;
     }
 
-    public void setIdUsuer(int idUsuer) {
-        this.idUsuer = idUsuer;
+    public void setIdUsuer(User usuer) {
+        this.user = usuer;
     }
 
     public float getTotal() {
@@ -36,12 +50,12 @@ public class Order {
         this.total = total;
     }
 
-    public Timestamp getFechaComp() {
-        return fechaComp;
+    public Timestamp getPurchaseDate() {
+        return purchaseDate;
     }
 
-    public void setFechaComp(Timestamp fechaComp) {
-        this.fechaComp = fechaComp;
+    public void setPurchaseDate(Timestamp purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public boolean isBought() {
@@ -59,6 +73,5 @@ public class Order {
     public void setListPreBuy(List<Contain> listPreBuy) {
         this.listPreBuy = listPreBuy;
     }
-    
-    
+
 }
