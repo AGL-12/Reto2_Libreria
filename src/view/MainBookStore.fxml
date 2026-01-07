@@ -8,7 +8,7 @@
 
 <BorderPane fx:id="root" prefHeight="700.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainBookStoreController">
     <top>
-        <fx:include source="Header.fxml" />
+        <fx:include fx:id="header" source="Header.fxml" />
     </top>
     <center>
         <VBox alignment="CENTER" BorderPane.alignment="CENTER">
