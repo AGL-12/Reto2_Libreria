@@ -59,7 +59,7 @@ public class ShoppingCartController implements Initializable {
         for (int i = 0; i < 5; i++) {
             libro = new Book();
             libro.setCover("mood-heart.png");
-            libro.setTitulo("carita wee");
+            libro.setTitle("carita wee");
             libro.setAuthor(a);
             libro.setAvgValuation(1.2f);
             libros.add(libro);
