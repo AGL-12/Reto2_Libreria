@@ -1,33 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import model.DBImplementation;
 import model.Profile;
+import threads.LoginThread;
 
 /**
  * Controller for the Login window.
  * Handles user login and navigation to the main menu or signup window.
  */
-public class LogInWindowController implements Initializable {
+public class LogInWindowController{
 
     @FXML
     private TextField TextField_Username;
@@ -45,8 +40,7 @@ public class LogInWindowController implements Initializable {
     private Label labelIncorrecto; // Label to show error messages
 
     // Controller handling business logic
-    private Controller cont = new Controller(new DBImplementation());
-
+    private final Controller cont = new Controller(new DBImplementation());
     /**
      * Opens the SignUp window.
      */
@@ -59,9 +53,6 @@ public class LogInWindowController implements Initializable {
             stage.setTitle("SignUp");
             stage.setScene(new Scene(root));
             stage.show();
-
-            controller.SignUpWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setCont(cont);
 
             // Close current window
             Stage currentStage = (Stage) Button_SignUp.getScene().getWindow();
@@ -79,37 +70,84 @@ public class LogInWindowController implements Initializable {
     private void logIn() {
         String username = TextField_Username.getText();
         String password = PasswordField_Password.getText();
-        if (username.equals("") || password.equals("")) {
-            labelIncorrecto.setText("Please fill in both fields.");
-        } else {
-            Profile profile = cont.logIn(username, password);
-            if (profile != null) {
-                try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                    Parent root = fxmlLoader.load();
+        if (username.isEmpty() || password.isEmpty()) {
+            labelIncorrecto.setText("Rellene ambos campos.");
+            return;
+        }
+        // 1. Bloqueo visual (Para que no pulse 20 veces)
+        Button_LogIn.setDisable(true);
+        labelIncorrecto.setText("Conectando...");
+        
+        // 2. Crear y lanzar el hilo (Le pasamos 'this' para que nos pueda llamar luego)
+        LoginThread hilo = new LoginThread(username, password, this);
+        hilo.start();
+    }
 
-                    controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-                    controllerWindow.setUsuario(profile);
-                    controllerWindow.setCont(cont);
+    @FXML
+    private void backToMain(ActionEvent event) {
+        try {
+            // 1. Cargamos la vista GRANDE (Main)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
+            Parent root = loader.load();
+            
+            // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
+            // HeaderController mainController = loader.getController();
+            // mainController.setControl(Control);
 
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(root));
-                    stage.show();
+            Stage oldStage = (Stage) Button_LogIn.getScene().getWindow();
+            Stage newStage = new Stage();
 
-                    Stage currentStage = (Stage) Button_LogIn.getScene().getWindow();
-                    currentStage.close();
+            // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
+            newStage.initStyle(StageStyle.DECORATED); 
+            
+            newStage.setScene(new Scene(root));
+            newStage.sizeToScene();
+            
+            // 3. Centramos en pantalla
+            newStage.centerOnScreen();
+            
+            newStage.show();
+            oldStage.close();
+        } catch (IOException ex) {
+            Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    // Este método debe ser público para que el Hilo lo vea
+    public void finalizarLogin(Profile profile) {
+        
+        Button_LogIn.setDisable(false); // Reactivamos botón
 
-                } catch (IOException ex) {
-                    Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                labelIncorrecto.setText("The username and/or password are incorrect.");
+        if (profile != null) {
+            // --- LOGIN CORRECTO: CÓDIGO DE CAMBIO DE VENTANA ---
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+                Parent root = fxmlLoader.load();
+
+                MenuWindowController controllerWindow = fxmlLoader.getController();
+                controllerWindow.setUsuario(profile);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.show();
+
+                // Cerramos la ventana actual
+                Stage currentStage = (Stage) Button_LogIn.getScene().getWindow();
+                currentStage.close();
+
+            } catch (IOException ex) {
+                Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+        } else {
+            // --- LOGIN FALLIDO ---
+            labelIncorrecto.setText("Usuario o contraseña incorrectos.");
         }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic if needed
+    // Método auxiliar para errores graves (Base de datos caída, etc)
+    public void mostrarError(String mensaje) {
+        Button_LogIn.setDisable(false);
+        labelIncorrecto.setText("Error: " + mensaje);
     }
 }
