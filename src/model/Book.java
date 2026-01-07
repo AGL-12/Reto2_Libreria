@@ -1,16 +1,17 @@
 package model;
 
+import java.io.Serializable;
 import javax.persistence.*;
 
 @Entity
 @Table(name = "book")
-public class Book {
+public class Book implements Serializable {
 
     @Id
     @Column(name = "isbn")
     private int ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
     private String cover;
-    private String titulo;
+    private String title;
     
     @ManyToOne
     @JoinColumn(name = "id_author")
@@ -28,7 +29,7 @@ public class Book {
     public Book(int ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
         this.ISBN = ISBN;
         this.cover = cover;
-        this.titulo = titulo;
+        this.title = titulo;
         this.author = author;
         this.sheets = sheets;
         this.stock = stock;
@@ -57,12 +58,12 @@ public class Book {
         this.cover = cover;
     }
 
-    public String getTitulo() {
-        return titulo;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Author getAuthor() {
