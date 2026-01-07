@@ -6,13 +6,15 @@
 package controller;
 
 import java.util.List;
+import model.Book;
 import model.ClassDAO;
 import model.Profile;
+import org.hibernate.Session;
 
 /**
  * Controller class that handles interaction between the GUI and the database.
  * Provides login, signup, deletion, modification, and data retrieval methods.
- * 
+ *
  * Author: acer
  */
 public class Controller {
@@ -35,8 +37,8 @@ public class Controller {
      * @param password The password
      * @return Profile object if login succeeds, null otherwise
      */
-    public Profile logIn(String username, String password) {
-        return dao.logIn(username, password);
+    public Profile logIn(Session session, String username, String password) {
+        return dao.logIn(session, username, password);
     }
 
     /**
@@ -44,9 +46,8 @@ public class Controller {
      *
      * @return true if signup succeeds, false otherwise
      */
-    public Boolean signUp(String gender, String cardNumber, String username, String password, String email,
-            String name, String telephone, String surname) {
-        return dao.signUp(gender, cardNumber, username, password, email, name, telephone, surname);
+    public void signUp(Session session, Profile profile) {
+        dao.signUp(session, profile);
     }
 
     /**
@@ -72,5 +73,8 @@ public class Controller {
      */
     public List comboBoxInsert() {
         return dao.comboBoxInsert();
+    }
+    public List<Book> buscarLibros(Session session, String texto){
+        return dao.buscarLibros(session, texto);
     }
 }
