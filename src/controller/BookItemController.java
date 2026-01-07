@@ -23,19 +23,22 @@ public class BookItemController {
     @FXML
     private StarRateController starsController;
 
-    //
     private Book book;
 
     public void setData(Book book) {
-        this.book = book;
-        title.setText(book.getTitulo());
+        //this.book = book;
+        Tooltip cov = new Tooltip(book.getTitle());
+        Tooltip.install(cover, cov);
+
+        title.setText(book.getTitle());
+        title.setTooltip(new Tooltip(book.getTitle()));
         // 1. Verificamos que la lista no sea null ni esté vacía para evitar errores
         if (book.getAuthor() != null) {
 
             String textoAutor = book.getAuthor().toString();
 
             author.setText(textoAutor);
-            
+
             // 3. Crear y asignar el Tooltip con el texto COMPLETO
             Tooltip tooltip = new Tooltip(textoAutor);
 
