@@ -407,8 +407,15 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override
-    public List<Commentate> getComments() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Commentate> getCommentsByBook(Session session, int isbn) {
+        // HQL: Selecciona los comentarios (c) donde el ISBN del libro asociado (c.book.ISBN) coincida
+        // IMPORTANTE: Asegúrate de que en tu clase Commentate el atributo se llame 'book' 
+        // y en tu clase Book el atributo se llame 'ISBN'.
+        String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
+
+        return session.createQuery(hql, Commentate.class)
+                      .setParameter("isbn", isbn)
+                      .list();    
     }
 
     @Override

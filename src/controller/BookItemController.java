@@ -1,13 +1,20 @@
 package controller;
 
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import model.Book;
 
 public class BookItemController {
@@ -26,7 +33,7 @@ public class BookItemController {
     private Book book;
 
     public void setData(Book book) {
-        //this.book = book;
+        this.book = book;
         Tooltip cov = new Tooltip(book.getTitle());
         Tooltip.install(cover, cov);
 
@@ -92,6 +99,31 @@ public class BookItemController {
         imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
         imageView.setSmooth(true); // Suavizado para mejor calidad
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
+    }
+
+    @FXML
+    private void openBookView(MouseEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
+            Parent root = fxmlLoader.load();
+            BookViewController cont = fxmlLoader.getController();
+            cont.setData(book);
+            Stage stage = (Stage) rootBookItem.getScene().getWindow();
+
+            Stage oldStage = (Stage) rootBookItem.getScene().getWindow();
+            Stage newStage = new Stage();
+            newStage.setScene(new Scene(root));
+            // 1. Calculamos cuánto mide la ventana nueva
+            newStage.sizeToScene();
+
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            newStage.centerOnScreen();
+
+            newStage.show();
+            oldStage.close();
+        } catch (IOException ex) {
+            Logger.getLogger(BookItemController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
