@@ -13,13 +13,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import model.Commentate;
 
 /**
  * FXML Controller class
  *
  * @author mikel
  */
-public class ComentViewController implements Initializable {
+public class CommentViewController implements Initializable {
 
     @FXML
     private Label lblUsuario;
@@ -67,5 +68,12 @@ public class ComentViewController implements Initializable {
         // 2. Habilitar edición
         txtComentario.setEditable(true);
         txtComentario.requestFocus();
+    }
+
+    void setData(Commentate coment) {
+        lblUsuario.setText(coment.getUser().getName());
+        lblFecha.setText(coment.getDateCreation().toString());
+        txtComentario.setText(coment.getCommentary());
+        estrellasController.setValueStars(coment.getValuation());
     }
 }

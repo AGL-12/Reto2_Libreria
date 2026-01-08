@@ -23,7 +23,7 @@ public interface ClassDAO {
     public List<Book> buscarLibros(Session session, String busqueda);
   
     
-    public List<Commentate> getComments();
+    public List<Commentate> getCommentsByBook(Session session, int isbn);
     public void addComment(Commentate comment);
     public void deleteComment(Commentate comment);
     

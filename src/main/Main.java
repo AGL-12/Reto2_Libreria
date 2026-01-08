@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import model.Admin;
 import model.Author;
 import model.Book;
+import model.Commentate;
 import model.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -49,7 +50,7 @@ public class Main extends Application {
         System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
 
         // PRECARGAR DATOS (Si la BD está vacía)
-        //preloadData();
+        preloadData();
         
         // Una vez comprobado, ya puedes lanzar la app
         launch(args);
@@ -95,17 +96,28 @@ public class Main extends Application {
             session.save(admin);
 
             // --- USER ---
-            User user = new User();
-            user.setUsername("user1");
-            user.setPassword("1234");
-            user.setEmail("user@cliente.com");
-            user.setName("Pepe");
-            user.setSurname("Cliente");
-            user.setTelephone("600333444");
-            user.setGender("Man");               // Campo específico de User
-            user.setCardNumber("1111-2222-3333"); // Campo específico de User
-            session.save(user);
-
+            User user1 = new User();
+            user1.setUsername("user1");
+            user1.setPassword("1234");
+            user1.setEmail("user@cliente.com");
+            user1.setName("Pepe");
+            user1.setSurname("Cliente");
+            user1.setTelephone("600333444");
+            user1.setGender("Man");               // Campo específico de User
+            user1.setCardNumber("1111-2222-3333"); // Campo específico de User
+            session.save(user1);
+            
+            User user2 = new User();
+            user2.setUsername("user2");
+            user2.setPassword("1234");
+            user2.setEmail("user2@cliente.com");
+            user2.setName("Marta");
+            user2.setSurname("Lectora");
+            user2.setTelephone("700999888");
+            user2.setGender("Woman");
+            user2.setCardNumber("4444-5555-6666");
+            session.save(user2);
+            
             // ==========================================
             // 2. CREAR AUTORES Y LIBROS
             // ==========================================
@@ -162,7 +174,27 @@ public class Main extends Application {
             b3.setSypnosis("En un lugar de la Mancha, de cuyo nombre no quiero acordarme...");
             b3.setEditorial("Cátedra");
             session.save(b3);
+            
+           // ==========================================
+            // 3. AÑADIR COMENTARIOS
+            // ==========================================
+            
+            // Comentario User 1 -> Harry Potter
+            Commentate c1 = new Commentate(user1, b1, "¡Me ha encantado! No pude parar de leer.", 5.0f);
+            session.save(c1);
 
+            // Comentario User 1 -> Clean Code
+            Commentate c2 = new Commentate(user1, b2, "Es denso pero fundamental para programar bien.", 4.5f);
+            session.save(c2);
+            
+            // Comentario User 2 -> Clean Code (AHORA SÍ FUNCIONA: Distinto usuario)
+            Commentate c3 = new Commentate(user2, b2, "Buenos ejemplos, aunque un poco antiguos.", 4.0f);
+            session.save(c3);
+
+            // Comentario User 1 -> Don Quijote
+            Commentate c4 = new Commentate(user1, b3, "Un clásico inmortal.", 5.0f);
+            session.save(c4);
+            
             tx.commit();
             System.out.println(">> ¡Datos precargados con éxito!");
 
