@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.io.IOException;
@@ -14,94 +9,123 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.stage.Stage;
 import model.Profile;
 
 /**
- * FXML Controller class
- *
- * @author uazko
+ * Controlador para el menú de opciones de Libro (Añadir, Modificar, Eliminar).
+ * Actúa como intermediario enviando el "modo" a BookCRUDWindow.
  */
 public class BookOptionWindowController implements Initializable {
 
     @FXML
-    private Button btnReturn;
+    private Button btnVolver;
     @FXML
-    private Button btnAdd;
+    private Button btnAñadirLibro;
     @FXML
-    private Button btnModify;
+    private Button btnModificarLibro;
     @FXML
-    private Button btnDelete;
+    private Button btnEliminarLibro;
 
-    private Controller cont; // Controller to handle business logic
-    private Profile profile; // Currently logged-in admin
-    private String mod;
+    private Controller cont; 
+    private Profile profile; 
 
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        // Inicialización si fuera necesaria
     }
 
+    // Setters para recibir datos de la ventana anterior (OptionsAdmin)
     public void setCont(Controller cont) {
         this.cont = cont;
     }
 
-    // Set the current admin profile
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
 
-    @FXML
-    private void Return(ActionEvent event) {
-    }
-
+    /**
+     * Acción para el botón "Añadir Libro".
+     * Abre la ventana CRUD en modo "create".
+     */
     @FXML
     private void createBook(ActionEvent event) {
-        mod = "create";
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
-        try {
-            javafx.scene.Parent root = fxmlLoader.load();
-            controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-            controllerWindow.setMod(mod);
-        } catch (IOException ex) {
-            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        abrirCRUD("create");
     }
 
+    /**
+     * Acción para el botón "Modificar Libro".
+     * Abre la ventana CRUD en modo "modify".
+     */
     @FXML
     private void modifyBook(ActionEvent event) {
-        mod = "modify";
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
+        abrirCRUD("modify");
+    }
+
+    /**
+     * Acción para el botón "Eliminar Libro".
+     * Abre la ventana CRUD en modo "delete".
+     */
+    @FXML
+    private void deleteBook(ActionEvent event) {
+        abrirCRUD("delete");
+    }
+
+    /**
+     * Método auxiliar para cargar la ventana y pasar los datos.
+     * Evita repetir código en cada botón.
+     */
+    private void abrirCRUD(String modo) {
         try {
-            javafx.scene.Parent root = fxmlLoader.load();
-            controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-            controllerWindow.setMod(mod);
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
+            Parent root = fxmlLoader.load();
+
+            // Obtener el controlador de la siguiente ventana
+            BookCRUDWindowController controllerWindow = fxmlLoader.getController();
+            
+            // PASAR LOS DATOS VITALES
+            controllerWindow.setCont(this.cont);      // La lógica de base de datos
+            controllerWindow.setProfile(this.profile); // El usuario actual
+            controllerWindow.setModo(modo);           // <--- AQUÍ PASAMOS EL MODO ("create", "modify", etc.)
+
+            // Mostrar la nueva ventana
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
+            stage.show();
+
+            // Cerrar la ventana actual (LibroOptionWindow)
+            Stage currentStage = (Stage) btnAñadirLibro.getScene().getWindow();
+            currentStage.close();
+
         } catch (IOException ex) {
-            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, "Error al abrir BookCRUDWindow", ex);
         }
     }
 
     @FXML
-    private void deleteBook(ActionEvent event) {
-        mod = "modify";
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
+    private void volver(ActionEvent event) {
         try {
-            javafx.scene.Parent root = fxmlLoader.load();
-            controller.BookCRUDWindowController controllerWindow = fxmlLoader.getController();
+            // Volver al menú de Admin (OptionsAdmin)
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            Parent root = fxmlLoader.load();
+
+            OptionsAdminController controllerWindow = fxmlLoader.getController();
             controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-            controllerWindow.setMod(mod);
+            controllerWindow.setCont(cont);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            Stage currentStage = (Stage) btnVolver.getScene().getWindow();
+            currentStage.close();
+
         } catch (IOException ex) {
             Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 }

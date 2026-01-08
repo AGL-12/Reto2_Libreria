@@ -6,7 +6,9 @@
 package controller;
 
 import java.util.List;
+import model.Book;
 import model.ClassDAO;
+import model.Commentate;
 import model.Profile;
 
 /**
@@ -72,5 +74,26 @@ public class Controller {
      */
     public List comboBoxInsert() {
         return dao.comboBoxInsert();
+    }
+    // LIBROS
+    public boolean createBook(Book book) {
+        return dao.createBook(book); 
+    }
+    public boolean modifyBook(Book book) {
+        return dao.modifyBook(book); 
+    }
+    public boolean deleteBook(int isbn) { 
+        return dao.deleteBook(isbn);
+    }
+    public Book getBookData(int isbn) {
+        return dao.getBookData(isbn); 
+    }
+
+    // COMENTARIOS
+    public List<Commentate> getAllComments() { 
+        return dao.getAllComments(); 
+    }
+    public boolean deleteComment(int idUser, int idBook) {
+        return dao.deleteComment(idUser, idBook); 
     }
 }

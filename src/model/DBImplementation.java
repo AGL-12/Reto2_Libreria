@@ -42,6 +42,16 @@ public class DBImplementation implements ClassDAO {
 
     private final String SLQSELECTNUSER = "SELECT u.USERNAME FROM USER_ u;";
 
+    private final String INSERT_BOOK = "INSERT INTO Book_ (Isbn, title, id_author, pages, stock, sipnosis, price, editorial, cover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String UPDATE_BOOK = "UPDATE Book_ SET title=?, id_author=?, pages=?, stock=?, sipnosis=?, price=?, editorial=?, cover=? WHERE Isbn=?";
+    private final String DELETE_BOOK = "DELETE FROM Book_ WHERE Isbn=?";
+    private final String SELECT_BOOK = "SELECT * FROM Book_ WHERE Isbn=?";
+    private final String SELECT_ALL_BOOKS = "SELECT * FROM Book_";
+    
+    // Asumiendo tabla 'commentate' basada en tu entidad Java
+    private final String SELECT_ALL_COMMENTS = "SELECT * FROM commentate"; 
+    private final String DELETE_COMMENT = "DELETE FROM commentate WHERE id_user=? AND id_book=?";
+    
     /**
      * Default constructor that loads DB configuration.
      */
@@ -394,5 +404,163 @@ public class DBImplementation implements ClassDAO {
             attempts++;
         }
         return thread.getConnection();
+    }
+    @Override
+    public boolean createBook(Book book) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = ConnectionPool.getConnection();
+            stmt = con.prepareStatement(INSERT_BOOK);
+            stmt.setString(1, String.valueOf(book.getISBN())); // Convertimos int a String para CHAR(13)
+            stmt.setString(2, book.getTitulo());
+            // Ojo: Book tiene objeto Author, pero BD pide id_author (int)
+            // Asumo que tu objeto Author tiene un ID válido.
+            stmt.setInt(3, book.getIdAuthor()); 
+            stmt.setInt(4, book.getSheets());
+            stmt.setInt(5, book.getStock());
+            stmt.setString(6, book.getSypnosis());
+            stmt.setFloat(7, book.getPrice());
+            stmt.setString(8, book.getEditorial());
+            stmt.setString(9, book.getCover());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            // Cierra recursos (puedes crear un método auxiliar closeResources)
+            try { if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
+    }
+
+    @Override
+    public boolean modifyBook(Book book) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = ConnectionPool.getConnection();
+            stmt = con.prepareStatement(UPDATE_BOOK);
+            stmt.setString(1, book.getTitulo());
+            stmt.setInt(2, book.getIdAuthor());
+            stmt.setInt(3, book.getSheets());
+            stmt.setInt(4, book.getStock());
+            stmt.setString(5, book.getSypnosis());
+            stmt.setFloat(6, book.getPrice());
+            stmt.setString(7, book.getEditorial());
+            stmt.setString(8, book.getCover());
+            stmt.setString(9, String.valueOf(book.getISBN())); // El WHERE
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
+    }
+
+    @Override
+    public boolean deleteBook(int isbn) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = ConnectionPool.getConnection();
+            stmt = con.prepareStatement(DELETE_BOOK);
+            stmt.setString(1, String.valueOf(isbn));
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
+    }
+    
+    @Override
+    public Book getBookData(int isbn) {
+         Connection con = null;
+         PreparedStatement stmt = null;
+         ResultSet rs = null;
+         Book b = null;
+         try {
+             con = ConnectionPool.getConnection();
+             stmt = con.prepareStatement(SELECT_BOOK);
+             stmt.setString(1, String.valueOf(isbn));
+             rs = stmt.executeQuery();
+             if(rs.next()){
+                 b = new Book();
+                 b.setISBN(Integer.parseInt(rs.getString("Isbn")));
+                 b.setTitulo(rs.getString("title"));
+                 b.setSheets(rs.getInt("pages"));
+                 b.setStock(rs.getInt("stock"));
+                 b.setSypnosis(rs.getString("sipnosis"));
+                 b.setPrice(rs.getFloat("price"));
+                 b.setEditorial(rs.getString("editorial"));
+                 b.setCover(rs.getString("cover"));
+                 
+                 // Recuperar Autor (Simple, solo ID por ahora)
+                 Author a = new Author();
+                 a.setIdAuthor(rs.getInt("id_author"));
+                 b.setIdAuthor(a.getIdAuthor()); 
+             }
+         } catch (SQLException e) {
+             e.printStackTrace();
+         } finally {
+             try { if(rs!=null) rs.close(); if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+         }
+         return b;
+    }
+    
+    @Override
+    public List<Book> getAllBooks() {
+        List<Book> libros = new ArrayList<>();
+        // ... Implementación similar a getBookData pero con while(rs.next()) y añadiendo a la lista
+        // No olvides cerrar recursos
+        return libros;
+    }
+
+    // --- IMPLEMENTACIÓN COMENTARIOS ---
+
+    @Override
+    public List<Commentate> getAllComments() {
+        List<Commentate> comments = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = ConnectionPool.getConnection();
+            stmt = con.prepareStatement(SELECT_ALL_COMMENTS);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                // Necesitas construir el objeto Commentate completo.
+                // Esto implica crear objetos User y Book dummy con los IDs
+                // para satisfacer el constructor de Commentate.
+                // ...
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try { if(rs!=null) rs.close(); if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
+        return comments;
+    }
+
+    @Override
+    public boolean deleteComment(int idUser, int idBook) {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = ConnectionPool.getConnection();
+            stmt = con.prepareStatement(DELETE_COMMENT);
+            stmt.setInt(1, idUser);
+            stmt.setInt(2, idBook);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { if(stmt!=null) stmt.close(); if(con!=null) con.close(); } catch(Exception e){}
+        }
     }
 }

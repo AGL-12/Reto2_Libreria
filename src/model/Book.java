@@ -13,6 +13,22 @@ public class Book {
     private String editorial;
     private float avgValuation; //calculado
 
+    public Book(int ISBN, String cover, String titulo, int idAuthor, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
+        this.ISBN = ISBN;
+        this.cover = cover;
+        this.titulo = titulo;
+        this.idAuthor = idAuthor;
+        this.sheets = sheets;
+        this.stock = stock;
+        this.sypnosis = sypnosis;
+        this.price = price;
+        this.editorial = editorial;
+        this.avgValuation = avgValuation;
+    }
+    public Book(){
+        
+    }
+
     public int getISBN() {
         return ISBN;
     }

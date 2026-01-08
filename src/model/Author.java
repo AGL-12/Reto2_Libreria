@@ -12,6 +12,10 @@ public class Author {
         this.apellido = apellido;
     }
 
+    public Author(){
+        
+    }
+
     public int getIdAuthor() {
         return idAuthor;
     }
