@@ -63,7 +63,7 @@ public class BookController {
     // Método auxiliar para cargar comentarios de la base de datos (solo lectura)
     private void cargarComentarioExistente(String user, String texto, boolean esMio) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/ComentViewController.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ComentView.fxml"));
             Node node = loader.load();
             ComentViewController controller = loader.getController();
 
