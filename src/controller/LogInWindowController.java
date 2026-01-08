@@ -14,15 +14,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
-import threads.LoginThread;
 
 /**
- * Controller for the Login window.
- * Handles user login and navigation to the main menu or signup window.
+ * Controller for the Login window. Handles user login and navigation to the
+ * main menu or signup window.
  */
-public class LogInWindowController{
+public class LogInWindowController {
 
     @FXML
     private TextField TextField_Username;
@@ -37,10 +37,10 @@ public class LogInWindowController{
     private Button Button_SignUp;
 
     @FXML
-    private Label labelIncorrecto; // Label to show error messages
+    private Label labelIncorrecto;
+    
+    private final ClassDAO dao = new DBImplementation();
 
-    // Controller handling business logic
-    private final Controller cont = new Controller(new DBImplementation());
     /**
      * Opens the SignUp window.
      */
@@ -63,8 +63,8 @@ public class LogInWindowController{
     }
 
     /**
-     * Attempts to log in the user.
-     * If successful, opens MenuWindow; otherwise, shows an error.
+     * Attempts to log in the user. If successful, opens MenuWindow; otherwise,
+     * shows an error.
      */
     @FXML
     private void logIn() {
@@ -74,13 +74,15 @@ public class LogInWindowController{
             labelIncorrecto.setText("Rellene ambos campos.");
             return;
         }
-        // 1. Bloqueo visual (Para que no pulse 20 veces)
-        Button_LogIn.setDisable(true);
-        labelIncorrecto.setText("Conectando...");
-        
-        // 2. Crear y lanzar el hilo (Le pasamos 'this' para que nos pueda llamar luego)
-        LoginThread hilo = new LoginThread(username, password, this);
-        hilo.start();
+        // Llamada SÍNCRONA (pero muy rápida porque Hibernate tarda milisegundos)
+        // El retardo de 30s ocurre en un hilo fantasma que no vemos.
+        Profile profile = dao.logIn(username, password);
+
+        if (profile != null) {
+            abrirMenu(profile);
+        } else {
+            labelIncorrecto.setText("Incorrecto");
+        }
     }
 
     @FXML
@@ -89,65 +91,48 @@ public class LogInWindowController{
             // 1. Cargamos la vista GRANDE (Main)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
             Parent root = loader.load();
-            
+
             // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
             // HeaderController mainController = loader.getController();
             // mainController.setControl(Control);
-
             Stage oldStage = (Stage) Button_LogIn.getScene().getWindow();
             Stage newStage = new Stage();
 
             // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
-            newStage.initStyle(StageStyle.DECORATED); 
-            
+            newStage.initStyle(StageStyle.DECORATED);
+
             newStage.setScene(new Scene(root));
             newStage.sizeToScene();
-            
+
             // 3. Centramos en pantalla
             newStage.centerOnScreen();
-            
+
             newStage.show();
             oldStage.close();
         } catch (IOException ex) {
             Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    // Este método debe ser público para que el Hilo lo vea
-    public void finalizarLogin(Profile profile) {
-        
-        Button_LogIn.setDisable(false); // Reactivamos botón
 
-        if (profile != null) {
-            // --- LOGIN CORRECTO: CÓDIGO DE CAMBIO DE VENTANA ---
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                Parent root = fxmlLoader.load();
+    public void abrirMenu(Profile profile) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = fxmlLoader.load();
 
-                MenuWindowController controllerWindow = fxmlLoader.getController();
-                controllerWindow.setUsuario(profile);
+            MenuWindowController controllerWindow = fxmlLoader.getController();
+            controllerWindow.setUsuario(profile);
 
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.show();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
 
-                // Cerramos la ventana actual
-                Stage currentStage = (Stage) Button_LogIn.getScene().getWindow();
-                currentStage.close();
+            // Cerramos la ventana actual
+            Stage currentStage = (Stage) Button_LogIn.getScene().getWindow();
+            currentStage.close();
 
-            } catch (IOException ex) {
-                Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        } else {
-            // --- LOGIN FALLIDO ---
-            labelIncorrecto.setText("Usuario o contraseña incorrectos.");
+        } catch (IOException ex) {
+            Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    // Método auxiliar para errores graves (Base de datos caída, etc)
-    public void mostrarError(String mensaje) {
-        Button_LogIn.setDisable(false);
-        labelIncorrecto.setText("Error: " + mensaje);
-    }
 }

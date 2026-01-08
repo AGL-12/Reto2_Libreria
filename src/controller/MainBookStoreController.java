@@ -18,9 +18,8 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import model.Book;
+import model.ClassDAO;
 import model.DBImplementation;
-import org.hibernate.Session;
-import utilities.HibernateUtil;
 
 /**
  *
@@ -37,16 +36,16 @@ public class MainBookStoreController {
 
     List<Book> libros = new ArrayList<>();
 
-    private Controller control = new Controller(new DBImplementation());
+    private final ClassDAO dao = new DBImplementation();
     // El temporizador para el delay
     private PauseTransition pause;
-    
+
     public void initialize() {
         cargarLibros("");
         // 2. CONFIGURAR EL DELAY (Por ejemplo, 0.5 segundos)
         // Esto crea un timer que espera 500ms antes de disparar su acción.
         pause = new PauseTransition(Duration.seconds(0.5));
-        
+
         // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
         pause.setOnFinished(event -> {
             // Obtenemos el texto actual del header y buscamos
@@ -59,10 +58,10 @@ public class MainBookStoreController {
         if (headerController != null) {
             headerController.getSearchTextField().textProperty().addListener((obs, oldVal, newVal) -> {
                 // MAGIA: Cada vez que escribes una letra...
-                
+
                 // A. Reiniciamos el timer desde cero (si estaba contando, se para y vuelve a empezar)
-                pause.playFromStart(); 
-                
+                pause.playFromStart();
+
                 // Resultado: Si escribes rápido "Harry", el timer se reinicia 5 veces
                 // y solo se ejecuta 'cargarLibros' una vez al final.
             });
@@ -78,19 +77,14 @@ public class MainBookStoreController {
     }
 
     private void cargarLibros(String string) {
-        Session session = null;
-        try {
-            // Camino Rápido: Abrir, Consultar, Cerrar (Sin hilos de 30s)
-            session = HibernateUtil.getSessionFactory().openSession();
+        // Llamamos al método de búsqueda del DAO
+        List<Book> librosEncontrados = dao.buscarLibros(string);
+        // Limpiamos el panel visual
+        tileBooks.getChildren().clear();
 
-            // Llamamos al método de búsqueda del DAO
-            List<Book> librosEncontrados = control.buscarLibros(session, string);
-
-            // Limpiamos el panel visual
-            tileBooks.getChildren().clear();
-
-            // Rellenamos con los resultados
-            for (Book lib : librosEncontrados) {
+        // Rellenamos con los resultados
+        for (Book lib : librosEncontrados) {
+            try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookItem.fxml"));
                 VBox libroBox = fxmlLoader.load();
 
@@ -98,17 +92,9 @@ public class MainBookStoreController {
                 libroItemController.setData(lib);
 
                 tileBooks.getChildren().add(libroBox);
-            }
-
-        } catch (IOException ex) {
-            Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, "Error FXML", ex);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+            } catch (IOException ex) {
+                Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
-
 }

@@ -24,9 +24,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import model.ClassDAO;
+import model.DBImplementation;
 import model.Profile;
 import model.User;
-import threads.SignUpThread;
+import model.UserSession;
 
 /**
  * Controller for the SignUp window. Handles user registration and navigation to
@@ -43,7 +45,7 @@ public class SignUpWindowController implements Initializable {
     @FXML
     private Button buttonSignUp, buttonLogIn;
 
-    //private Controller cont;
+    private final ClassDAO dao = new DBImplementation();
     private ToggleGroup grupOp;
 
     @Override
@@ -104,50 +106,53 @@ public class SignUpWindowController implements Initializable {
         }
 
         if (username.isEmpty() || pass.isEmpty() || email.isEmpty()) {
-            mostrarAlerta("Rellena los campos obligatorios");
+            showAlert("Rellena los campos obligatorios");
             return;
         }
 
         // 3. CREAR EL OBJETO COMPLETO (Polimorfismo: User es un Profile)
-        // Usamos User porque tiene campos específicos (gender, card)
-        User nuevoUsuario = new User();
+        User userNew = new User();
 
         // Datos de Profile
-        nuevoUsuario.setUsername(username);
-        nuevoUsuario.setPassword(pass);
-        nuevoUsuario.setEmail(email);
-        nuevoUsuario.setName(name);
-        nuevoUsuario.setSurname(surname);
-        nuevoUsuario.setTelephone(telephone);
+        userNew.setUsername(username);
+        userNew.setPassword(pass);
+        userNew.setEmail(email);
+        userNew.setName(name);
+        userNew.setSurname(surname);
+        userNew.setTelephone(telephone);
 
         // Datos de User
-        nuevoUsuario.setGender(gender);
-        nuevoUsuario.setCardNumber(cardN);
+        userNew.setGender(gender);
+        userNew.setCardNumber(cardN);
 
-        // 4. BLOQUEO VISUAL
-        buttonSignUp.setDisable(true);
-
-        // 5. LANZAR HILO
-        // Le pasamos el objeto ya montado
-        SignUpThread hilo = new SignUpThread(nuevoUsuario, this);
-        hilo.start();
+        // 3. LLAMADA AL DAO (Síncrona visualmente, Asíncrona en limpieza)
+        try {
+            // Esto guarda, hace commit y lanza el hilo basura.
+            // Devuelve el control casi al instante.
+            dao.signUp(userNew); 
+            
+            // Si no ha saltado error, es que todo fue bien.
+            
+            // 4. Auto-Login y cambio de ventana
+            // Como ya tenemos el objeto 'nuevoUsuario' relleno, lo pasamos directo
+            goToMainBookStore(userNew);
+            
+        } catch (Exception e) {
+            // Si el DAO falla (ej: usuario duplicado), salta aquí
+            showAlert("Error al registrar: " + e.getMessage());
+        }
     }
 
-    // --- CALLBACK: LO QUE LLAMA EL HILO AL TERMINAR ---
-    public void finalizarRegistro(boolean exito, String mensajeError, Profile perfilRegistrado) {
-        buttonSignUp.setDisable(false);
-
-        if (exito) {
-            // REGISTRO EXITOSO -> ABRIR MENU DIRECTAMENTE
+    public void goToMainBookStore(Profile userNew) {
             // Nota: No hace falta hacer LogIn otra vez. Hibernate ya actualizó 
             // el objeto 'perfilRegistrado' con su ID. Ya está listo.
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                 Parent root = fxmlLoader.load();
-
-                MenuWindowController controllerWindow = fxmlLoader.getController();
-                controllerWindow.setUsuario(perfilRegistrado); // Pasamos el usuario ya logueado
-
+                
+                //Usamos UserSesion Singlenton
+                UserSession.getInstance().setUser(userNew);
+                
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.show();
@@ -160,13 +165,9 @@ public class SignUpWindowController implements Initializable {
                 Logger.getLogger(SignUpWindowController.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-        } else {
-            // REGISTRO FALLIDO
-            mostrarAlerta("Error en el registro: " + mensajeError);
-        }
     }
 
-    private void mostrarAlerta(String mensaje) {
+    private void showAlert(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);

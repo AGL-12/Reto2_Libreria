@@ -14,13 +14,13 @@ import org.hibernate.Session;
  */
 public interface ClassDAO {
 
-    public Profile logIn(Session session, String username, String password);
-    public void signUp(Session session, Profile profile);
+    public Profile logIn(String username, String password);
+    public void signUp(Profile profile);
     public Boolean dropOutUser(String username, String password);
     public Boolean dropOutAdmin(String usernameToDelete, String adminUsername, String adminPassword);
     public Boolean modificarUser (String password, String email, String name, String telephone, String surname, String username, String gender);
     
-    public List<Book> buscarLibros(Session session, String busqueda);
+    public List<Book> buscarLibros(String busqueda);
   
     
     public List<Commentate> getComments();

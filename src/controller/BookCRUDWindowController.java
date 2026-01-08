@@ -55,19 +55,8 @@ public class BookCRUDWindowController implements Initializable {
     private Button btnSubirArchivo;
 
     private File archivoPortada;
-    private Controller cont; // Controller to handle business logic
     private Profile profile;
     private String modo;
-
-    /**
-     * Initializes the controller class.
-     */
-    public void setModo(String opcion) {
-        this.modo = opcion;
-    }
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
 
     // Set the current admin profile
     public void setProfile(Profile profile) {

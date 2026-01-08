@@ -7,8 +7,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.Transaction;
 import threads.HiloConnection;
+import threads.SessionHolderThread;
+import utilities.HibernateUtil;
 
 /**
  * Implementation of ClassDAO using database operations. Handles all database
@@ -39,9 +41,7 @@ public class DBImplementation implements ClassDAO {
     /**
      * Default constructor that loads DB configuration.
      */
-    public DBImplementation() {
-
-    }
+    public DBImplementation() {}
 
     /**
      * Logs in a user or admin from the database.
@@ -51,23 +51,80 @@ public class DBImplementation implements ClassDAO {
      * @return Profile object (User or Admin) if found, null otherwise
      */
     @Override
-    public Profile logIn(Session session, String username, String password) {
-        String hql = "FROM Profile p WHERE p.username = :user AND p.password = :pass";
-        // Simplemente ejecutamos la consulta usando la sesión prestada
-        Query<Profile> query = session.createQuery(hql, Profile.class);
-        query.setParameter("user", username);
-        query.setParameter("pass", password);
-        
-        return query.uniqueResult();
+    public Profile logIn(String username, String password) {
+        Session session = HibernateUtil.getSessionFactory().openSession(); // 1. Abrimos aquí
+        Transaction tx = null;
+        Profile userFound = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            // 2. Consulta
+            String hql = "FROM Profile p WHERE p.username = :user AND p.password = :pass";
+            userFound = session.createQuery(hql, Profile.class)
+                    .setParameter("user", username)
+                    .setParameter("pass", password)
+                    .uniqueResult();
+
+            tx.commit(); // 3. Confirmamos transacción (liberamos bloqueos de BD)
+
+            // 4. AQUÍ ESTÁ EL TRUCO MAESTRO:
+            // No cerramos la sesión. Se la pasamos al hilo para que la retenga.
+            new SessionHolderThread(session).start();
+
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            // Si hay error, cerramos aquí porque el hilo no arrancó
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        // 5. Devolvemos el dato INMEDIATAMENTE. La UI no espera.
+        return userFound;
     }
+
     /**
      * Signs up a new user in the database.
      *
      * @return true if signup was successful, false otherwise
      */
     @Override
-    public void signUp(Session session, Profile profile) {
-        session.save(profile);
+    public void signUp(Profile profile) {
+        // 1. Abrimos sesión
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            // 2. Guardamos (Hibernate inserta en Profile y User/Admin)
+            session.save(profile);
+
+            // 3. Confirmamos
+            tx.commit();
+
+            // 4. EL TRUCO: Lanzamos el hilo para que retenga la conexión 30s
+            // El usuario ya recibe el 'ok', pero la conexión sigue ocupada en fondo.
+            new SessionHolderThread(session).start();
+
+        } catch (Exception e) {
+            // Si hay error (ej: usuario duplicado), deshacemos
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            // IMPORTANTE: Si falló, el hilo no arrancó, así que cerramos nosotros
+            if (session.isOpen()) {
+                session.close();
+            }
+
+            // Relanzamos la excepción para que salga la Alerta roja en la ventana
+            throw e;
+        }
     }
 
     /**
@@ -312,22 +369,41 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override
-    public List<Book> buscarLibros(Session session, String busqueda) {
-        // Si la búsqueda está vacía, devolvemos TODOS los libros
-        if (busqueda == null || busqueda.trim().isEmpty()) {
-            return session.createQuery("FROM Book", Book.class).list();
+    public List<Book> buscarLibros(String busqueda) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Book> resultados = null;
+
+        try {
+            // No hace falta Transaction para solo leer (Select)
+
+            // Lógica de "Volver a ningún filtro"
+            if (busqueda == null || busqueda.trim().isEmpty()) {
+                return session.createQuery("FROM Book", Book.class).list();
+            }
+
+            // Consulta HQL
+            String search = "%" + busqueda.toLowerCase() + "%";
+            String hql = "FROM Book b WHERE "
+                    + "lower(b.title) LIKE :q OR "
+                    + // titulo cambiado a title
+                    "lower(b.author.name) LIKE :q OR "
+                    + "str(b.ISBN) LIKE :q";
+
+            resultados = session.createQuery(hql, Book.class)
+                    .setParameter("q", search)
+                    .list();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // PARA BÚSQUEDAS: Cerramos INMEDIATAMENTE.
+            // Si retuvieras aquí 30s, el buscador en tiempo real mataría el Pool.
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
 
-        // HQL: Busca si el título coincide O si el nombre del autor coincide O si el ISBN coincide
-        // Usamos str(b.ISBN) para convertir el numero a texto y poder buscar trozos (ej: buscar "978")
-        String hql = "FROM Book b WHERE " +
-                     "lower(b.title) LIKE :q OR " +
-                     "lower(b.author.name) LIKE :q OR " +
-                     "str(b.ISBN) LIKE :q";
-
-        return session.createQuery(hql, Book.class)
-                      .setParameter("q", "%" + busqueda.toLowerCase() + "%") // Los % son los comodines
-                      .list();
+        return resultados;
     }
 
     @Override
