@@ -24,6 +24,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import model.Book;
+import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
 import org.hibernate.Session;
@@ -57,6 +58,8 @@ public class BookViewController implements Initializable {
 
     private Book currentBook;
 
+    private final ClassDAO dao = new DBImplementation();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initContextMenu();
@@ -85,11 +88,9 @@ public class BookViewController implements Initializable {
      * Refresca la lista visual pidiendo los datos actualizados al modelo.
      */
     private void refreshList() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
         try {
             // currentBook es el libro que estás visualizando
-            List<Commentate> comentarios = new DBImplementation().getCommentsByBook(session, currentBook.getISBN());
+            List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
 
             for (Commentate coment : comentarios) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
@@ -102,8 +103,6 @@ public class BookViewController implements Initializable {
             }
         } catch (IOException ex) {
             Logger.getLogger(BookViewController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            session.close();
         }
     }
 

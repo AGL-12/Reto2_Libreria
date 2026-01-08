@@ -41,7 +41,8 @@ public class DBImplementation implements ClassDAO {
     /**
      * Default constructor that loads DB configuration.
      */
-    public DBImplementation() {}
+    public DBImplementation() {
+    }
 
     /**
      * Logs in a user or admin from the database.
@@ -385,8 +386,7 @@ public class DBImplementation implements ClassDAO {
             String search = "%" + busqueda.toLowerCase() + "%";
             String hql = "FROM Book b WHERE "
                     + "lower(b.title) LIKE :q OR "
-                    + // titulo cambiado a title
-                    "lower(b.author.name) LIKE :q OR "
+                    + "lower(b.author.name) LIKE :q OR "
                     + "str(b.ISBN) LIKE :q";
 
             resultados = session.createQuery(hql, Book.class)
@@ -407,15 +407,35 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override
-    public List<Commentate> getCommentsByBook(Session session, int isbn) {
-        // HQL: Selecciona los comentarios (c) donde el ISBN del libro asociado (c.book.ISBN) coincida
-        // IMPORTANTE: Asegúrate de que en tu clase Commentate el atributo se llame 'book' 
-        // y en tu clase Book el atributo se llame 'ISBN'.
-        String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
+    public List<Commentate> getCommentsByBook(int isbn) {
+        Session session = HibernateUtil.getSessionFactory().openSession(); // 1. Abrimos aquí
+        Transaction tx = null;
+        List<Commentate> comments = null;
 
-        return session.createQuery(hql, Commentate.class)
-                      .setParameter("isbn", isbn)
-                      .list();    
+        try {
+            tx = session.beginTransaction();
+
+            // HQL: Selecciona los comentarios (c) donde el ISBN del libro asociado (c.book.ISBN) coincida
+            // IMPORTANTE: Asegúrate de que en tu clase Commentate el atributo se llame 'book' 
+            // y en tu clase Book el atributo se llame 'ISBN'.
+            String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
+            comments = session.createQuery(hql, Commentate.class)
+                    .setParameter("isbn", isbn)
+                    .list();
+
+            tx.commit(); // 3. Confirmamos transacción (liberamos bloqueos de BD)
+
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            // Si hay error, cerramos aquí porque el hilo no arrancó
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return comments;
     }
 
     @Override
