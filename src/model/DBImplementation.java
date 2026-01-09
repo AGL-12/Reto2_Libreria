@@ -117,24 +117,21 @@ public class DBImplementation implements ClassDAO {
      * Deletes a standard user from the database.
      */
     @Override
-    public Boolean dropOutUser(String username, String password) {
-        return false;
+    public void dropOutUser(Profile profile) {
     }
 
     /**
      * Deletes a user selected by admin from the database.
      */
     @Override
-    public Boolean dropOutAdmin(String usernameToDelete, String adminUsername, String adminPassword) {
-        return false;
+    public void dropOutAdmin(Profile profile) {
     }
 
     /**
      * Modifies the information of a user in the database.
      */
     @Override
-    public Boolean modificarUser(String password, String email, String name, String telephone, String surname, String username, String gender) {
-        return false;
+    public void modificarUser(Profile profile) {
     }
 
     /**

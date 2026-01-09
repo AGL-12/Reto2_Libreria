@@ -6,7 +6,6 @@
 package model;
 
 import java.util.List;
-import org.hibernate.Session;
 
 /**
  * Data Access Object interface for database operations.
@@ -16,9 +15,9 @@ public interface ClassDAO {
 
     public Profile logIn(String username, String password);
     public void signUp(Profile profile);
-    public Boolean dropOutUser(String username, String password);
-    public Boolean dropOutAdmin(String usernameToDelete, String adminUsername, String adminPassword);
-    public Boolean modificarUser (String password, String email, String name, String telephone, String surname, String username, String gender);
+    public void dropOutUser(Profile profile);
+    public void dropOutAdmin(Profile profile);
+    public void modificarUser (Profile profile);
     // --- GESTIÓN DE LIBROS (Book_) ---
     public void createBook(Book book);
     public void modifyBook(Book book);
