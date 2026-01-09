@@ -1,5 +1,6 @@
 package main;
 
+import controller.MainBookStoreController;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,7 @@ import model.Author;
 import model.Book;
 import model.Commentate;
 import model.User;
+import model.UserSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import utilities.HibernateUtil;
@@ -27,8 +29,8 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
         Parent root = fxmlloader.load();
-        //MainBookStoreController main = fxmlloader.getController();
-        //main.headerMode("NO_USER");
+        MainBookStoreController main = fxmlloader.getController();
+        main.headerMode(UserSession.getInstance().getUser());
         Scene scene = new Scene(root);
         stage.setTitle("Libreria che");
         stage.setScene(scene);
@@ -50,7 +52,7 @@ public class Main extends Application {
         System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
 
         // PRECARGAR DATOS (Si la BD está vacía)
-        preloadData();
+        //preloadData();
         
         // Una vez comprobado, ya puedes lanzar la app
         launch(args);

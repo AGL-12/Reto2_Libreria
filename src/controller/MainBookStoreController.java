@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
+import model.Profile;
 
 /**
  *
@@ -68,14 +69,6 @@ public class MainBookStoreController {
         }
     }
 
-    public void headerMode(String mode) {
-        switch (mode) {
-            case "NO_USER":
-                headerController.setForNoUser();
-                break;
-        }
-    }
-
     private void cargarLibros(String string) {
         // Llamamos al método de búsqueda del DAO
         List<Book> librosEncontrados = dao.buscarLibros(string);
@@ -95,6 +88,12 @@ public class MainBookStoreController {
             } catch (IOException ex) {
                 Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    public void headerMode(Profile user) {
+        if (user == null) {
+            headerController.setForNoUser();
         }
     }
 }
