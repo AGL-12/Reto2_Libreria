@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,6 +18,7 @@ import javafx.stage.StageStyle;
 import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
+import model.UserSession;
 
 /**
  * Controller for the Login window. Handles user login and navigation to the
@@ -38,7 +40,7 @@ public class LogInWindowController {
 
     @FXML
     private Label labelIncorrecto;
-    
+
     private final ClassDAO dao = new DBImplementation();
 
     /**
@@ -70,19 +72,34 @@ public class LogInWindowController {
     private void logIn() {
         String username = TextField_Username.getText();
         String password = PasswordField_Password.getText();
+
         if (username.isEmpty() || password.isEmpty()) {
             labelIncorrecto.setText("Rellene ambos campos.");
             return;
         }
-        // Llamada SÍNCRONA (pero muy rápida porque Hibernate tarda milisegundos)
-        // El retardo de 30s ocurre en un hilo fantasma que no vemos.
-        Profile profile = dao.logIn(username, password);
 
-        if (profile != null) {
-            abrirMenu(profile);
-        } else {
-            labelIncorrecto.setText("Incorrecto");
-        }
+        labelIncorrecto.setText("Conectando...");
+        Button_LogIn.setDisable(true);
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Profile profileEncontrado = dao.logIn(username, password);
+
+                // 2. Volvemos a la pantalla para mostrar el resultado
+                Platform.runLater(() -> {
+
+                    Button_LogIn.setDisable(false); // Reactivar botón
+
+                    if (profileEncontrado != null) {
+                        UserSession.getInstance().setUser(profileEncontrado);
+                        abrirMenu(profileEncontrado);
+                    } else {
+                        labelIncorrecto.setText("Incorrecto");
+                    }
+                });
+            }
+        }).start();
     }
 
     @FXML
@@ -116,8 +133,12 @@ public class LogInWindowController {
 
     public void abrirMenu(Profile profile) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
+
+            MainBookStoreController mainUser = fxmlLoader.getController();
+            mainUser.headerMode(profile);
+
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();

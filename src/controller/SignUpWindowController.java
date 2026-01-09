@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -125,45 +126,62 @@ public class SignUpWindowController implements Initializable {
         userNew.setGender(gender);
         userNew.setCardNumber(cardN);
 
-        // 3. LLAMADA AL DAO (Síncrona visualmente, Asíncrona en limpieza)
-        try {
-            // Esto guarda, hace commit y lanza el hilo basura.
-            // Devuelve el control casi al instante.
-            dao.signUp(userNew); 
-            
-            // Si no ha saltado error, es que todo fue bien.
-            
-            // 4. Auto-Login y cambio de ventana
-            // Como ya tenemos el objeto 'nuevoUsuario' relleno, lo pasamos directo
-            goToMainBookStore(userNew);
-            
-        } catch (Exception e) {
-            // Si el DAO falla (ej: usuario duplicado), salta aquí
-            showAlert("Error al registrar: " + e.getMessage());
-        }
+        // Bloqueo visual del botón (esto sí se puede hacer aquí porque estamos en el hilo principal)
+        buttonSignUp.setDisable(true);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 1. TRABAJO SUCIO (En segundo plano)
+                    // Esto tarda un poco (abre sesión, guarda, commit, lanza el retenedor)
+                    dao.signUp(userNew);
+
+                    // 2. ÉXITO (Volvemos al Hilo Visual)
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Aquí ya podemos tocar la ventana
+                            buttonSignUp.setDisable(false);
+                            goToMainBookStore(userNew);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    // 3. ERROR (Volvemos al Hilo Visual)
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            buttonSignUp.setDisable(false);
+                            showAlert("Error al registrar: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     public void goToMainBookStore(Profile userNew) {
-            // Nota: No hace falta hacer LogIn otra vez. Hibernate ya actualizó 
-            // el objeto 'perfilRegistrado' con su ID. Ya está listo.
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                Parent root = fxmlLoader.load();
-                
-                //Usamos UserSesion Singlenton
-                UserSession.getInstance().setUser(userNew);
-                
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.show();
+        // Nota: No hace falta hacer LogIn otra vez. Hibernate ya actualizó 
+        // el objeto 'perfilRegistrado' con su ID. Ya está listo.
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = fxmlLoader.load();
 
-                // Cerramos ventana actual
-                Stage currentStage = (Stage) buttonSignUp.getScene().getWindow();
-                currentStage.close();
+            //Usamos UserSesion Singlenton
+            UserSession.getInstance().setUser(userNew);
 
-            } catch (IOException ex) {
-                Logger.getLogger(SignUpWindowController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Cerramos ventana actual
+            Stage currentStage = (Stage) buttonSignUp.getScene().getWindow();
+            currentStage.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(SignUpWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 

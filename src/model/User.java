@@ -18,12 +18,17 @@ import javax.persistence.*;
 public class User extends Profile {
 
     private String gender;
-    
+
     @Column(name = "card_number")
     private String cardNumber;
-    
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> purchaseList;
+
+    // Lista inversa: Un libro tiene muchos comentarios.
+    // fetch = FetchType.LAZY es el defecto (se cargan solo cuando los pides)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Commentate> comments;
 
     public User(String gender, String cardNumber, String username, String password, String email, int userCode, String name, String telephone, String surname, List<Order> purchaseList) {
         super(username, password, email, userCode, name, telephone, surname);
@@ -60,6 +65,14 @@ public class User extends Profile {
 
     public void setPurchaseList(List<Order> purchaseList) {
         this.purchaseList = purchaseList;
+    }
+
+    public List<Commentate> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Commentate> comments) {
+        this.comments = comments;
     }
 
     @Override

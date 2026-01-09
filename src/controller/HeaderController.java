@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.Profile;
 
 public class HeaderController {
 
@@ -119,5 +120,12 @@ public class HeaderController {
     // Esto permite que el MainBookStoreController escuche lo que escribes aquí
     public TextField getSearchTextField() {
         return txtSearch;
+    }
+
+    void setUserLogged(Profile user) {
+        logIn.setManaged(false);
+        lblUserName.setText(user.getName());
+        btnAllPurchase.setManaged(false);
+        btnBackMain.setManaged(false);
     }
 }

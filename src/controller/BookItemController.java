@@ -29,7 +29,9 @@ public class BookItemController {
     private Label author;
     @FXML
     private StarRateController starsController;
-
+    @FXML
+    private Label Contador;
+    
     private Book book;
 
     public void setData(Book book) {

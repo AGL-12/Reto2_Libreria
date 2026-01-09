@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +22,7 @@ import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
+import model.User;
 
 /**
  *
@@ -35,14 +37,16 @@ public class MainBookStoreController {
     @FXML
     public HeaderController headerController;
 
-    List<Book> libros = new ArrayList<>();
-
+    private List<Book> allBooks = new ArrayList<>();
     private final ClassDAO dao = new DBImplementation();
     // El temporizador para el delay
     private PauseTransition pause;
 
+    @FXML
     public void initialize() {
-        cargarLibros("");
+        allBooks = dao.getAllBooks();
+
+        showBooks(allBooks);
         // 2. CONFIGURAR EL DELAY (Por ejemplo, 0.5 segundos)
         // Esto crea un timer que espera 500ms antes de disparar su acción.
         pause = new PauseTransition(Duration.seconds(0.5));
@@ -52,7 +56,7 @@ public class MainBookStoreController {
             // Obtenemos el texto actual del header y buscamos
             String textoABuscar = headerController.getSearchTextField().getText();
             System.out.println("Buscando en BD: " + textoABuscar); // Log para que veas el delay
-            cargarLibros(textoABuscar);
+            searchBooks(textoABuscar);
         });
 
         // 3. CONECTAR EL LISTENER
@@ -64,36 +68,60 @@ public class MainBookStoreController {
                 pause.playFromStart();
 
                 // Resultado: Si escribes rápido "Harry", el timer se reinicia 5 veces
-                // y solo se ejecuta 'cargarLibros' una vez al final.
             });
         }
     }
 
-    private void cargarLibros(String string) {
-        // Llamamos al método de búsqueda del DAO
-        List<Book> librosEncontrados = dao.buscarLibros(string);
-        // Limpiamos el panel visual
-        tileBooks.getChildren().clear();
-
-        // Rellenamos con los resultados
-        for (Book lib : librosEncontrados) {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookItem.fxml"));
-                VBox libroBox = fxmlLoader.load();
-
-                BookItemController libroItemController = fxmlLoader.getController();
-                libroItemController.setData(lib);
-
-                tileBooks.getChildren().add(libroBox);
-            } catch (IOException ex) {
-                Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+    private void searchBooks(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            // Si borran el texto, mostramos la lista maestra entera
+            showBooks(allBooks);
+            return;
         }
+
+        String busqueda = text.toLowerCase();
+
+        // FILTRO PROFESIONAL CON STREAMS
+        List<Book> filtrados = allBooks.stream()
+                .filter(b -> {
+                    // Condiciones de búsqueda (Título OR Autor OR ISBN)
+                    boolean coincideTitulo = b.getTitle().toLowerCase().contains(busqueda);
+                    // Ojo con los nulos en autor
+                    boolean coincideAutor = b.getAuthor() != null && b.getAuthor().toString().toLowerCase().contains(busqueda);
+                    boolean coincideISBN = String.valueOf(b.getISBN()).contains(busqueda);
+
+                    return coincideTitulo || coincideAutor || coincideISBN;
+                })
+                .collect(Collectors.toList());
+
+        showBooks(filtrados);
     }
 
     public void headerMode(Profile user) {
         if (user == null) {
             headerController.setForNoUser();
+        } else if (user instanceof User) {
+            headerController.setUserLogged(user);
+        }
+    }
+
+    private void showBooks(List<Book> allBooks) {
+        tileBooks.getChildren().clear();
+
+        try {
+            for (Book lib : allBooks) {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookItem.fxml"));
+                VBox libroBox = fxmlLoader.load();
+
+                BookItemController itemController = fxmlLoader.getController();
+
+                // Aquí 'lib' ya viene con el avgValuation calculado desde el DAO
+                itemController.setData(lib);
+
+                tileBooks.getChildren().add(libroBox);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

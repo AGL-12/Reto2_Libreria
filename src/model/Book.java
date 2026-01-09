@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.*;
 
 @Entity
@@ -12,7 +13,7 @@ public class Book implements Serializable {
     private int ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
     private String cover;
     private String title;
-    
+
     @ManyToOne
     @JoinColumn(name = "id_author")
     private Author author;
@@ -22,6 +23,10 @@ public class Book implements Serializable {
     private String sypnosis;
     private float price;
     private String editorial;
+    // Lista inversa: Un libro tiene muchos comentarios.
+    // fetch = FetchType.LAZY es el defecto (se cargan solo cuando los pides)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private List<Commentate> comments;
     // CAMPO CALCULADO: No se guarda en BD
     @Transient
     private float avgValuation;
@@ -39,7 +44,8 @@ public class Book implements Serializable {
         this.avgValuation = avgValuation;
     }
 
-    public Book() {}
+    public Book() {
+    }
 
     public int getISBN() {
         return ISBN;
@@ -111,6 +117,14 @@ public class Book implements Serializable {
 
     public void setEditorial(String editorial) {
         this.editorial = editorial;
+    }
+
+    public List<Commentate> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Commentate> comments) {
+        this.comments = comments;
     }
 
     public float getAvgValuation() {
