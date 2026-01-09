@@ -7,8 +7,9 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 
-<HBox fx:id="padreHeader" alignment="CENTER" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HeaderController">
+<HBox fx:id="rootHeader" alignment="CENTER" prefHeight="57.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.HeaderController">
    <children>
       <ImageView fx:id="logo" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
          <image>
@@ -16,12 +17,19 @@
          </image>
       </ImageView>
       <Label fx:id="lblUserName" text="Bienvenido" />
-      <HBox alignment="CENTER" prefHeight="57.0" prefWidth="348.0" HBox.hgrow="ALWAYS">
+      <StackPane HBox.hgrow="ALWAYS">
          <children>
-            <TextField promptText="ISBN,TITULO O AUTOR" HBox.hgrow="ALWAYS" />
-            <Button mnemonicParsing="false" text="Button" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="txtSearch" promptText="ISBN,TITULO O AUTOR">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <StackPane.margin>
+                  <Insets right="20.0" />
+               </StackPane.margin>
+            </TextField>
+            <Button fx:id="btnSearch" mnemonicParsing="false" onAction="#clearSearch" text="x" StackPane.alignment="CENTER_RIGHT" />
          </children>
-      </HBox>
+      </StackPane>
       <Button fx:id="logIn" mnemonicParsing="false" onAction="#abrirLogin" text="Iniciar Sesión" HBox.hgrow="ALWAYS" />
       <Button fx:id="option" mnemonicParsing="false" text="Opciones" HBox.hgrow="ALWAYS" />
       <Button fx:id="logOut" mnemonicParsing="false" text="Cerrar Sessión" HBox.hgrow="ALWAYS" />

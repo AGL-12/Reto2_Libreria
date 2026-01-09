@@ -5,9 +5,8 @@
  */
 package model;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import org.hibernate.Session;
 
 /**
  * Data Access Object interface for database operations.
@@ -16,22 +15,23 @@ import java.util.Map;
 public interface ClassDAO {
 
     public Profile logIn(String username, String password);
-    public Boolean signUp(String gender, String cardNumber, String username, String password, String email, String name, String telephone, String surname);
+    public void signUp(Profile profile);
     public Boolean dropOutUser(String username, String password);
     public Boolean dropOutAdmin(String usernameToDelete, String adminUsername, String adminPassword);
     public Boolean modificarUser (String password, String email, String name, String telephone, String surname, String username, String gender);
-// --- GESTIÓN DE LIBROS (Book_) ---
-    public boolean createBook(Book book);
-    public boolean modifyBook(Book book);
-    public boolean deleteBook(int isbn); // El SQL define ISBN como char(13), pero en Java lo tienes como int. Ojo con esto.
+    // --- GESTIÓN DE LIBROS (Book_) ---
+    public void createBook(Book book);
+    public void modifyBook(Book book);
+    public void deleteBook(int isbn); // El SQL define ISBN como char(13), pero en Java lo tienes como int. Ojo con esto.
     public Book getBookData(int isbn); // Para comprobar si existe o cargar datos
     public List<Book> getAllBooks(); // Útil para la tienda o listados
 
     // --- GESTIÓN DE COMENTARIOS ---
     // Nota: No vi la tabla de comentarios en el snippet del SQL, asumo que existe 
     // y se llama 'commentate' o similar basada en tu entidad Java.
-    public List<Commentate> getAllComments(); 
-    public boolean deleteComment(int idUser, int idBook);
-  
-    List comboBoxInsert();
+    public List<Commentate> getCommentsByBook(int isbn);
+    public void addComment(Commentate comment);
+    public void deleteComment(Commentate comment);
+    public List<Book> buscarLibros(String busqueda);
+    public List comboBoxInsert();
 }

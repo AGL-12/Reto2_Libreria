@@ -35,11 +35,22 @@ public class BookCRUDWindowController implements Initializable {
     @FXML private ImageView idPortada;
     @FXML private Button btnSubirArchivo;
 
+<<<<<<< HEAD
     private Controller cont;
+=======
+    private File archivoPortada;
+>>>>>>> dev
     private Profile profile;
     private String modo; // "create", "modify", "delete"
     private File archivoPortada; // Para guardar la referencia a la imagen
 
+<<<<<<< HEAD
+=======
+    // Set the current admin profile
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+>>>>>>> dev
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Configuramos el campo ISBN para que busque al pulsar ENTER

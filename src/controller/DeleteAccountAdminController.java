@@ -6,7 +6,6 @@
 package controller;
 
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -16,6 +15,8 @@ import javafx.scene.control.TextField;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
 import model.Profile;
 import javafx.scene.control.ComboBox;
@@ -31,18 +32,12 @@ public class DeleteAccountAdminController implements Initializable {
     @FXML
     private TextField TextFieldPassword; // Password field for confirmation
 
-    private Controller cont; // Controller to handle business logic
     private Profile profile; // Currently logged-in admin
 
     @FXML
     private Button Button_Cancel; // Button to cancel the action
     @FXML
     private Button Button_Delete; // Button to delete selected user
-
-    // Set the controller instance
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
 
     // Set the current admin profile
     public void setProfile(Profile profile) {
@@ -51,21 +46,20 @@ public class DeleteAccountAdminController implements Initializable {
 
     // Populate the ComboBox with users from the controller
     public void setComboBoxUser() {
-        List<String> users = cont.comboBoxInsert();
+        //List<String> users = cont.comboBoxInsert();
         ComboBoxUser.getItems().clear();
-        ComboBoxUser.getItems().addAll(users);
+        //ComboBoxUser.getItems().addAll(users);
     }
 
     // Cancel button action: returns to MenuWindow
     @FXML
     private void cancel() {
         try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
+            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = fxmlLoader.load();
 
             controller.MenuWindowController controllerWindow = fxmlLoader.getController();
             controllerWindow.setUsuario(profile);
-            controllerWindow.setCont(this.cont);
 
             javafx.stage.Stage stage = new javafx.stage.Stage();
             stage.setScene(new javafx.scene.Scene(root));
@@ -127,7 +121,6 @@ public class DeleteAccountAdminController implements Initializable {
 
                         controller.MenuWindowController controllerWindow = fxmlLoader.getController();
                         controllerWindow.setUsuario(profile);
-                        controllerWindow.setCont(this.cont);
                         javafx.stage.Stage stage = new javafx.stage.Stage();
                         stage.setScene(new javafx.scene.Scene(root));
                         stage.show();
