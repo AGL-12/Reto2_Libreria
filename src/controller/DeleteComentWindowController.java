@@ -36,9 +36,6 @@ public class DeleteComentWindowController implements Initializable {
     private TableColumn<Commentate, Date> columnDate;
     @FXML
     private Button btnDeleteComent;
-    private Controller cont; // Controller to handle business logic
-    private Profile profile; // Currently logged-in admin
-
     /**
      * Initializes the controller class.
      */
@@ -46,12 +43,4 @@ public class DeleteComentWindowController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
-
-    // Set the current admin profile
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
 }

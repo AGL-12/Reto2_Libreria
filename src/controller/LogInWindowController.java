@@ -118,10 +118,6 @@ public class LogInWindowController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
             Parent root = fxmlLoader.load();
-
-            MenuWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setUsuario(profile);
-
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();

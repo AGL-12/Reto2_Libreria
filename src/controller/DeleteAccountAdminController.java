@@ -13,10 +13,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import model.Profile;
 import javafx.scene.control.ComboBox;
@@ -57,12 +61,8 @@ public class DeleteAccountAdminController implements Initializable {
         try {
             FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
             Parent root = fxmlLoader.load();
-
-            controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setUsuario(profile);
-
-            javafx.stage.Stage stage = new javafx.stage.Stage();
-            stage.setScene(new javafx.scene.Scene(root));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
             stage.show();
 
             // Close current window
@@ -95,21 +95,21 @@ public class DeleteAccountAdminController implements Initializable {
             return;
         }
         
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+        Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete account");
         alert.setHeaderText("Are you sure you want to delete this account?");
         alert.setContentText("This action cannot be undone.");
 
-        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 String userToDelete = ComboBoxUser.getValue();
                 String adminPassword = TextFieldPassword.getText();
                 String adminUsername = profile.getUsername();
                 
-                Boolean success = cont.dropOutAdmin(userToDelete, adminUsername, adminPassword);
-                if (success) {
-                    javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                //Boolean success = cont.dropOutAdmin(userToDelete, adminUsername, adminPassword);
+                /*
+                    controlAlert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Deleted account");
                     successAlert.setHeaderText(null);
                     successAlert.setContentText("The account has been successfully deleted.");
@@ -137,7 +137,7 @@ public class DeleteAccountAdminController implements Initializable {
                     error.setContentText("The password is incorrect. Please try again.");
                     error.showAndWait();
                 }
-
+                */
             } catch (Exception ex) {
                 ex.printStackTrace();
                 javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);

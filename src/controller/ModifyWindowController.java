@@ -13,7 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -43,22 +45,6 @@ public class ModifyWindowController implements Initializable {
     @FXML
     private Button Button_Cancel;
 
-    private Controller cont; // Controller instance for business logic
-    private Profile profile; // Currently logged-in user
-
-    // Set controller instance
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
-
-    // Set current profile and populate labels
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-        LabelUsername.setText(profile.getUsername());
-        LabelEmail.setText(profile.getEmail());
-    }
-
-    // Save changes button action
     @FXML
     private void save(ActionEvent event) throws passwordequalspassword {
         // Read all input values
@@ -70,12 +56,13 @@ public class ModifyWindowController implements Initializable {
         String gender = "";
         String username;
         String email;
-        
+
         // obtener el genero actual si es un User
+        /*
         if (profile instanceof User) {
             gender = ((User) profile).getGender();
         }
-        
+
         username = profile.getUsername();
         email = profile.getEmail();
 
@@ -88,10 +75,10 @@ public class ModifyWindowController implements Initializable {
         if (telephone == null || telephone.isEmpty() || telephone.equals("Insert your new telephone")) {
             telephone = profile.getTelephone();
         }
-        if (newPass == null || newPass.isEmpty() || cNewPass == null || cNewPass.isEmpty() || 
-            newPass.equals("New Password") || cNewPass.equals("Confirm New Password")) {
+        if (newPass == null || newPass.isEmpty() || cNewPass == null || cNewPass.isEmpty()
+                || newPass.equals("New Password") || cNewPass.equals("Confirm New Password")) {
             newPass = profile.getPassword();
-            
+
             Boolean success = cont.modificarUser(newPass, email, name, telephone, surname, username, gender);
             if (success) {
                 // actualizar el objeto profile con los nuevos valores
@@ -99,13 +86,13 @@ public class ModifyWindowController implements Initializable {
                 profile.setSurname(surname);
                 profile.setTelephone(telephone);
                 profile.setPassword(newPass);
-                
+
                 javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
                 successAlert.setTitle("Success");
                 successAlert.setHeaderText(null);
                 successAlert.setContentText("User data has been successfully updated.");
                 successAlert.showAndWait();
-                
+
                 try {
                     javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                     javafx.scene.Parent root = fxmlLoader.load();
@@ -141,13 +128,13 @@ public class ModifyWindowController implements Initializable {
                     profile.setSurname(surname);
                     profile.setTelephone(telephone);
                     profile.setPassword(newPass);
-                    
+
                     javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
                     successAlert.setTitle("Success");
                     successAlert.setHeaderText(null);
                     successAlert.setContentText("User data has been successfully updated.");
                     successAlert.showAndWait();
-                    
+
                     try {
                         javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
                         javafx.scene.Parent root = fxmlLoader.load();
@@ -175,19 +162,15 @@ public class ModifyWindowController implements Initializable {
                 }
             }
         }
+         */
     }
 
     // Cancel button action: returns to MenuWindow without saving
     @FXML
     private void cancel() {
         try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setUsuario(profile);
-            controllerWindow.setCont(this.cont);
-
+            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new javafx.scene.Scene(root));
             stage.show();

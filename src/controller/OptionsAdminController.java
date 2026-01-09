@@ -14,11 +14,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import model.Profile;
 
 /**
  * FXML Controller class
@@ -40,9 +40,6 @@ public class OptionsAdminController implements Initializable {
     @FXML
     private Label label_Username;
     
-    private Controller cont; // Controller to handle business logic
-    private Profile profile;
-
     /**
      * Initializes the controller class.
      */
@@ -51,25 +48,11 @@ public class OptionsAdminController implements Initializable {
         // TODO
     }    
 
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
-
-    // Set the current admin profile
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
-    
     @FXML
     private void deleteUserWindow(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.OptionsAdminController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -86,12 +69,7 @@ public class OptionsAdminController implements Initializable {
     private void eliminarComentarioWindow(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteComentWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.DeleteComentWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -108,12 +86,7 @@ public class OptionsAdminController implements Initializable {
     private void modificarUsuarioWindow(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ModifyWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.ModifyWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -130,12 +103,7 @@ public class OptionsAdminController implements Initializable {
     private void opcionesLibroWindow(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookOptionWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.BookOptionWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();

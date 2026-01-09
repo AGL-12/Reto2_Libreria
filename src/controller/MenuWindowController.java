@@ -26,8 +26,8 @@ import model.Profile;
 import model.User;
 
 /**
- * Controller for the main Menu window.
- * Handles navigation to modify, delete, and logout actions.
+ * Controller for the main Menu window. Handles navigation to modify, delete,
+ * and logout actions.
  */
 public class MenuWindowController implements Initializable {
 
@@ -43,22 +43,6 @@ public class MenuWindowController implements Initializable {
     @FXML
     private Label label_Username;
 
-    private Profile profile;
-    private Controller cont;
-
-    public void setUsuario(Profile profile) {
-        this.profile = profile;
-        label_Username.setText(profile.getUsername());
-    }
-
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
-
-    public Controller getCont() {
-        return cont;
-    }
-
     /**
      * Opens the Modify window.
      */
@@ -66,12 +50,7 @@ public class MenuWindowController implements Initializable {
     private void modifyVentana(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ModifyWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.ModifyWindowController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(this.cont);
-
+            Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -85,20 +64,17 @@ public class MenuWindowController implements Initializable {
     }
 
     /**
-     * Opens the Delete Account window depending on profile type.
-     * Users open DeleteAccount; Admins open DeleteAccountAdmin.
+     * Opens the Delete Account window depending on profile type. Users open
+     * DeleteAccount; Admins open DeleteAccountAdmin.
      */
     @FXML
     private void delete() {
+        /*
         try {
             FXMLLoader fxmlLoader;
             if (profile instanceof User) {
                 fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccount.fxml"));
-                javafx.scene.Parent root = fxmlLoader.load();
-                controller.DeleteAccountController controllerWindow = fxmlLoader.getController();
-                controllerWindow.setProfile(profile);
-                controllerWindow.setCont(cont);
-
+                Parent root = fxmlLoader.load();
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.show();
@@ -107,12 +83,8 @@ public class MenuWindowController implements Initializable {
 
             } else if (profile instanceof Admin) {
                 fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
-                javafx.scene.Parent root = fxmlLoader.load();
-                controller.DeleteAccountAdminController controllerWindow = fxmlLoader.getController();
-                controllerWindow.setProfile(profile);
-                controllerWindow.setCont(cont);
-                controllerWindow.setComboBoxUser();
-
+                Parent root = fxmlLoader.load();
+                //controllerWindow.setComboBoxUser();
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.show();
@@ -122,6 +94,7 @@ public class MenuWindowController implements Initializable {
         } catch (IOException ex) {
             Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        */
     }
 
     /**
@@ -130,27 +103,26 @@ public class MenuWindowController implements Initializable {
     @FXML
     private void cerrarVentana(ActionEvent event) {
         try {
-        // 1. Cargamos la vista GRANDE (Main)
+            // 1. Cargamos la vista GRANDE (Main)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
             Parent root;
             root = loader.load();
-            
+
             // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
             // HeaderController mainController = loader.getController();
             // mainController.setControl(Control);
-
             Stage oldStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Stage newStage = new Stage();
 
             // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
-            newStage.initStyle(StageStyle.DECORATED); 
-            
+            newStage.initStyle(StageStyle.DECORATED);
+
             newStage.setScene(new Scene(root));
             newStage.sizeToScene();
-            
+
             // 3. Centramos en pantalla
             newStage.centerOnScreen();
-            
+
             newStage.show();
             oldStage.close();
         } catch (IOException ex) {

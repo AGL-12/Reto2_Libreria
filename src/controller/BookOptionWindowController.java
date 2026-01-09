@@ -30,21 +30,11 @@ public class BookOptionWindowController implements Initializable {
     @FXML
     private Button btnEliminarLibro;
 
-    private Controller cont; 
     private Profile profile; 
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Inicialización si fuera necesaria
-    }
-
-    // Setters para recibir datos de la ventana anterior (OptionsAdmin)
-    public void setCont(Controller cont) {
-        this.cont = cont;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     /**
@@ -87,8 +77,6 @@ public class BookOptionWindowController implements Initializable {
             BookCRUDWindowController controllerWindow = fxmlLoader.getController();
             
             // PASAR LOS DATOS VITALES
-            controllerWindow.setCont(this.cont);      // La lógica de base de datos
-            controllerWindow.setProfile(this.profile); // El usuario actual
             controllerWindow.setModo(modo);           // <--- AQUÍ PASAMOS EL MODO ("create", "modify", etc.)
 
             // Mostrar la nueva ventana
@@ -112,11 +100,6 @@ public class BookOptionWindowController implements Initializable {
             // Volver al menú de Admin (OptionsAdmin)
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = fxmlLoader.load();
-
-            OptionsAdminController controllerWindow = fxmlLoader.getController();
-            controllerWindow.setProfile(profile);
-            controllerWindow.setCont(cont);
-
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
