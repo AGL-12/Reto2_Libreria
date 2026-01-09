@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
@@ -15,7 +16,11 @@
             <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                <children>
                   <fx:include fx:id="stars" source="StarRate.fxml" VBox.vgrow="ALWAYS" />
-                  <Label fx:id="Contador" text="Label" />
+                  <Label fx:id="contador" text="Label">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </Label>
                </children>
             </HBox>
          </children>

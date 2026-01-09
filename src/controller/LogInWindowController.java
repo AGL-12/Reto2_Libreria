@@ -110,8 +110,6 @@ public class LogInWindowController {
             Parent root = loader.load();
 
             // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
-            // HeaderController mainController = loader.getController();
-            // mainController.setControl(Control);
             Stage oldStage = (Stage) Button_LogIn.getScene().getWindow();
             Stage newStage = new Stage();
 

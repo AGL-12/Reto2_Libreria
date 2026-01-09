@@ -30,8 +30,8 @@ public class BookItemController {
     @FXML
     private StarRateController starsController;
     @FXML
-    private Label Contador;
-    
+    private Label contador;
+
     private Book book;
 
     public void setData(Book book) {
@@ -41,6 +41,8 @@ public class BookItemController {
 
         title.setText(book.getTitle());
         title.setTooltip(new Tooltip(book.getTitle()));
+
+        contador.setText("(" + book.getComments().size() + ")");
         // 1. Verificamos que la lista no sea null ni esté vacía para evitar errores
         if (book.getAuthor() != null) {
 
