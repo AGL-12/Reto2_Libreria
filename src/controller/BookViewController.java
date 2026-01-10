@@ -5,6 +5,7 @@
  */
 package controller;
 
+import static com.mchange.v2.c3p0.impl.C3P0Defaults.user;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -27,6 +28,9 @@ import model.Book;
 import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
+import model.Profile;
+import model.User;
+import model.UserSession;
 import org.hibernate.Session;
 import utilities.HibernateUtil;
 
@@ -88,6 +92,7 @@ public class BookViewController implements Initializable {
      * Refresca la lista visual pidiendo los datos actualizados al modelo.
      */
     private void refreshList() {
+        commentsContainer.getChildren().clear();
         try {
             // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
@@ -132,6 +137,55 @@ public class BookViewController implements Initializable {
 
     @FXML
     private void handleNewComment(ActionEvent event) {
+
+        Profile currentUser = UserSession.getInstance().getUser();
+
+        if (currentUser == null) {
+            showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
+            return;
+        } else if (!(currentUser instanceof User)) {
+            showAlert("Los administradores no pueden publicar opiniones.", Alert.AlertType.ERROR);
+            return;
+        }
+        
+        
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+        dialog.setTitle("Nuevo comentario");
+        dialog.setHeaderText("Escribe tu opinión sobre " + currentBook.getTitle());
+        dialog.setContentText("Comentario");
+        
+        // Esperamos a que el usuario escriba y pulse Aceptar
+        java.util.Optional<String> result = dialog.showAndWait();
+
+        // 3. Si hay texto, procedemos
+        result.ifPresent(textoComentario -> {
+            if (textoComentario.trim().isEmpty()) return;
+
+            try {
+                // A. Crear el objeto Comentario (Asumimos 5 estrellas por defecto)
+                Commentate newComment = new Commentate((User) currentUser, currentBook, textoComentario, 5.0f);
+
+                // B. Guardar en la Base de Datos
+                dao.addComment(newComment);
+
+                // C. ACTUALIZAR LA VISTA AL INSTANTE (Sin recargar)
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
+                Parent commentBox = fxmlLoader.load();
+
+                // Pasamos los datos a la tarjeta del comentario
+                CommentViewController controller = fxmlLoader.getController();
+                controller.setData(newComment);
+
+                // D. EL TRUCO: Añadir en la posición 0 (arriba del todo)
+                commentsContainer.getChildren().add(0, commentBox);
+
+                showAlert("¡Tu opinión se ha publicado!", Alert.AlertType.INFORMATION);
+
+            } catch (Exception ex) {
+                Logger.getLogger(BookViewController.class.getName()).log(Level.SEVERE, null, ex);
+                showAlert("Error al guardar el comentario.", Alert.AlertType.ERROR);
+            }
+        });
     }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
