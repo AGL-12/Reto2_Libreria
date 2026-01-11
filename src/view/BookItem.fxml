@@ -24,6 +24,9 @@
                </children>
             </HBox>
          </children>
+         <VBox.margin>
+            <Insets top="5.0" />
+         </VBox.margin>
       </VBox>
    </children>
 </VBox>

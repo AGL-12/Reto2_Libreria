@@ -141,11 +141,11 @@ public class HeaderController {
 
     private void logoResponsive() {
         // 1. Vinculamos el ancho de la imagen al 25% (0.25) del ancho del contenedor
-        logo.fitWidthProperty().bind(rootHeader.widthProperty().multiply(0.25));
+        //logo.fitWidthProperty().bind(rootHeader.widthProperty().multiply(0.25));
     }
 
     private void configurarBotonBorrar() {
-        // Si tienes un icono mejor: btnSearch.setGraphic(new ImageView(...));
+        // Si hay un icono mejor: btnSearch.setGraphic(new ImageView(...));
         btnSearch.visibleProperty().bind(txtSearch.textProperty().isNotEmpty());
 
         // --- O ---
