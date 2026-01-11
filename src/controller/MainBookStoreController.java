@@ -97,14 +97,6 @@ public class MainBookStoreController {
         showBooks(filtrados);
     }
 
-    public void headerMode(Profile user) {
-        if (user == null) {
-            headerController.setForNoUser();
-        } else if (user instanceof User) {
-            headerController.setUserLogged(user);
-        }
-    }
-
     private void showBooks(List<Book> allBooks) {
         tileBooks.getChildren().clear();
 

@@ -16,6 +16,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import model.Profile;
+import model.User;
+import model.UserSession;
 
 public class HeaderController {
 
@@ -64,23 +66,20 @@ public class HeaderController {
     @FXML
     private void backToMain(ActionEvent event) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LoginWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
 
+            MainBookStoreController mainCont = fxmlLoader.getController();
+            mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
+
             Stage stage = (Stage) rootHeader.getScene().getWindow();
-
-            Stage oldStage = (Stage) rootHeader.getScene().getWindow();
-            Stage newStage = new Stage();
-
-            // Estilo sin bordes
-            newStage.initStyle(StageStyle.UNDECORATED);
-            newStage.setScene(new Scene(root));
+            stage.setScene(new Scene(root));
 
             // 1. Calculamos cuánto mide la ventana nueva
-            newStage.sizeToScene();
+            stage.sizeToScene();
 
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            newStage.centerOnScreen();
+            stage.centerOnScreen();
 
             /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
              * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
@@ -90,8 +89,7 @@ public class HeaderController {
              * newStage.setX(centerX - (newStage.getWidth() / 2));
              * newStage.setY(centerY - (newStage.getHeight() / 2));
              */
-            newStage.show();
-            oldStage.close();
+            stage.show();
         } catch (IOException ex) {
             Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -146,13 +144,6 @@ public class HeaderController {
         logo.fitWidthProperty().bind(rootHeader.widthProperty().multiply(0.25));
     }
 
-    void setForNoUser() {
-        btnOption.setManaged(false);
-        btnLogOut.setManaged(false);
-        btnAllPurchase.setManaged(false);
-        btnBackMain.setManaged(false);
-    }
-
     private void configurarBotonBorrar() {
         // Si tienes un icono mejor: btnSearch.setGraphic(new ImageView(...));
         btnSearch.visibleProperty().bind(txtSearch.textProperty().isNotEmpty());
@@ -173,10 +164,18 @@ public class HeaderController {
         return txtSearch;
     }
 
-    void setUserLogged(Profile user) {
-        btnLogIn.setManaged(false);
-        lblUserName.setText(user.getName());
-        btnAllPurchase.setManaged(false);
-        btnBackMain.setManaged(false);
+    public void setMode(Profile user, String filter) {
+        if (user == null) {
+            btnOption.setManaged(false);
+            btnLogOut.setManaged(false);
+            btnAllPurchase.setManaged(false);
+        } else if (user instanceof User) {
+            btnLogIn.setManaged(false);
+            lblUserName.setText(user.getName());
+            btnAllPurchase.setManaged(false);
+        }
+        if (filter != "book view") {
+            btnBackMain.setManaged(false);
+        }
     }
 }

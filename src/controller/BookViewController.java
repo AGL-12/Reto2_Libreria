@@ -6,15 +6,12 @@
 package controller;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -27,15 +24,13 @@ import model.Book;
 import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
-import org.hibernate.Session;
-import utilities.HibernateUtil;
 
 /**
  * FXML Controller class
  *
  * @author mikel
  */
-public class BookViewController implements Initializable {
+public class BookViewController {
 
     @FXML
     private ImageView coverBook;
@@ -55,13 +50,14 @@ public class BookViewController implements Initializable {
     private Button btnAddComment;
     @FXML
     private VBox commentsContainer;
+    @FXML
+    public HeaderController headerController;
 
     private Book currentBook;
-
+    
     private final ClassDAO dao = new DBImplementation();
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize() {
         initContextMenu();
     }
 
