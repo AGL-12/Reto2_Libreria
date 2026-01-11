@@ -18,7 +18,7 @@
                   <fx:include fx:id="stars" source="StarRate.fxml" VBox.vgrow="ALWAYS" />
                   <Label fx:id="contador" text="Label">
                      <HBox.margin>
-                        <Insets top="5.0" />
+                        <Insets left="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
                </children>
