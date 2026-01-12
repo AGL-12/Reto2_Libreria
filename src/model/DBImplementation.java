@@ -170,7 +170,7 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override
-    public void  createBook(Book book) {
+    public void createBook(Book book) {
     }
 
     @Override
@@ -190,30 +190,31 @@ public class DBImplementation implements ClassDAO {
     public List<Book> getAllBooks() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Book> libros = new ArrayList<>();
-        
-        try {
-            // 1. Traemos todos los libros
-            libros = session.createQuery("FROM Book", Book.class).list();
 
+        try {
+            // 1. Traemos todos los libros que hay stock
+            String hql = "FROM Book";
+
+            libros = session.createQuery(hql, Book.class).list();
             // 2. CALCULAMOS LA MEDIA DE ESTRELLAS (Antes de cerrar sesión)
             for (Book b : libros) {
                 // Hibernate carga los comentarios aquí bajo demanda
-                List<Commentate> comentarios = b.getComments(); 
-                
+                List<Commentate> comentarios = b.getComments();
+
                 if (comentarios != null && !comentarios.isEmpty()) {
-                    double suma = 0;
+                    float suma = 0;
                     for (Commentate c : comentarios) {
                         suma += c.getValuation(); // Asumo que valuation es float/double
                     }
-                    float media = (float) (suma / comentarios.size());
-                    
+                    float media = suma / comentarios.size();
+
                     // Seteamos el campo @Transient
                     b.setAvgValuation(media);
                 } else {
                     b.setAvgValuation(0f);
                 }
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

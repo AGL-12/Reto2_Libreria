@@ -13,6 +13,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Book;
@@ -32,6 +33,10 @@ public class BookItemController {
     private StarRateController starsController;
     @FXML
     private Label contador;
+    @FXML
+    private StackPane stackImg;
+    @FXML
+    private ImageView soldOut;
 
     private Book book;
 
@@ -45,11 +50,11 @@ public class BookItemController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
             Parent root = fxmlLoader.load();
-            
+
             BookViewController cont = fxmlLoader.getController();
             cont.setData(book);
             cont.headerController.setMode(UserSession.getInstance().getUser(), "book view");
-            
+
             Stage stage = (Stage) rootBookItem.getScene().getWindow();
             Stage oldStage = (Stage) rootBookItem.getScene().getWindow();
             Stage newStage = new Stage();
@@ -107,7 +112,7 @@ public class BookItemController {
 
     private void setComponents() {
         Tooltip cov = new Tooltip(book.getTitle());
-        Tooltip.install(cover, cov);
+        Tooltip.install(stackImg, cov);
 
         title.setText(book.getTitle());
         title.setTooltip(new Tooltip(book.getTitle()));
@@ -129,9 +134,18 @@ public class BookItemController {
             author.setText("Anónimo"); // O déjalo vacío ""
         }
         Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
+        Image soldOugImage = new Image(getClass().getResourceAsStream("/images/soldOut.png"));
 
         // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
         cutOutImage(cover, originalImage, 140, 210);
+        cutOutImage(soldOut, soldOugImage, 140, 210);
+        if (book.getStock() <= 0) {
+            // --- NO HAY STOCK ---
+            cover.setOpacity(0.5);      // Poner portada semitransparente (efecto deshabilitado)
+        } else {
+            // --- HAY STOCK ---
+            soldOut.setVisible(false);  // Ocultar sello
+        }
         // CONFIGURACIÓN:
         starsController.setEditable(false); // BLOQUEADO
         starsController.setValueStars(book.getAvgValuation()); // PINTAR NOTA
