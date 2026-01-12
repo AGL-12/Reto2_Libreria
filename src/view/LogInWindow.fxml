@@ -8,12 +8,12 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="SignUpRoot" prefHeight="360.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LogInWindowController">
+<AnchorPane id="SignUpRoot" fx:id="loginRoot" prefHeight="360.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LogInWindowController">
    <children>
+      <TextField id="TextField_Username" fx:id="TextField_Username" layoutX="55.0" layoutY="130.0" promptText="Username" />
+      <PasswordField id="PasswordField_Password" fx:id="PasswordField_Password" layoutX="55.0" layoutY="191.0" promptText="Password" />
       <Button id="Button_LogIn" fx:id="Button_LogIn" layoutX="99.0" layoutY="237.0" mnemonicParsing="false" onAction="#logIn" prefHeight="28.0" prefWidth="61.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Log In " textAlignment="CENTER" />
       <Button id="Button_SignUp" fx:id="Button_SignUp" layoutX="101.0" layoutY="281.0" mnemonicParsing="false" onAction="#signUp" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Sign Up" />
-      <PasswordField id="PasswordField_Password" fx:id="PasswordField_Password" layoutX="55.0" layoutY="191.0" promptText="Password" />
-      <TextField id="TextField_Username" fx:id="TextField_Username" layoutX="55.0" layoutY="130.0" promptText="Username" />
       <ImageView layoutX="92.0" layoutY="38.0">
          <image>
             <Image url="@../images/person_celebrate_76dp_5084C1_FILL0_wght400_GRAD0_opsz48.png" />

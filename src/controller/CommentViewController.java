@@ -71,7 +71,7 @@ public class CommentViewController implements Initializable {
 
     }
 
-   /* public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
+    /* public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
         this.lblUsuario.setText(usuario);
         this.lblFecha.setText(fecha);
         this.txtComment.setText(texto);
@@ -80,29 +80,26 @@ public class CommentViewController implements Initializable {
             estrellasController.setValueStars(puntuacion);
         }
     }*/
-    
-    
-  public void setData(Commentate comment) {
+    public void setData(Commentate comment) {
         this.currentComment = comment;
 
-      
         // 1. Rellenar la información visual (con seguridad anti-null)
         if (lblUsuario != null && comment.getUser() != null) {
             lblUsuario.setText(comment.getUser().getName());
         }
-        
+
         if (lblFecha != null && comment.getDateCreation() != null) {
             lblFecha.setText(comment.getDateCreation().toString());
         }
-        
+
         if (txtComment != null) {
             txtComment.setText(comment.getCommentary());
             // Forzamos estilo por si acaso
-            txtComment.setStyle("-fx-text-fill: black; -fx-control-inner-background: white; -fx-opacity: 1;");
+            txtComment.getStyleClass().remove("comment-edit-mode");
         } else {
             System.err.println("¡ERROR CRÍTICO! txtComment es NULL en el controlador.");
         }
-        
+
         if (estrellasController != null) {
             estrellasController.setValueStars(comment.getValuation());
         }
@@ -111,9 +108,9 @@ public class CommentViewController implements Initializable {
         Profile currentUser = UserSession.getInstance().getUser();
 
         // Verificamos que todo exista antes de comparar
-        if (currentUser != null && comment.getUser() != null && 
-            currentUser.getUserCode() == comment.getUser().getUserCode()) {
-            
+        if (currentUser != null && comment.getUser() != null
+                && currentUser.getUserCode() == comment.getUser().getUserCode()) {
+
             // ¡Es mío!
             if (buttonBox != null) {
                 buttonBox.setVisible(true);
@@ -127,6 +124,7 @@ public class CommentViewController implements Initializable {
             }
         }
     }
+
     public void activeEditable() {
         // 1. Mostrar los botones
         buttonBox.setVisible(true);
@@ -143,17 +141,18 @@ public class CommentViewController implements Initializable {
         txtComment.setText(coment.getCommentary());
         estrellasController.setValueStars(coment.getValuation());
     }*/
-@FXML
+    @FXML
     private void handleEdit(ActionEvent event) {
         if (!isEditing) {
             // --- MODO: EMPEZAR A EDITAR ---
             isEditing = true;
-            
+
             // 1. Habilitar escritura
             txtComment.setEditable(true);
             txtComment.requestFocus(); // Poner el cursor ahí
-           // txtComment.setStyle("-fx-text-fill: black; -fx-control-inner-background: #ffffff; -fx-border-color: #2E86C1;"); // Borde azul para notar que se edita
-            
+            if (!txtComment.getStyleClass().contains("comment-edit-mode")) {
+                txtComment.getStyleClass().add("comment-edit-mode");
+            }
             // 2. Habilitar Estrellas (NUEVO)
             if (estrellasController != null) {
                 estrellasController.setEditable(true);
@@ -162,11 +161,11 @@ public class CommentViewController implements Initializable {
             // 2. Cambiar botones
             btnEdit.setText("💾 Guardar");
             btnDelete.setText("❌ Cancelar");
-            
+
         } else {
             // --- MODO: GUARDAR CAMBIOS ---
             String nuevoTexto = txtComment.getText();
-            
+
             if (nuevoTexto.trim().isEmpty()) {
                 showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING);
                 return;
@@ -176,13 +175,12 @@ public class CommentViewController implements Initializable {
                 // Actualizar DB y Objeto
                 currentComment.setCommentary(nuevoTexto);
                 dao.updateComment(currentComment);
-                
+
                 // Volver a estado normal
                 finalizarEdicion();
-                
+
                 // Mensaje opcional (puedes quitarlo si te molesta)
                 // showAlert("Comentario guardado", Alert.AlertType.INFORMATION); 
-
             } catch (Exception e) {
                 showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
             }
@@ -196,7 +194,7 @@ public class CommentViewController implements Initializable {
             // Restauramos el texto original
             txtComment.setText(currentComment.getCommentary());
             finalizarEdicion();
-            
+
         } else {
             // --- MODO: BORRAR COMENTARIO ---
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -208,7 +206,7 @@ public class CommentViewController implements Initializable {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 try {
                     dao.deleteComment(currentComment);
-                    
+
                     // Borrar visualmente
                     if (buttonBox != null && buttonBox.getParent() != null) {
                         Node tarjeta = buttonBox.getParent();
@@ -221,13 +219,12 @@ public class CommentViewController implements Initializable {
             }
         }
     }
-    
+
     // Método auxiliar para volver al estado normal
     private void finalizarEdicion() {
         isEditing = false;
         txtComment.setEditable(false);
-        txtComment.setStyle("-fx-text-fill: black; -fx-control-inner-background: white;"); // Quitar borde azul
-        
+        txtComment.getStyleClass().remove("comment-edit-mode");
         btnEdit.setText("Editar"); // O pon tu icono "✏️"
         btnDelete.setText("Borrar"); // O pon tu icono "🗑️"
     }
@@ -237,5 +234,5 @@ public class CommentViewController implements Initializable {
         alert.setContentText(message);
         alert.show();
     }
-    
+
 }

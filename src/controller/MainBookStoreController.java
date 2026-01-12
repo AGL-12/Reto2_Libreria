@@ -54,7 +54,7 @@ public class MainBookStoreController {
         // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
         pause.setOnFinished(event -> {
             // Obtenemos el texto actual del header y buscamos
-            String textoABuscar = headerController.getSearchTextField().getText();
+            String textoABuscar = headerController.getSearchTextField().getText().trim();
             System.out.println("Buscando en BD: " + textoABuscar); // Log para que veas el delay
             searchBooks(textoABuscar);
         });
@@ -95,14 +95,6 @@ public class MainBookStoreController {
                 .collect(Collectors.toList());
 
         showBooks(filtrados);
-    }
-
-    public void headerMode(Profile user) {
-        if (user == null) {
-            headerController.setForNoUser();
-        } else if (user instanceof User) {
-            headerController.setUserLogged(user);
-        }
     }
 
     private void showBooks(List<Book> allBooks) {

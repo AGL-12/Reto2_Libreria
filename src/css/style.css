@@ -183,7 +183,7 @@
 }
 
 /* STATE 1: Read-only mode (Transparent, looks like a label) */
-.comment-read-mode {
+#txtComment {
     -fx-control-inner-background: transparent;
     -fx-background-color: transparent;
     -fx-text-box-border: transparent;
