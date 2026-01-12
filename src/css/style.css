@@ -181,3 +181,26 @@
     /* Una sombra suave extra para que destaque más */
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);
 }
+
+/* STATE 1: Read-only mode (Transparent, looks like a label) */
+.comment-read-mode {
+    -fx-control-inner-background: transparent;
+    -fx-background-color: transparent;
+    -fx-text-box-border: transparent;
+    -fx-text-fill: black;
+    /* Removes the default focus glow */
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}
+
+/* STATE 2: Edit mode (White background, Blue border) */
+.comment-edit-mode {
+    -fx-control-inner-background: white;
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-border-color: #2E86C1;
+    -fx-border-radius: 3;
+    -fx-border-width: 1px;
+    /* Blue focus glow */
+    -fx-focus-color: #2E86C1;
+}
