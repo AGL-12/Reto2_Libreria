@@ -79,7 +79,6 @@
                            </font>
                         </Label>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnSaveComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Guardar opinión" />
                         <Button fx:id="btnAddComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Escribir opinión" />
                      </children>
                   </HBox>

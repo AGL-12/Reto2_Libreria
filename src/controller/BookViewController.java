@@ -30,6 +30,7 @@ import model.DBImplementation;
 import model.Profile;
 import model.User;
 import model.UserSession;
+import model.Admin;
 
 /**
  * FXML Controller class
@@ -60,7 +61,7 @@ public class BookViewController {
     public HeaderController headerController;
 
     private Book currentBook;
-    
+
     private final ClassDAO dao = new DBImplementation();
     @FXML
     private HBox buttonBox;
@@ -79,6 +80,8 @@ public class BookViewController {
     @FXML
     private StarRateController estrellasController;
 
+    private Profile currentUser = UserSession.getInstance().getUser();
+
     public void initialize() {
         initContextMenu();
     }
@@ -88,6 +91,9 @@ public class BookViewController {
      * en controles avanzados.
      */
     private void initContextMenu() {
+        if (currentUser instanceof Admin) {
+            btnAddComment.setVisible(false);
+        }
         /*
         ContextMenu contextMenu = new ContextMenu();
 
@@ -110,7 +116,28 @@ public class BookViewController {
         try {
             // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
+// 2. OBTENER USUARIO ACTUAL
+            Profile currentUser = UserSession.getInstance().getUser();
 
+            // 3. ORDENAR LA LISTA (LÓGICA NUEVA)
+            if (currentUser != null) {
+                comentarios.sort((c1, c2) -> {
+                    int myId = currentUser.getUserCode();
+                    boolean c1IsMine = c1.getUser().getUserCode() == myId;
+                    boolean c2IsMine = c2.getUser().getUserCode() == myId;
+
+                    // Si c1 es mío, va antes (-1)
+                    if (c1IsMine && !c2IsMine) {
+                        return -1;
+                    }
+                    // Si c2 es mío, c2 va antes (1)
+                    if (!c1IsMine && c2IsMine) {
+                        return 1;
+                    }
+                    // Si no, se quedan igual
+                    return 0;
+                });
+            }
             for (Commentate coment : comentarios) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
                 Parent commentBox = fxmlLoader.load();
@@ -151,18 +178,11 @@ public class BookViewController {
 
     @FXML
     private void handleNewComment(ActionEvent event) {
-        Profile currentUser = UserSession.getInstance().getUser();
-
         // Validaciones
         if (currentUser == null) {
             showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
             return;
         }
-        if (!(currentUser instanceof User)) {
-            showAlert("Los administradores no pueden publicar opiniones.", Alert.AlertType.ERROR);
-            return;
-        }
-
         // Comprobar si ya comentó
         try {
             List<Commentate> comentariosExistentes = dao.getCommentsByBook(currentBook.getISBN());
@@ -229,9 +249,9 @@ public class BookViewController {
                 puntuacion = (float) estrellasController.getValueUser(); // O .getRating(), según tu StarRateController
                 // Si tu método se llama getRating() o getValueStars(), úsalo aquí.
             }
-            
+
             // Creamos el comentario con la puntuación real
-            Commentate newComment = new Commentate((User)currentUser, currentBook, texto, puntuacion);
+            Commentate newComment = new Commentate((User) currentUser, currentBook, texto, puntuacion);
             // -------------------
             dao.addComment(newComment);
 

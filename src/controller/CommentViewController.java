@@ -19,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
+import model.Admin;
 import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
@@ -41,7 +42,7 @@ public class CommentViewController implements Initializable {
     @FXML
     private HBox buttonBox;
     @FXML
-    private StarRateController estrellasController;
+    public StarRateController starRateController;
     @FXML
     private Button btnEdit;
     @FXML
@@ -65,8 +66,8 @@ public class CommentViewController implements Initializable {
             buttonBox.setManaged(false);
         }
 
-        if (estrellasController != null) {
-            estrellasController.setEditable(false);
+        if (starRateController != null) {
+            starRateController.setEditable(false);
         }
 
     }
@@ -100,25 +101,56 @@ public class CommentViewController implements Initializable {
             System.err.println("¡ERROR CRÍTICO! txtComment es NULL en el controlador.");
         }
 
-        if (estrellasController != null) {
-            estrellasController.setValueStars(comment.getValuation());
+        if (starRateController != null) {
+            starRateController.setValueStars(comment.getValuation());
         }
 
         // 2. LÓGICA DE SEGURIDAD: ¿Muestro los botones?
         Profile currentUser = UserSession.getInstance().getUser();
 
-        // Verificamos que todo exista antes de comparar
-        if (currentUser != null && comment.getUser() != null
-                && currentUser.getUserCode() == comment.getUser().getUserCode()) {
+        // Variables booleanas para aclarar la lógica
+        boolean isOwner = false;
+        boolean isAdmin = false;
 
-            // ¡Es mío!
-            if (buttonBox != null) {
+        if (currentUser != null) {
+            // ¿Es el dueño?
+            if (comment.getUser() != null && currentUser.getUserCode() == comment.getUser().getUserCode()) {
+                isOwner = true;
+            }
+            // ¿Es admin?
+            if (currentUser instanceof Admin) {
+                isAdmin = true;
+            }
+        }
+
+        // REGLAS DE VISIBILIDAD
+        if (buttonBox != null) {
+            if (isOwner) {
+                // CASO 1: SOY EL DUEÑO -> Veo todo
                 buttonBox.setVisible(true);
                 buttonBox.setManaged(true);
-            }
-        } else {
-            // No es mío
-            if (buttonBox != null) {
+
+                btnEdit.setVisible(true);
+                btnEdit.setManaged(true);
+
+                btnDelete.setVisible(true);
+                btnDelete.setManaged(true);
+
+            } else if (isAdmin) {
+                // CASO 2: SOY ADMIN (Pero no dueño) -> Solo borrar
+                buttonBox.setVisible(true);
+                buttonBox.setManaged(true);
+
+                // Ocultamos editar
+                btnEdit.setVisible(false);
+                btnEdit.setManaged(false);
+
+                // Mostramos borrar
+                btnDelete.setVisible(true);
+                btnDelete.setManaged(true);
+
+            } else {
+                // CASO 3: NI DUEÑO NI ADMIN -> No veo nada
                 buttonBox.setVisible(false);
                 buttonBox.setManaged(false);
             }
@@ -154,8 +186,8 @@ public class CommentViewController implements Initializable {
                 txtComment.getStyleClass().add("comment-edit-mode");
             }
             // 2. Habilitar Estrellas (NUEVO)
-            if (estrellasController != null) {
-                estrellasController.setEditable(true);
+            if (starRateController != null) {
+                starRateController.setEditable(true);
             }
 
             // 2. Cambiar botones
