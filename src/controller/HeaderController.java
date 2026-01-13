@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -15,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import model.Admin;
 import model.Profile;
 import model.User;
 import model.UserSession;
@@ -43,6 +45,12 @@ public class HeaderController {
     private Button btnOption;
     @FXML
     private Button btnLogOut;
+    
+    // --- NUEVO GETTER ---
+    // Esto permite que el MainBookStoreController escuche lo que escribes aquí
+    public TextField getSearchTextField() {
+        return txtSearch;
+    }
 
     public void initialize() {
         logoResponsive();
@@ -57,6 +65,34 @@ public class HeaderController {
 
     @FXML
     private void goToBuy(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
+            Parent root = fxmlLoader.load();
+
+            MainBookStoreController mainCont = fxmlLoader.getController();
+            mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
+
+            Stage stage = (Stage) rootHeader.getScene().getWindow();
+            stage.setScene(new Scene(root));
+
+            // 1. Calculamos cuánto mide la ventana nueva
+            stage.sizeToScene();
+
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            stage.centerOnScreen();
+
+            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
+             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
+             *
+             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
+             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
+             * newStage.setX(centerX - (newStage.getWidth() / 2));
+             * newStage.setY(centerY - (newStage.getHeight() / 2));
+             */
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
@@ -133,6 +169,42 @@ public class HeaderController {
 
     @FXML
     private void option(ActionEvent event) {
+        Profile pf = UserSession.getInstance().getUser();
+        try {
+            FXMLLoader fxmlLoader;
+            if (pf instanceof User) {
+                fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            } else if (pf instanceof Admin) {
+                fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            } else {
+                showAlert("No tiene una sesion iniciada", Alert.AlertType.WARNING);
+                return;
+            }
+            Parent root = fxmlLoader.load();
+
+            //MainBookStoreController mainCont = fxmlLoader.getController();
+            //mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
+            Stage stage = (Stage) rootHeader.getScene().getWindow();
+            stage.setScene(new Scene(root));
+
+            // 1. Calculamos cuánto mide la ventana nueva
+            stage.sizeToScene();
+
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            stage.centerOnScreen();
+
+            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
+             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
+             *
+             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
+             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
+             * newStage.setX(centerX - (newStage.getWidth() / 2));
+             * newStage.setY(centerY - (newStage.getHeight() / 2));
+             */
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
@@ -158,12 +230,6 @@ public class HeaderController {
          */
     }
 
-    // --- NUEVO GETTER ---
-    // Esto permite que el MainBookStoreController escuche lo que escribes aquí
-    public TextField getSearchTextField() {
-        return txtSearch;
-    }
-
     public void setMode(Profile user, String filter) {
         if (user == null) {
             btnOption.setManaged(false);
@@ -173,9 +239,22 @@ public class HeaderController {
             btnLogIn.setManaged(false);
             lblUserName.setText(user.getName());
             btnAllPurchase.setManaged(false);
+        } else if (user instanceof Admin) {
+            btnLogIn.setManaged(false);
+            lblUserName.setText(user.getName());
+            btnAllPurchase.setManaged(false);
+            btnBuy.setManaged(false);
         }
         if (filter != "book view") {
             btnBackMain.setManaged(false);
         }
+    }
+
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle("Gestión de librería");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

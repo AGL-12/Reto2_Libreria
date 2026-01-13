@@ -7,12 +7,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -52,14 +54,20 @@ public class LogInWindowController {
     private double yOffset = 0;
 
     public void initialize() {
-        loginRoot.setOnMousePressed(event -> {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
+        loginRoot.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            }
         });
-        loginRoot.setOnMouseDragged(event -> {
-            Stage stage = (Stage) loginRoot.getScene().getWindow();
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
+        loginRoot.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                Stage stage = (Stage) loginRoot.getScene().getWindow();
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            }
         });
     }
 
@@ -107,15 +115,17 @@ public class LogInWindowController {
                 Profile profileEncontrado = dao.logIn(username, password);
 
                 // 2. Volvemos a la pantalla para mostrar el resultado
-                Platform.runLater(() -> {
-
-                    Button_LogIn.setDisable(false); // Reactivar botón
-
-                    if (profileEncontrado != null) {
-                        UserSession.getInstance().setUser(profileEncontrado);
-                        OpenMain();
-                    } else {
-                        labelIncorrecto.setText("Incorrecto");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Button_LogIn.setDisable(false); // Reactivar botón
+                        
+                        if (profileEncontrado != null) {
+                            UserSession.getInstance().setUser(profileEncontrado);
+                            OpenMain();
+                        } else {
+                            labelIncorrecto.setText("Incorrecto");
+                        }
                     }
                 });
             }

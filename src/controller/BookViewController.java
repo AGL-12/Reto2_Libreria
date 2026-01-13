@@ -5,6 +5,7 @@
  */
 package controller;
 
+import static com.mchange.v2.c3p0.impl.C3P0Defaults.user;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,13 +18,19 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Book;
 import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
+import model.Profile;
+import model.User;
+import model.UserSession;
+import model.Admin;
 
 /**
  * FXML Controller class
@@ -54,8 +61,26 @@ public class BookViewController {
     public HeaderController headerController;
 
     private Book currentBook;
-    
+
     private final ClassDAO dao = new DBImplementation();
+    @FXML
+    private HBox buttonBox;
+    @FXML
+    private Label lblUsuario;
+    @FXML
+    private Label lblFecha;
+    @FXML
+    private VBox cajaEscribir;
+    @FXML
+    private Button btnCancelar;
+    @FXML
+    private Button btnPublicar;
+    @FXML
+    private TextArea txtNuevoComentario;
+    @FXML
+    private StarRateController estrellasController;
+
+    private Profile currentUser = UserSession.getInstance().getUser();
 
     public void initialize() {
         initContextMenu();
@@ -66,6 +91,9 @@ public class BookViewController {
      * en controles avanzados.
      */
     private void initContextMenu() {
+        if (currentUser instanceof Admin) {
+            btnAddComment.setVisible(false);
+        }
         /*
         ContextMenu contextMenu = new ContextMenu();
 
@@ -84,10 +112,32 @@ public class BookViewController {
      * Refresca la lista visual pidiendo los datos actualizados al modelo.
      */
     private void refreshList() {
+        commentsContainer.getChildren().clear();
         try {
             // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
+            // 2. OBTENER USUARIO ACTUAL
+            Profile currentUser = UserSession.getInstance().getUser();
 
+            // 3. ORDENAR LA LISTA (LÓGICA NUEVA)
+            if (currentUser != null) {
+                comentarios.sort((c1, c2) -> {
+                    int myId = currentUser.getUserCode();
+                    boolean c1IsMine = c1.getUser().getUserCode() == myId;
+                    boolean c2IsMine = c2.getUser().getUserCode() == myId;
+
+                    // Si c1 es mío, va antes (-1)
+                    if (c1IsMine && !c2IsMine) {
+                        return -1;
+                    }
+                    // Si c2 es mío, c2 va antes (1)
+                    if (!c1IsMine && c2IsMine) {
+                        return 1;
+                    }
+                    // Si no, se quedan igual
+                    return 0;
+                });
+            }
             for (Commentate coment : comentarios) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
                 Parent commentBox = fxmlLoader.load();
@@ -128,6 +178,102 @@ public class BookViewController {
 
     @FXML
     private void handleNewComment(ActionEvent event) {
+        // Validaciones
+        if (currentUser == null) {
+            showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
+            return;
+        }
+        // Comprobar si ya comentó
+        try {
+            List<Commentate> comentariosExistentes = dao.getCommentsByBook(currentBook.getISBN());
+            for (Commentate c : comentariosExistentes) {
+                if (c.getUser().getUserCode() == currentUser.getUserCode()) {
+                    showAlert("¡Ya has opinado sobre este libro!", Alert.AlertType.WARNING);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // Si falla la conexión, seguimos o mostramos error suave
+        }
+
+        // MOSTRAR LA CAJA (Usando el nombre nuevo)
+        cajaEscribir.setVisible(true);
+        cajaEscribir.setManaged(true);
+
+        // Ocultar botón principal
+        btnAddComment.setVisible(false);
+        btnAddComment.setManaged(false);
+
+        // MOSTRAR LA CAJA
+        cajaEscribir.setVisible(true);
+        cajaEscribir.setManaged(true);
+        btnAddComment.setVisible(false);
+        btnAddComment.setManaged(false);
+
+        // --- AÑADE ESTO ---
+        if (estrellasController != null) {
+            estrellasController.setEditable(true); // ¡Habilitar clics!
+            estrellasController.setValueStars(0);  // Resetear a 0 estrellas limpias
+        }
+        // ------------------
+
+        txtNuevoComentario.requestFocus();
+    }
+
+    // --- ACCIÓN 2: CANCELAR ---
+    @FXML
+    private void handleCancelar(ActionEvent event) {
+        txtNuevoComentario.clear();
+        cajaEscribir.setVisible(false);
+        cajaEscribir.setManaged(false);
+
+        btnAddComment.setVisible(true);
+        btnAddComment.setManaged(true);
+    }
+
+    // --- ACCIÓN 3: PUBLICAR ---
+    @FXML
+    private void handlePublicar(ActionEvent event) {
+        String texto = txtNuevoComentario.getText().trim();
+
+        if (texto.isEmpty()) {
+            showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            Profile currentUser = UserSession.getInstance().getUser();
+// Ahora cogemos el valor real:
+            float puntuacion = 0;
+            if (estrellasController != null) {
+                puntuacion = (float) estrellasController.getValueUser(); // O .getRating(), según tu StarRateController
+                // Si tu método se llama getRating() o getValueStars(), úsalo aquí.
+            }
+
+            // Creamos el comentario con la puntuación real
+            Commentate newComment = new Commentate((User) currentUser, currentBook, texto, puntuacion);
+            // -------------------
+            dao.addComment(newComment);
+
+            // 2. Crear tarjeta visual (AQUÍ SÍ usas CommentView.fxml)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
+            Parent tarjeta = loader.load();
+            CommentViewController controller = loader.getController();
+            controller.setData(newComment);
+
+            // Añadir arriba del todo
+            commentsContainer.getChildren().add(0, tarjeta);
+
+            // 3. Cerrar y limpiar
+            handleCancelar(null);
+            btnAddComment.setDisable(true); // Bloqueamos porque ya comentó
+
+            showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
+
+        } catch (Exception ex) {
+            Logger.getLogger(BookViewController.class.getName()).log(Level.SEVERE, null, ex);
+            showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {

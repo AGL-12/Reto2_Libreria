@@ -190,9 +190,8 @@ public class DBImplementation implements ClassDAO {
     public List<Book> getAllBooks() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Book> libros = new ArrayList<>();
-
         try {
-            // 1. Traemos todos los libros que hay stock
+            // 1. Traemos todos los libros
             String hql = "FROM Book";
 
             libros = session.createQuery(hql, Book.class).list();
@@ -206,6 +205,7 @@ public class DBImplementation implements ClassDAO {
                     for (Commentate c : comentarios) {
                         suma += c.getValuation(); // Asumo que valuation es float/double
                     }
+
                     float media = suma / comentarios.size();
 
                     // Seteamos el campo @Transient
@@ -294,12 +294,68 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override
-    public void addComment(Commentate comment) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void addComment(Commentate comment) { // <--- Fíjate que ya no pone "throws Exception"
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            session.save(comment);
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace(); // Imprime el error en la consola para que sepas qué pasó
+            // Lanzamos un error "no chequeado" para detener el programa pero sin romper la interfaz
+            throw new RuntimeException("Error guardando el comentario: " + e.getMessage());
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     @Override
     public void deleteComment(Commentate comment) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.delete(comment); // Hibernate borra el objeto
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Error al borrar: " + e.getMessage());
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+    }
+
+    @Override
+    public void updateComment(Commentate comment) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.update(comment); // Hibernate actualiza los cambios
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Error al modificar: " + e.getMessage());
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
     }
 }
