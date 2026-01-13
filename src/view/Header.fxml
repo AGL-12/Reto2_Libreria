@@ -27,7 +27,10 @@
                   <Insets right="20.0" />
                </StackPane.margin>
             </TextField>
-            <Button fx:id="btnSearch" mnemonicParsing="false" onAction="#clearSearch" text="x" StackPane.alignment="CENTER_RIGHT" />
+            <Button fx:id="btnSearch" mnemonicParsing="false" onAction="#clearSearch" text="x" StackPane.alignment="CENTER_RIGHT">
+               <StackPane.margin>
+                  <Insets right="20.0" />
+               </StackPane.margin></Button>
          </children>
       </StackPane>
       <Button fx:id="btnLogIn" mnemonicParsing="false" onAction="#logIn" text="Iniciar Sesión" HBox.hgrow="ALWAYS" />

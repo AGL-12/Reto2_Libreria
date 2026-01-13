@@ -116,7 +116,7 @@ public class BookViewController {
         try {
             // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
-// 2. OBTENER USUARIO ACTUAL
+            // 2. OBTENER USUARIO ACTUAL
             Profile currentUser = UserSession.getInstance().getUser();
 
             // 3. ORDENAR LA LISTA (LÓGICA NUEVA)
