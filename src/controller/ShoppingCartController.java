@@ -36,6 +36,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private VBox vBoxContenedorLibros;
     @FXML
     private Label lblTotal;
+    @FXML
+    private VBox vBoxResumen;
+    @FXML
+    public HeaderController headerController;
     
     private TilePane tileLibros;
 

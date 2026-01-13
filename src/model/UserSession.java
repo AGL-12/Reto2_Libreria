@@ -1,5 +1,8 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserSession {
 
     // 1. La única instancia que existirá (static)
@@ -7,7 +10,9 @@ public class UserSession {
 
     // 2. El dato que queremos guardar (el usuario logueado)
     private Profile user;
-
+    
+    private List<Book> cart = new ArrayList<>();
+    
     // 3. Constructor privado para que nadie haga "new UserSession()"
     private UserSession() {
     }
@@ -37,5 +42,17 @@ public class UserSession {
     // Helper para saber si hay alguien logueado rápido
     public boolean isLoggedIn() {
         return user != null;
+    }
+    
+    public void addBookToCart(Book book) {
+        cart.add(book);
+    }
+
+    public List<Book> getCart() {
+        return cart;
+    }
+    
+    public void clearCart() { // Útil para cuando compre
+        cart.clear();
     }
 }
