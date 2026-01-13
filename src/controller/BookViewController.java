@@ -275,6 +275,27 @@ public class BookViewController {
             showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
+    
+    //Barra menu logica
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        // Muestra un mensaje simulando la generación del reporte
+        showAlert("Generando informe de comentarios...", Alert.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        // Muestra la ventana de ayuda requerida
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Ayuda del Sistema");
+        alert.setHeaderText("Manual de Usuario");
+        alert.setContentText("Guía rápida:\n"
+                           + "1. Selecciona un libro para ver detalles.\n"
+                           + "2. Escribe en el cuadro inferior y pulsa 'Publicar' para opinar.\n"
+                           + "3. Si eres Admin, usa el botón 'Borrar' para moderar.\n"
+                           + "4. Usa el menú Actions > Report para informes.");
+        alert.showAndWait();
+    }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView

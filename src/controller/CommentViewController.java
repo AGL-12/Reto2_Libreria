@@ -15,7 +15,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
@@ -57,6 +59,14 @@ public class CommentViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        ContextMenu cm = new ContextMenu();
+        MenuItem miBorrar = new MenuItem("Borrar Comentario");
+        miBorrar.setOnAction(this::handleDelete); // Reusamos tu método borrar
+        cm.getItems().add(miBorrar);
+        
+        
+        
         if (txtComment != null) {
             txtComment.setEditable(false);
         }
