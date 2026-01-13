@@ -69,8 +69,8 @@ public class HeaderController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
             Parent root = fxmlLoader.load();
 
-            MainBookStoreController mainCont = fxmlLoader.getController();
-            mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
+            ShoppingCartController shopCont = fxmlLoader.getController();
+            shopCont.headerController.setMode(UserSession.getInstance().getUser(), "buying");
 
             Stage stage = (Stage) rootHeader.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -209,6 +209,39 @@ public class HeaderController {
 
     @FXML
     private void logOut(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
+            Parent root = fxmlLoader.load();
+            
+            MainBookStoreController main = fxmlLoader.getController();
+            main.headerController.setMode(UserSession.getInstance().getUser(), null);
+
+            Stage stage = (Stage) rootHeader.getScene().getWindow();
+
+            Stage oldStage = (Stage) rootHeader.getScene().getWindow();
+            Stage newStage = new Stage();
+
+            newStage.setScene(new Scene(root));
+
+            // 1. Calculamos cuánto mide la ventana nueva
+            newStage.sizeToScene();
+
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            newStage.centerOnScreen();
+
+            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
+             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
+             *
+             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
+             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
+             * newStage.setX(centerX - (newStage.getWidth() / 2));
+             * newStage.setY(centerY - (newStage.getHeight() / 2));
+             */
+            newStage.show();
+            oldStage.close();
+        } catch (IOException ex) {
+            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void logoResponsive() {
@@ -245,8 +278,11 @@ public class HeaderController {
             btnAllPurchase.setManaged(false);
             btnBuy.setManaged(false);
         }
-        if (filter != "book view") {
+        if (filter == null) {
             btnBackMain.setManaged(false);
+        }
+        if (filter == "buying") {
+            btnBuy.setManaged(false);
         }
     }
 
