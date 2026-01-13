@@ -34,4 +34,15 @@ public interface ClassDAO {
     public void deleteComment(Commentate comment);
     public List<Book> buscarLibros(String busqueda);
     public List comboBoxInsert();
+    
+    
+    /**
+     * Busca un pedido NO PAGADO (bought=false) de un usuario específico.
+     */
+    public Order getUnfinishedOrder(User user);
+
+    /**
+     * Guarda o actualiza un pedido y sus líneas en la base de datos.
+     */
+    public void saveOrder(Order order);
 }

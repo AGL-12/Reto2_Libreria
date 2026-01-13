@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import threads.SessionHolderThread;
@@ -356,6 +357,60 @@ public class DBImplementation implements ClassDAO {
             if (session != null && session.isOpen()) {
                 session.close();
             }
+        }
+    }
+    
+    
+    @Override
+    public Order getUnfinishedOrder(User user) {
+        Session session = null;
+        Order carrito = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            
+            // Buscamos un pedido que pertenezca al usuario Y que no esté pagado (bought = false)
+            String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
+            
+            carrito = session.createQuery(hql, Order.class)
+                    .setParameter("userId", user.getUserCode())
+                    .uniqueResult(); // Devuelve uno o null
+
+            // TRUCO IMPORTANTE: Hibernate es "vago" (Lazy). Si cerramos la sesión,
+            // la lista de libros (Contain) se pierde. Usamos esto para forzar la carga:
+            if (carrito != null) {
+                Hibernate.initialize(carrito.getListPreBuy());
+            }
+
+        } catch (Exception e) {
+            // Manejo de errores (puedes loguearlo)
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return carrito;
+    }
+
+    @Override
+    public void saveOrder(Order order) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+            
+            // saveOrUpdate es mágico:
+            // - Si el Order es nuevo (ID 0) -> Hace INSERT
+            // - Si el Order ya existe (ID > 0) -> Hace UPDATE
+            // - Y gracias a CascadeType.ALL en tu clase Order, guarda también los Contains
+            session.saveOrUpdate(order);
+            
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            throw new RuntimeException("Error al guardar el carrito en BD");
+        } finally {
+            if (session != null) session.close();
         }
     }
 }
