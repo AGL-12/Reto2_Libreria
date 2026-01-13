@@ -59,7 +59,7 @@ public class DeleteAccountAdminController implements Initializable {
     @FXML
     private void cancel() {
         try {
-            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));

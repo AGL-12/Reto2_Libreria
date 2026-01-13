@@ -10,7 +10,7 @@ public class Book implements Serializable {
 
     @Id
     @Column(name = "isbn")
-    private int ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
+    private long ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
     private String cover;
     private String title;
 
@@ -31,7 +31,7 @@ public class Book implements Serializable {
     @Transient
     private float avgValuation;
 
-    public Book(int ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
+    public Book(long ISBN, String cover, String titulo, Author author, int sheets, int stock, String sypnosis, float price, String editorial, float avgValuation) {
         this.ISBN = ISBN;
         this.cover = cover;
         this.title = titulo;
@@ -47,11 +47,11 @@ public class Book implements Serializable {
     public Book() {
     }
 
-    public int getISBN() {
+    public long getISBN() {
         return ISBN;
     }
 
-    public void setISBN(int ISBN) {
+    public void setISBN(long ISBN) {
         this.ISBN = ISBN;
     }
 

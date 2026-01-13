@@ -8,12 +8,12 @@ import javax.persistence.Embeddable;
 public class ContainId implements Serializable {
 
     private int idOrder;
-    private int isbnBook;
+    private long isbnBook;
 
     public ContainId() {
     }
 
-    public ContainId(int idOrder, int isbnBook) {
+    public ContainId(int idOrder, long isbnBook) {
         this.idOrder = idOrder;
         this.isbnBook = isbnBook;
     }
@@ -27,11 +27,11 @@ public class ContainId implements Serializable {
         this.idOrder = idOrder;
     }
 
-    public int getIsbnBook() {
+    public long getIsbnBook() {
         return isbnBook;
     }
 
-    public void setIsbnBook(int isbnBook) {
+    public void setIsbnBook(long isbnBook) {
         this.isbnBook = isbnBook;
     }
 

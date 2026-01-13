@@ -52,7 +52,7 @@ public class Main extends Application {
         System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
 
         // PRECARGAR DATOS (Si la BD está vacía)
-        //preloadData();
+        preloadData();
         // Una vez comprobado, ya puedes lanzar la app
         launch(args);
 
@@ -104,7 +104,7 @@ public class Main extends Application {
             user1.setName("Pepe");
             user1.setSurname("Cliente");
             user1.setTelephone("600333444");
-            user1.setGender("Man");               // Campo específico de User
+            user1.setGender("Man");                // Campo específico de User
             user1.setCardNumber("1111-2222-3333"); // Campo específico de User
             session.save(user1);
 
@@ -129,8 +129,8 @@ public class Main extends Application {
             session.save(rowling);
 
             Book b1 = new Book();
-            b1.setISBN(1001);
-            b1.setTitle("Harry Potter y el Cáliz de Fuego"); // Nombre largo como pediste
+            b1.setISBN(9788498386655L); // <--- CAMBIO: ISBN de 13 dígitos (con L de long)
+            b1.setTitle("Harry Potter y el Cáliz de Fuego");
             b1.setCover("mood-heart.png");
             b1.setAuthor(rowling);
             b1.setPrice(25.50f);
@@ -147,7 +147,7 @@ public class Main extends Application {
             session.save(martin);
 
             Book b2 = new Book();
-            b2.setISBN(1002);
+            b2.setISBN(9780132350884L); // <--- CAMBIO: ISBN de 13 dígitos
             b2.setTitle("Clean Code");
             b2.setCover("images.jpg");
             b2.setAuthor(martin);
@@ -165,7 +165,7 @@ public class Main extends Application {
             session.save(cervantes);
 
             Book b3 = new Book();
-            b3.setISBN(1003);
+            b3.setISBN(9788420412146L); // <--- CAMBIO: ISBN de 13 dígitos
             b3.setTitle("Don Quijote de la Mancha");
             b3.setCover("Book&Bugs_logo.png");
             b3.setAuthor(cervantes);
@@ -187,7 +187,7 @@ public class Main extends Application {
             Commentate c2 = new Commentate(user1, b2, "Es denso pero fundamental para programar bien.", 4.5f);
             session.save(c2);
 
-            // Comentario User 2 -> Clean Code (AHORA SÍ FUNCIONA: Distinto usuario)
+            // Comentario User 2 -> Clean Code
             Commentate c3 = new Commentate(user2, b2, "Buenos ejemplos, aunque un poco antiguos.", 4.0f);
             session.save(c3);
 
