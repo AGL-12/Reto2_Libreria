@@ -52,12 +52,11 @@ public class BookViewController {
     @FXML
     private Label stockBook;
     @FXML
-    private Button btnSaveComment;
-    @FXML
     private Button btnAddComment;
     @FXML
     private VBox commentsContainer;
     @FXML
+    private Button btnAddToCart;
     public HeaderController headerController;
 
     private Book currentBook;
@@ -77,7 +76,6 @@ public class BookViewController {
     private Button btnPublicar;
     @FXML
     private TextArea txtNuevoComentario;
-    @FXML
     private StarRateController estrellasController;
 
     private Profile currentUser = UserSession.getInstance().getUser();
@@ -174,6 +172,15 @@ public class BookViewController {
         stockBook.setText("Stock: " + book.getStock());
 
         refreshList();
+        // --- LÓGICA DE BOTÓN ---
+        Profile user = UserSession.getInstance().getUser();
+        if (user instanceof Admin) {
+            btnAddToCart.setVisible(false); // Admin no compra
+            btnAddToCart.setManaged(false); // No ocupa sitio
+        } else {
+            btnAddToCart.setVisible(true);
+            btnAddToCart.setManaged(true);
+        }
     }
 
     @FXML
@@ -329,6 +336,35 @@ public class BookViewController {
         imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
         imageView.setSmooth(true); // Suavizado para mejor calidad
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
+    }
+    
+    
+    @FXML
+    private void handleAddToCart(ActionEvent event) {
+        // 1. Validar que hay un libro seleccionado
+        if (currentBook == null) {
+            showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        // 2. Validar que el usuario puede comprar
+        // (Aunque ya ocultamos el botón al Admin, doble seguridad no sobra)
+        if (!UserSession.getInstance().isLoggedIn()) {
+            showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            // 3. LLAMADA MAESTRA: Añadir a sesión -> Guardar en BD
+            UserSession.getInstance().addToCart(currentBook);
+            
+            // 4. Feedback visual
+            showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
 }
