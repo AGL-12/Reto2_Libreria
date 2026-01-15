@@ -37,6 +37,10 @@ public class Contain implements Serializable {
         this.id = new ContainId(order.getIdOrder(), book.getISBN());
     }
 
+    public Contain() {
+      
+    }
+
     public ContainId getId() {
         return id;
     }

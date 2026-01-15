@@ -11,6 +11,8 @@ import model.Admin;
 import model.Author;
 import model.Book;
 import model.Commentate;
+import model.Contain;
+import model.Order;
 import model.User;
 import model.UserSession;
 import org.hibernate.Session;
@@ -30,7 +32,7 @@ public class Main extends Application {
         FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
         Parent root = fxmlloader.load();
         MainBookStoreController main = fxmlloader.getController();
-        main.headerMode(UserSession.getInstance().getUser());
+        main.headerController.setMode(UserSession.getInstance().getUser(), null);
         Scene scene = new Scene(root);
         stage.setTitle("Libreria che");
         stage.setScene(scene);
@@ -53,7 +55,8 @@ public class Main extends Application {
 
         // PRECARGAR DATOS (Si la BD está vacía)
         preloadData();
-        
+
+        //preloadData();
         // Una vez comprobado, ya puedes lanzar la app
         launch(args);
 
@@ -108,7 +111,7 @@ public class Main extends Application {
             user1.setGender("Man");               // Campo específico de User
             user1.setCardNumber("1111-2222-3333"); // Campo específico de User
             session.save(user1);
-            
+
             User user2 = new User();
             user2.setUsername("user2");
             user2.setPassword("1234");
@@ -119,7 +122,7 @@ public class Main extends Application {
             user2.setGender("Woman");
             user2.setCardNumber("4444-5555-6666");
             session.save(user2);
-            
+
             // ==========================================
             // 2. CREAR AUTORES Y LIBROS
             // ==========================================
@@ -176,11 +179,10 @@ public class Main extends Application {
             b3.setSypnosis("En un lugar de la Mancha, de cuyo nombre no quiero acordarme...");
             b3.setEditorial("Cátedra");
             session.save(b3);
-            
-           // ==========================================
+
+            // ==========================================
             // 3. AÑADIR COMENTARIOS
             // ==========================================
-            
             // Comentario User 1 -> Harry Potter
             Commentate c1 = new Commentate(user1, b1, "¡Me ha encantado! No pude parar de leer.", 5.0f);
             session.save(c1);
@@ -188,7 +190,7 @@ public class Main extends Application {
             // Comentario User 1 -> Clean Code
             Commentate c2 = new Commentate(user1, b2, "Es denso pero fundamental para programar bien.", 4.5f);
             session.save(c2);
-            
+
             // Comentario User 2 -> Clean Code (AHORA SÍ FUNCIONA: Distinto usuario)
             Commentate c3 = new Commentate(user2, b2, "Buenos ejemplos, aunque un poco antiguos.", 4.0f);
             session.save(c3);
@@ -196,10 +198,49 @@ public class Main extends Application {
             // Comentario User 1 -> Don Quijote
             Commentate c4 = new Commentate(user1, b3, "Un clásico inmortal.", 5.0f);
             session.save(c4);
-            
-            tx.commit();
+
+            //tx.commit();
             System.out.println(">> ¡Datos precargados con éxito!");
 
+            // ==========================================
+// 4. CREAR HISTORIAL DE COMPRAS (Orders y Contain)
+// ==========================================
+            System.out.println(">> Generando historial de compras para user1 (Pepe)...");
+
+// --- PEDIDO 1: Finalizado (Aparecerá en el historial) ---
+            Order o1 = new Order();
+            o1.setIdUsuer(user1); // Asociamos a Pepe
+            o1.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis() - 86400000)); // Ayer
+            o1.setBought(true); // Status = true
+            session.save(o1);
+
+// Creamos las líneas usando tu constructor: public Contain(int quantity, Order order, Book book)
+// El constructor se encarga de crear el ContainId internamente
+            Contain line1 = new Contain(1, o1, b1); // 1 unidad de Harry Potter
+            line1.setSum(b1.getPrice()); // Seteamos el precio final en el campo transient o propio
+            session.save(line1);
+
+            Contain line2 = new Contain(2, o1, b2); // 2 unidades de Clean Code
+            line2.setSum(b2.getPrice() * 2);
+            session.save(line2);
+
+// --- PEDIDO 2: Finalizado ---
+            Order o2 = new Order();
+            o2.setIdUsuer(user1);
+            o2.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis())); // Hoy
+            o2.setBought(true);
+            session.save(o2);
+
+            Contain line3 = new Contain(1, o2, b3); // 1 unidad de Don Quijote
+            line3.setSum(b3.getPrice());
+            session.save(line3);
+
+// --- PEDIDO 3: Carrito pendiente (NO debe salir en historial) ---
+            Order o3 = new Order();
+            o3.setIdUsuer(user1);
+            o3.setBought(false); // Status = false
+            session.save(o3);
+            tx.commit();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();

@@ -30,7 +30,12 @@ public interface ClassDAO {
     // y se llama 'commentate' o similar basada en tu entidad Java.
     public List<Commentate> getCommentsByBook(int isbn);
     public void addComment(Commentate comment);
+    public void updateComment(Commentate comment);
     public void deleteComment(Commentate comment);
     public List<Book> buscarLibros(String busqueda);
     public List comboBoxInsert();
+    
+    
+   //Historial Compras
+    public List<Order> getHistory(int id);
 }

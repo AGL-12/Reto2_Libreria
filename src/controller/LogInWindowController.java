@@ -7,12 +7,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import model.ClassDAO;
@@ -25,6 +28,9 @@ import model.UserSession;
  * main menu or signup window.
  */
 public class LogInWindowController {
+
+    @FXML
+    private AnchorPane loginRoot;
 
     @FXML
     private TextField TextField_Username;
@@ -42,6 +48,28 @@ public class LogInWindowController {
     private Label labelIncorrecto;
 
     private final ClassDAO dao = new DBImplementation();
+
+    // 2. VARIABLES PARA EL CÁLCULO DE MOVIMIENTO
+    private double xOffset = 0;
+    private double yOffset = 0;
+
+    public void initialize() {
+        loginRoot.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            }
+        });
+        loginRoot.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                Stage stage = (Stage) loginRoot.getScene().getWindow();
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            }
+        });
+    }
 
     /**
      * Opens the SignUp window.
@@ -80,22 +108,24 @@ public class LogInWindowController {
 
         labelIncorrecto.setText("Conectando...");
         Button_LogIn.setDisable(true);
-        
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Profile profileEncontrado = dao.logIn(username, password);
 
                 // 2. Volvemos a la pantalla para mostrar el resultado
-                Platform.runLater(() -> {
-
-                    Button_LogIn.setDisable(false); // Reactivar botón
-
-                    if (profileEncontrado != null) {
-                        UserSession.getInstance().setUser(profileEncontrado);
-                        abrirMenu(profileEncontrado);
-                    } else {
-                        labelIncorrecto.setText("Incorrecto");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Button_LogIn.setDisable(false); // Reactivar botón
+                        
+                        if (profileEncontrado != null) {
+                            UserSession.getInstance().setUser(profileEncontrado);
+                            OpenMain();
+                        } else {
+                            labelIncorrecto.setText("Incorrecto");
+                        }
                     }
                 });
             }
@@ -109,9 +139,10 @@ public class LogInWindowController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
             Parent root = loader.load();
 
+            MainBookStoreController mainUser = loader.getController();
+            mainUser.headerController.setMode(UserSession.getInstance().getUser(), null);
+
             // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
-            // HeaderController mainController = loader.getController();
-            // mainController.setControl(Control);
             Stage oldStage = (Stage) Button_LogIn.getScene().getWindow();
             Stage newStage = new Stage();
 
@@ -131,13 +162,13 @@ public class LogInWindowController {
         }
     }
 
-    public void abrirMenu(Profile profile) {
+    public void OpenMain() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
 
             MainBookStoreController mainUser = fxmlLoader.getController();
-            mainUser.headerMode(profile);
+            mainUser.headerController.setMode(UserSession.getInstance().getUser(), null);
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));

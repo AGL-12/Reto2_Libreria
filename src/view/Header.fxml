@@ -27,15 +27,18 @@
                   <Insets right="20.0" />
                </StackPane.margin>
             </TextField>
-            <Button fx:id="btnSearch" mnemonicParsing="false" onAction="#clearSearch" text="x" StackPane.alignment="CENTER_RIGHT" />
+            <Button fx:id="btnSearch" mnemonicParsing="false" onAction="#clearSearch" text="x" StackPane.alignment="CENTER_RIGHT">
+               <StackPane.margin>
+                  <Insets right="20.0" />
+               </StackPane.margin></Button>
          </children>
       </StackPane>
-      <Button fx:id="logIn" mnemonicParsing="false" onAction="#abrirLogin" text="Iniciar Sesión" HBox.hgrow="ALWAYS" />
-      <Button fx:id="option" mnemonicParsing="false" text="Opciones" HBox.hgrow="ALWAYS" />
-      <Button fx:id="logOut" mnemonicParsing="false" text="Cerrar Sessión" HBox.hgrow="ALWAYS" />
-      <Button fx:id="btnBuy" mnemonicParsing="false" text="Comprar" />
-      <Button fx:id="btnAllPurchase" mnemonicParsing="false" text="Historial de Compras" />
-      <Button fx:id="btnBackMain" mnemonicParsing="false" text="Volver" />
+      <Button fx:id="btnLogIn" mnemonicParsing="false" onAction="#logIn" text="Iniciar Sesión" HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnOption" mnemonicParsing="false" onAction="#option" text="Opciones" HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnLogOut" mnemonicParsing="false" onAction="#logOut" text="Cerrar Sessión" HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnBuy" mnemonicParsing="false" onAction="#goToBuy" text="Comprar" />
+      <Button fx:id="btnAllPurchase" mnemonicParsing="false" onAction="#seeAllPurchase" text="Historial de Compras" />
+      <Button fx:id="btnBackMain" mnemonicParsing="false" onAction="#backToMain" text="Volver" />
    </children>
    <opaqueInsets>
       <Insets />

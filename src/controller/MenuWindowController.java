@@ -24,6 +24,7 @@ import javafx.stage.StageStyle;
 import model.Admin;
 import model.Profile;
 import model.User;
+import model.UserSession;
 
 /**
  * Controller for the main Menu window. Handles navigation to modify, delete,
@@ -36,6 +37,9 @@ public class MenuWindowController implements Initializable {
 
     @FXML
     private Button Button_Modify;
+
+    @FXML
+    private Button Button_Historial;
 
     @FXML
     private Button Button_LogOut;
@@ -94,7 +98,7 @@ public class MenuWindowController implements Initializable {
         } catch (IOException ex) {
             Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        */
+         */
     }
 
     /**
@@ -133,5 +137,22 @@ public class MenuWindowController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Initialization logic if needed
+    }
+
+    @FXML
+    private void historial(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
+            Parent root = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            Stage currentStage = (Stage) Button_Modify.getScene().getWindow();
+            currentStage.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

@@ -6,14 +6,25 @@
 package controller;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
+import model.Admin;
+import model.ClassDAO;
 import model.Commentate;
+import model.DBImplementation;
+import model.Profile;
+import model.UserSession;
 
 /**
  * FXML Controller class
@@ -27,36 +38,122 @@ public class CommentViewController implements Initializable {
     @FXML
     private Label lblFecha;
     @FXML
-    private TextArea txtComentario;
+    private TextArea txtComment;
     @FXML
     private HBox buttonBox;
     @FXML
-    private StarRateController estrellasController;
+    public StarRateController starRateController;
     @FXML
-    private Button btnEditar;
+    private Button btnEdit;
     @FXML
-    private Button btnBorrar;
+    private Button btnDelete;
+
+    private Commentate currentComment;
+    private final ClassDAO dao = new DBImplementation();
+    private boolean isEditing = false;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonBox.setVisible(false);
-        buttonBox.setManaged(false);
-        if (estrellasController != null) {
-            estrellasController.setEditable(false);
+        if (txtComment != null) {
+            txtComment.setEditable(false);
+        }
+
+        if (buttonBox != null) {
+            buttonBox.setVisible(false);
+            buttonBox.setManaged(false);
+        }
+
+        if (starRateController != null) {
+            starRateController.setEditable(false);
         }
 
     }
 
-    public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
+    /* public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
         this.lblUsuario.setText(usuario);
         this.lblFecha.setText(fecha);
-        this.txtComentario.setText(texto);
+        this.txtComment.setText(texto);
 
         if (estrellasController != null) {
             estrellasController.setValueStars(puntuacion);
+        }
+    }*/
+    public void setData(Commentate comment) {
+        this.currentComment = comment;
+
+        // 1. Rellenar la información visual (con seguridad anti-null)
+        if (lblUsuario != null && comment.getUser() != null) {
+            lblUsuario.setText(comment.getUser().getName());
+        }
+
+        if (lblFecha != null && comment.getDateCreation() != null) {
+            lblFecha.setText(comment.getDateCreation().toString());
+        }
+
+        if (txtComment != null) {
+            txtComment.setText(comment.getCommentary());
+            // Forzamos estilo por si acaso
+            txtComment.getStyleClass().remove("comment-edit-mode");
+        } else {
+            System.err.println("¡ERROR CRÍTICO! txtComment es NULL en el controlador.");
+        }
+
+        if (starRateController != null) {
+            starRateController.setValueStars(comment.getValuation());
+        }
+
+        // 2. LÓGICA DE SEGURIDAD: ¿Muestro los botones?
+        Profile currentUser = UserSession.getInstance().getUser();
+
+        // Variables booleanas para aclarar la lógica
+        boolean isOwner = false;
+        boolean isAdmin = false;
+
+        if (currentUser != null) {
+            // ¿Es el dueño?
+            if (comment.getUser() != null && currentUser.getUserCode() == comment.getUser().getUserCode()) {
+                isOwner = true;
+            }
+            // ¿Es admin?
+            if (currentUser instanceof Admin) {
+                isAdmin = true;
+            }
+        }
+
+        // REGLAS DE VISIBILIDAD
+        if (buttonBox != null) {
+            if (isOwner) {
+                // CASO 1: SOY EL DUEÑO -> Veo todo
+                buttonBox.setVisible(true);
+                buttonBox.setManaged(true);
+
+                btnEdit.setVisible(true);
+                btnEdit.setManaged(true);
+
+                btnDelete.setVisible(true);
+                btnDelete.setManaged(true);
+
+            } else if (isAdmin) {
+                // CASO 2: SOY ADMIN (Pero no dueño) -> Solo borrar
+                buttonBox.setVisible(true);
+                buttonBox.setManaged(true);
+
+                // Ocultamos editar
+                btnEdit.setVisible(false);
+                btnEdit.setManaged(false);
+
+                // Mostramos borrar
+                btnDelete.setVisible(true);
+                btnDelete.setManaged(true);
+
+            } else {
+                // CASO 3: NI DUEÑO NI ADMIN -> No veo nada
+                buttonBox.setVisible(false);
+                buttonBox.setManaged(false);
+            }
         }
     }
 
@@ -66,14 +163,108 @@ public class CommentViewController implements Initializable {
         buttonBox.setManaged(true);
 
         // 2. Habilitar edición
-        txtComentario.setEditable(true);
-        txtComentario.requestFocus();
+        txtComment.setEditable(true);
+        txtComment.requestFocus();
     }
 
-    void setData(Commentate coment) {
+    /*void setData(Commentate coment) {
         lblUsuario.setText(coment.getUser().getName());
         lblFecha.setText(coment.getDateCreation().toString());
-        txtComentario.setText(coment.getCommentary());
+        txtComment.setText(coment.getCommentary());
         estrellasController.setValueStars(coment.getValuation());
+    }*/
+    @FXML
+    private void handleEdit(ActionEvent event) {
+        if (!isEditing) {
+            // --- MODO: EMPEZAR A EDITAR ---
+            isEditing = true;
+
+            // 1. Habilitar escritura
+            txtComment.setEditable(true);
+            txtComment.requestFocus(); // Poner el cursor ahí
+            if (!txtComment.getStyleClass().contains("comment-edit-mode")) {
+                txtComment.getStyleClass().add("comment-edit-mode");
+            }
+            // 2. Habilitar Estrellas (NUEVO)
+            if (starRateController != null) {
+                starRateController.setEditable(true);
+            }
+
+            // 2. Cambiar botones
+            btnEdit.setText("💾 Guardar");
+            btnDelete.setText("❌ Cancelar");
+
+        } else {
+            // --- MODO: GUARDAR CAMBIOS ---
+            String nuevoTexto = txtComment.getText();
+
+            if (nuevoTexto.trim().isEmpty()) {
+                showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            try {
+                // Actualizar DB y Objeto
+                currentComment.setCommentary(nuevoTexto);
+                dao.updateComment(currentComment);
+
+                // Volver a estado normal
+                finalizarEdicion();
+
+                // Mensaje opcional (puedes quitarlo si te molesta)
+                // showAlert("Comentario guardado", Alert.AlertType.INFORMATION); 
+            } catch (Exception e) {
+                showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
     }
+
+    @FXML
+    private void handleDelete(ActionEvent event) {
+        if (isEditing) {
+            // --- MODO: CANCELAR EDICIÓN ---
+            // Restauramos el texto original
+            txtComment.setText(currentComment.getCommentary());
+            finalizarEdicion();
+
+        } else {
+            // --- MODO: BORRAR COMENTARIO ---
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Borrar");
+            alert.setHeaderText("¿Seguro que quieres borrarlo?");
+            alert.setContentText("No se puede deshacer.");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try {
+                    dao.deleteComment(currentComment);
+
+                    // Borrar visualmente
+                    if (buttonBox != null && buttonBox.getParent() != null) {
+                        Node tarjeta = buttonBox.getParent();
+                        tarjeta.setVisible(false);
+                        tarjeta.setManaged(false);
+                    }
+                } catch (Exception e) {
+                    showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR);
+                }
+            }
+        }
+    }
+
+    // Método auxiliar para volver al estado normal
+    private void finalizarEdicion() {
+        isEditing = false;
+        txtComment.setEditable(false);
+        txtComment.getStyleClass().remove("comment-edit-mode");
+        btnEdit.setText("Editar"); // O pon tu icono "✏️"
+        btnDelete.setText("Borrar"); // O pon tu icono "🗑️"
+    }
+
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setContentText(message);
+        alert.show();
+    }
+
 }
