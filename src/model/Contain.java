@@ -38,7 +38,7 @@ public class Contain implements Serializable {
     }
 
     public Contain() {
-      
+
     }
 
     public ContainId getId() {
@@ -87,5 +87,27 @@ public class Contain implements Serializable {
     public float getSum() {
         return sum;
     }
+    
+// ==========================================
+    // MÉTODOS PARA LA VISTA (TABLA)
+    // ==========================================
 
+    /**
+     * Puente para sacar el Título. La tabla llama aquí cuando pones: new
+     * PropertyValueFactory<>("nombreLibro")
+     */
+    public String getNombreLibro() {
+        // Gracias al JOIN FETCH, 'this.book' ya no es null, tiene datos.
+        return this.book.getTitle();
+    }
+
+    /**
+     * Puente para sacar el Precio Total. La tabla llama aquí cuando pones: new
+     * PropertyValueFactory<>("totalEuros")
+     */
+    public String getTotalEuros() {
+        // Multiplicamos el precio del libro (Book) por la cantidad (Contain)
+        float total = this.book.getPrice() * this.quantity;
+        return total + " €";
+    }
 }

@@ -393,6 +393,28 @@ public class DBImplementation implements ClassDAO {
             }
         }
         return orders;
-
     }
+
+    @Override
+    public List<Contain> getOrder(int id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        List<Contain> contains = null;
+        try {
+            tx = session.beginTransaction();
+           String hql = "FROM Contain c JOIN FETCH c.book WHERE c.order.idOrder = :id";
+
+            contains = session.createQuery(hql, Contain.class)
+                    .setParameter("id", id)
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return contains;
+    }
+
 }

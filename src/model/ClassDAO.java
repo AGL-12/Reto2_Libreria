@@ -38,4 +38,5 @@ public interface ClassDAO {
     
    //Historial Compras
     public List<Order> getHistory(int id);
+    public List<Contain> getOrder (int id);
 }
