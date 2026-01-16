@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.io.IOException;
@@ -17,15 +12,17 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import model.Author;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import model.Book;
 import model.ClassDAO;
+import model.Contain;
 import model.DBImplementation;
+import model.Order;
 import model.Profile;
 import model.UserSession;
 
@@ -43,58 +40,70 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     @FXML
     private VBox vBoxResumen;
     @FXML
+    private Button btnComprar;
+
+    // Si usas el Header incluido
+    @FXML
     public HeaderController headerController;
 
-    private TilePane tileLibros;
+    // --- VARIABLES GLOBALES ---
+    private List<Book> libros = new ArrayList<>(); // Lista para cálculos de precio
+    private Order cartOder = null; // Objeto del pedido actual
 
-    List<Book> libros = new ArrayList<>();
     private final ClassDAO dao = new DBImplementation();
 
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         Profile userLogged = UserSession.getInstance().getUser();
-        if (userLogged != null) {
-            // 2. LLAMADA AL DAO: Usamos tu método nuevo "pendingBook"
-            // Esto llena la lista con los libros que están en bought=false
-            libros = dao.pendingBook(userLogged.getId());
-            
-            System.out.println(libros);
 
-            // 3. Cargar la parte visual
-            if (libros != null && !libros.isEmpty()) {
+        if (userLogged != null) {
+            // 1. Cargar el objeto pedido completo desde la BD
+            cartOder = dao.cartOrder(userLogged.getId());
+
+            // 2. Si existe pedido y tiene líneas, cargamos la vista
+            if (cartOder != null && cartOder.getListPreBuy() != null && !cartOder.getListPreBuy().isEmpty()) {
                 cargarVistaLibros();
             } else {
                 lblTotal.setText("El carrito está vacío.");
+                btnComprar.setDisable(true);
             }
         }
-
     }
 
     private void cargarVistaLibros() {
+        // 1. LIMPIEZA OBLIGATORIA: Borramos lo visual y lo lógico para empezar de cero
+        vBoxContenedorLibros.getChildren().clear();
+        libros.clear();
+
+        // 2. Llenamos la lista GLOBAL 'libros' con los datos del pedido
+        // (Antes creabas una lista local 'books' aquí, por eso fallaba el precio luego)
+        for (Contain c : cartOder.getListPreBuy()) {
+            if (c.getBook() != null) {
+                libros.add(c.getBook());
+            }
+        }
+
         try {
-            // Recorremos la lista de libros REALES
+            // 3. Generamos la parte visual para cada libro
             for (Book lib : libros) {
-                // Cargar el FXML de la cajita individual
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
                 VBox libroBox = fxmlLoader.load();
 
-                // Añadir el CheckBox dinámicamente
+                // Añadimos CheckBox
                 CheckBox cb = new CheckBox("Seleccionar");
                 cb.setSelected(true);
-                cb.setOnAction(this); // Vinculamos el evento para recalcular precio al hacer clic
+                cb.setOnAction(this); // Vinculamos evento
                 libroBox.getChildren().add(cb);
 
-                // Pasar los datos del libro al controlador pequeño (PreOrderController)
+                // Configuramos el controlador pequeño
                 PreOrderController preOrderController = fxmlLoader.getController();
                 preOrderController.setData(lib);
 
-                // Añadir la cajita al VBox grande del carrito
+                // Añadimos al VBox principal
                 vBoxContenedorLibros.getChildren().add(libroBox);
             }
-            // Calcular el total inicial
+
+            // 4. Calculamos el total inicial
             actualizarPrecioTotal();
 
         } catch (IOException ex) {
@@ -104,33 +113,72 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
 
     private void actualizarPrecioTotal() {
         double total = 0;
-        int libro = 0;
+        int indice = 0;
 
-        // Recorremos los hijos del VBox (cada libroBox)
+        // Protección si la lista está vacía
+        if (libros == null || libros.isEmpty()) {
+            lblTotal.setText("Total: 0.00 €");
+            return;
+        }
+
         for (Node nodoLibro : vBoxContenedorLibros.getChildren()) {
             if (nodoLibro instanceof VBox) {
                 VBox libroVBox = (VBox) nodoLibro;
 
-                // Buscamos el CheckBox dentro de ese libro
                 for (Node hijo : libroVBox.getChildren()) {
                     if (hijo instanceof CheckBox) {
                         CheckBox cb = (CheckBox) hijo;
+
                         if (cb.isSelected()) {
-                            // Sumamos el precio del libro correspondiente a esta posición
-                            total += libros.get(libro).getPrice();
+                            // --- PROTECCIÓN ANTI-CRASH ---
+                            // Verificamos que el índice existe antes de usarlo
+                            if (indice < libros.size()) {
+                                total += libros.get(indice).getPrice();
+                            }
                         }
                     }
                 }
-                libro++;
+                indice++;
             }
         }
-
-        // Actualizamos el Label
-        lblTotal.setText("Total: $" + String.format("%.2f", total));
+        lblTotal.setText("Total: " + String.format("%.2f", total) + " €");
     }
 
+    @Override
     public void handle(ActionEvent event) {
-        // Cada vez que se pulse CUALQUIER checkbox, se ejecutará esto
         actualizarPrecioTotal();
+    }
+
+    @FXML
+    private void handleComprar(ActionEvent event) {
+        if (cartOder != null) {
+            // Usamos el ID del pedido que ya tenemos cargado en memoria
+            // Asegúrate de que tu DAO tiene el método 'buy(int idPedido)'
+            boolean exito = dao.buy(cartOder);
+            
+            if (exito) {
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Compra Exitosa", "Pedido realizado correctamente.");
+
+                // Limpiamos pantalla y datos
+                vBoxContenedorLibros.getChildren().clear();
+                libros.clear();
+                cartOder = null;
+                lblTotal.setText("Total: 0.00 €");
+                btnComprar.setDisable(true);
+
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo finalizar la compra.");
+            }
+        } else {
+            mostrarAlerta(Alert.AlertType.WARNING, "Vacío", "No hay nada para comprar.");
+        }
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String contenido) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(contenido);
+        alert.showAndWait();
     }
 }

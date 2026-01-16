@@ -42,5 +42,9 @@ public interface ClassDAO {
     
     //Carrtito
     public List<Contain> getCartItem(int id);
-    public List<Book> pendingBook (int id);
+    public Order cartOrder (int id);
+
+    public boolean buy(Order order);
+
+    public int getOrderId(int id);
 }
