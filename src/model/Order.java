@@ -23,7 +23,7 @@ public class Order {
     // Relación 1 Pedido -> Muchos "Contain" (Líneas de pedido)
     // 'mappedBy' indica que la clase Contain es la dueña de la relación
     // CascadeType.ALL: Si guardas el Pedido, se guardan sus líneas automáticamente.
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Contain> listPreBuy;
 
     public int getIdOrder() {

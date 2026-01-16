@@ -24,6 +24,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import model.Author;
 import model.Book;
+import model.ClassDAO;
+import model.DBImplementation;
+import model.Profile;
+import model.UserSession;
 
 /**
  * FXML Controller class
@@ -40,40 +44,61 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private VBox vBoxResumen;
     @FXML
     public HeaderController headerController;
-    
+
     private TilePane tileLibros;
 
     List<Book> libros = new ArrayList<>();
+    private final ClassDAO dao = new DBImplementation();
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Profile userLogged = UserSession.getInstance().getUser();
+        if (userLogged != null) {
+            // 2. LLAMADA AL DAO: Usamos tu método nuevo "pendingBook"
+            // Esto llena la lista con los libros que están en bought=false
+            libros = dao.pendingBook(userLogged.getId());
+            
+            System.out.println(libros);
 
-        libros.addAll(cargarLibros());
+            // 3. Cargar la parte visual
+            if (libros != null && !libros.isEmpty()) {
+                cargarVistaLibros();
+            } else {
+                lblTotal.setText("El carrito está vacío.");
+            }
+        }
 
+    }
+
+    private void cargarVistaLibros() {
         try {
+            // Recorremos la lista de libros REALES
             for (Book lib : libros) {
+                // Cargar el FXML de la cajita individual
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
                 VBox libroBox = fxmlLoader.load();
-                
+
+                // Añadir el CheckBox dinámicamente
                 CheckBox cb = new CheckBox("Seleccionar");
-                cb.setId("checkDinámico");
                 cb.setSelected(true);
-                cb.setOnAction(this);
+                cb.setOnAction(this); // Vinculamos el evento para recalcular precio al hacer clic
                 libroBox.getChildren().add(cb);
-                
+
+                // Pasar los datos del libro al controlador pequeño (PreOrderController)
                 PreOrderController preOrderController = fxmlLoader.getController();
                 preOrderController.setData(lib);
-                
-                // 2. Lo agregas al contenedor que sí existe en el FXML
+
+                // Añadir la cajita al VBox grande del carrito
                 vBoxContenedorLibros.getChildren().add(libroBox);
-                
-                actualizarPrecioTotal();
             }
+            // Calcular el total inicial
+            actualizarPrecioTotal();
+
         } catch (IOException ex) {
-            Logger.getLogger(ShoppingCartController.class.getName()).log(Level.SEVERE, "Error al cargar PreOrder.fxml", ex);
+            Logger.getLogger(ShoppingCartController.class.getName()).log(Level.SEVERE, "Error cargando vista", ex);
         }
     }
 
@@ -85,7 +110,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         for (Node nodoLibro : vBoxContenedorLibros.getChildren()) {
             if (nodoLibro instanceof VBox) {
                 VBox libroVBox = (VBox) nodoLibro;
-                
+
                 // Buscamos el CheckBox dentro de ese libro
                 for (Node hijo : libroVBox.getChildren()) {
                     if (hijo instanceof CheckBox) {
@@ -99,34 +124,13 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 libro++;
             }
         }
-        
+
         // Actualizamos el Label
         lblTotal.setText("Total: $" + String.format("%.2f", total));
     }
-    
+
     public void handle(ActionEvent event) {
         // Cada vez que se pulse CUALQUIER checkbox, se ejecutará esto
         actualizarPrecioTotal();
     }
-    
-    
-    /*Metodo prueba para tener libros cargados*/
-    private List<Book> cargarLibros() {
-        Book libro;
-        Author a = new Author(1, "Alex", "Boss", null);
-
-        for (int i = 0; i < 5; i++) {
-            libro = new Book();
-            libro.setCover("mood-heart.png");
-            libro.setTitle("carita wee");
-            libro.setAuthor(a);
-            libro.setAvgValuation(1.2f);
-            libro.setPrice(20);
-            libros.add(libro);
-        }
-
-        return libros;
-
-    }
-
 }

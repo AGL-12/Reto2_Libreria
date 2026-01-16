@@ -39,4 +39,8 @@ public interface ClassDAO {
    //Historial Compras
     public List<Order> getHistory(int id);
     public List<Contain> getOrder (int id);
+    
+    //Carrtito
+    public List<Contain> getCartItem(int id);
+    public List<Book> pendingBook (int id);
 }
