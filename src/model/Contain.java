@@ -27,6 +27,10 @@ public class Contain implements Serializable {
     @MapsId("isbnBook") // <-- "Usa el campo 'isbnBook' de ContainId para mi FK"
     @JoinColumn(name = "isbn_book")
     private Book book;
+    
+    // --- CONSTRUCTOR VACÍO OBLIGATORIO PARA HIBERNATE ---
+    public Contain() {
+    }
 
     public Contain(int quantity, Order order, Book book) {
         this.quantity = quantity;

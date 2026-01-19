@@ -347,50 +347,49 @@ public class DBImplementation implements ClassDAO {
             tx = session.beginTransaction();
             session.update(comment); // Hibernate actualiza los cambios
             tx.commit();
+            
+            new SessionHolderThread(session).start();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             e.printStackTrace();
             throw new RuntimeException("Error al modificar: " + e.getMessage());
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
         }
     }
     
     
-    @Override
+@Override
     public Order getUnfinishedOrder(User user) {
         Session session = null;
-        Order carrito = null;
+        Order order = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             
-            // Buscamos un pedido que pertenezca al usuario Y que no esté pagado (bought = false)
-            String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
+// Asumiendo que en tu clase User/Profile el atributo @Id se llama 'userCode'
+String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
             
-            carrito = session.createQuery(hql, Order.class)
+            order = (Order) session.createQuery(hql)
                     .setParameter("userId", user.getUserCode())
-                    .uniqueResult(); // Devuelve uno o null
-
-            // TRUCO IMPORTANTE: Hibernate es "vago" (Lazy). Si cerramos la sesión,
-            // la lista de libros (Contain) se pierde. Usamos esto para forzar la carga:
-            if (carrito != null) {
-                Hibernate.initialize(carrito.getListPreBuy());
+                    .uniqueResult();
+            
+            // --- ¡TRUCO IMPORTANTE! ---
+            // Si encontramos pedido, forzamos a Hibernate a cargar la lista de libros
+            // ANTES de cerrar la sesión. Si no hacemos esto, la lista llega vacía o rota.
+            if (order != null) {
+                Hibernate.initialize(order.getListPreBuy());
             }
-
+            
         } catch (Exception e) {
-            // Manejo de errores (puedes loguearlo)
+            System.err.println("Error al recuperar el carrito: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (session != null) session.close();
         }
-        return carrito;
+        return order;
     }
 
-    @Override
+@Override
     public void saveOrder(Order order) {
         Session session = null;
         Transaction tx = null;
@@ -398,17 +397,17 @@ public class DBImplementation implements ClassDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
             
-            // saveOrUpdate es mágico:
-            // - Si el Order es nuevo (ID 0) -> Hace INSERT
-            // - Si el Order ya existe (ID > 0) -> Hace UPDATE
-            // - Y gracias a CascadeType.ALL en tu clase Order, guarda también los Contains
-            session.saveOrUpdate(order);
+            // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
+            // con la base de datos, asegurando que se guarden los Contains.
+            session.merge(order);
             
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            System.err.println("Error al guardar la orden: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Error al guardar el carrito en BD");
+            // Es vital relanzar la excepción para enterarnos si falla
+            throw new RuntimeException(e); 
         } finally {
             if (session != null) session.close();
         }

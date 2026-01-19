@@ -76,6 +76,8 @@ public class BookViewController {
     private Button btnPublicar;
     @FXML
     private TextArea txtNuevoComentario;
+    
+    @FXML
     private StarRateController estrellasController;
 
     private Profile currentUser = UserSession.getInstance().getUser();
@@ -355,9 +357,7 @@ public class BookViewController {
         }
 
         try {
-            // 3. LLAMADA MAESTRA: Añadir a sesión -> Guardar en BD
             UserSession.getInstance().addToCart(currentBook);
-            
             // 4. Feedback visual
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
             
