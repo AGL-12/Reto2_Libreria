@@ -111,3 +111,151 @@
     /* Blue focus glow */
     -fx-focus-color: #2E86C1;
 }
+
+/* =============================================================================
+   ESTILOS GENERALES Y SCROLLPANE
+   (Para quitar los bordes grises feos de JavaFX por defecto)
+   ============================================================================= */
+.scroll-pane, 
+.scroll-pane > .viewport {
+    -fx-background-color: transparent; /* Fondo transparente */
+}
+
+.scroll-pane {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+/* La hoja blanca donde está el libro */
+.book-sheet {
+    -fx-background-color: #ffffff;
+}
+
+/* =============================================================================
+   VISTA DEL LIBRO (BookView)
+   ============================================================================= */
+
+/* 1. Título del Libro: Grande y Limpio */
+#titleBook {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111111;
+}
+
+/* 2. Autor: Gris medio para jerarquía */
+#authorName {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 16px;
+    -fx-text-fill: #666666;
+    -fx-padding: 0 0 10 0; /* Un poco de espacio abajo */
+}
+
+/* 3. Precio: Grande, pero manteniendo el estilo minimalista */
+#priceBook {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    /* Opción A: Negro minimalista */
+    /* -fx-text-fill: #000000; */
+    /* Opción B: Tu verde, pero más oscuro y elegante */
+    -fx-text-fill: #2E7D32; 
+}
+
+/* 4. Sinopsis y Stock */
+#sypnosis, #stockBook {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #444444;
+    -fx-line-spacing: 4px; /* Mejora la lectura de párrafos largos */
+}
+
+/* 5. Imagen del Libro: Sombra suave para que "flote" */
+#coverBook {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);
+}
+
+/* 6. Botón "Añadir al Carrito" 
+   (Copiamos el estilo de tu #btnBuy del header para consistencia) */
+#btnAddToCart {
+    -fx-background-color: #000000;
+    -fx-text-fill: #ffffff;
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 25; /* Píldora */
+    -fx-padding: 10 30;
+    -fx-cursor: hand;
+}
+
+#btnAddToCart:hover {
+    -fx-background-color: #333333; /* Gris oscuro al pasar ratón */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+/* 7. Botón "+ Escribir opinión" y otros botones secundarios
+   (Estilo "Outline": Fondo blanco, borde negro) */
+#btnAddComment, #btnCancelar, #btnPublicar {
+    -fx-background-color: transparent;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+    -fx-padding: 6 15;
+    -fx-cursor: hand;
+}
+
+#btnAddComment:hover, #btnCancelar:hover, #btnPublicar:hover {
+    -fx-border-color: #000;
+    -fx-text-fill: #000;
+}
+
+/* 8. Caja para escribir nuevo comentario (Estilo SearchBar) */
+#txtNuevoComentario {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #ddd;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10;
+    -fx-prompt-text-fill: #999;
+}
+#txtNuevoComentario:focused {
+    -fx-background-color: #fff;
+    -fx-border-color: #000;
+}
+
+/* =============================================================================
+   VISTA DE COMENTARIOS (CommentView)
+   ============================================================================= */
+
+/* Contenedor de cada comentario individual */
+.comment-card {
+    -fx-background-color: #ffffff;
+    /* Solo una línea sutil abajo para separar, muy limpio */
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-border-width: 1px;
+    -fx-padding: 15 0; /* Espacio arriba y abajo */
+}
+
+/* Usuario que comenta */
+#lblUsuario {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: #000;
+}
+
+/* Fecha del comentario */
+#lblFecha {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #999;
+}
+
+/* Texto del comentario (Lectura) */
+.comment-text {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333;
+}

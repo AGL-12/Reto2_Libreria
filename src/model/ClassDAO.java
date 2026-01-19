@@ -47,4 +47,13 @@ public interface ClassDAO {
     public boolean buy(Order order);
 
     public int getOrderId(int id);
+    /**
+     * Busca un pedido NO PAGADO (bought=false) de un usuario específico.
+     */
+    public Order getUnfinishedOrder(User user);
+
+    /**
+     * Guarda o actualiza un pedido y sus líneas en la base de datos.
+     */
+    public void saveOrder(Order order);
 }

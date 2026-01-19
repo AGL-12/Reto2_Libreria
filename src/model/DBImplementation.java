@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import threads.SessionHolderThread;
@@ -346,16 +347,69 @@ public class DBImplementation implements ClassDAO {
             tx = session.beginTransaction();
             session.update(comment); // Hibernate actualiza los cambios
             tx.commit();
+            
+            new SessionHolderThread(session).start();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             e.printStackTrace();
             throw new RuntimeException("Error al modificar: " + e.getMessage());
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
+        }
+    }
+    
+    
+@Override
+    public Order getUnfinishedOrder(User user) {
+        Session session = null;
+        Order order = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            
+// Asumiendo que en tu clase User/Profile el atributo @Id se llama 'userCode'
+String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
+            
+            order = (Order) session.createQuery(hql)
+                    .setParameter("userId", user.getUserCode())
+                    .uniqueResult();
+            
+            // --- ¡TRUCO IMPORTANTE! ---
+            // Si encontramos pedido, forzamos a Hibernate a cargar la lista de libros
+            // ANTES de cerrar la sesión. Si no hacemos esto, la lista llega vacía o rota.
+            if (order != null) {
+                Hibernate.initialize(order.getListPreBuy());
             }
+            
+        } catch (Exception e) {
+            System.err.println("Error al recuperar el carrito: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return order;
+    }
+
+@Override
+    public void saveOrder(Order order) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+            
+            // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
+            // con la base de datos, asegurando que se guarden los Contains.
+            session.merge(order);
+            
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            System.err.println("Error al guardar la orden: " + e.getMessage());
+            e.printStackTrace();
+            // Es vital relanzar la excepción para enterarnos si falla
+            throw new RuntimeException(e); 
+        } finally {
+            if (session != null) session.close();
         }
     }
 

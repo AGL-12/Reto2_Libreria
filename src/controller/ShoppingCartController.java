@@ -181,35 +181,4 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         alert.setContentText(contenido);
         alert.showAndWait();
     }
-
-    @FXML
-    private void handleReportAction(ActionEvent event) {
-        // Reutilizamos tu método showAlert existente o creamos uno nuevo
-        showAlert("Generando informe de comentarios...", Alert.AlertType.INFORMATION);
-    }
-
-    /**
-     * Acción para el menú Help > About/Help. Muestra el manual de usuario.
-     */
-    @FXML
-    private void handleHelpAction(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Ayuda del Sistema");
-        alert.setHeaderText("Manual de Usuario");
-        alert.setContentText("Guía rápida:\n"
-                + "1. Selecciona un libro para ver detalles.\n"
-                + "2. Escribe en el cuadro inferior y pulsa 'Publicar' para opinar.\n"
-                + "3. Si eres Admin, usa el botón 'Borrar' para moderar.\n"
-                + "4. Usa el menú Actions > Report para informes.");
-        alert.showAndWait();
-    }
-
-    // (Asegúrate de mantener tu método showAlert existente, ya que handleReportAction lo usa)
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 }
