@@ -52,7 +52,7 @@ public class Main extends Application {
         System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
 
         // PRECARGAR DATOS (Si la BD está vacía)
-        //preloadData();
+        preloadData();
         // Una vez comprobado, ya puedes lanzar la app
         launch(args);
 
