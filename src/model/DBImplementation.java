@@ -13,178 +13,169 @@ import threads.SessionHolderThread;
 import utilities.HibernateUtil;
 
 /**
- * Implementation of ClassDAO using database operations. Handles all database
- * interactions for users and admins. Provides login, signup, deletion,
- * modification, and retrieval of usernames.
- *
- * Author: acer
+ * Implementation of ClassDAO using database operations.
  */
 public class DBImplementation implements ClassDAO {
 
-    private PreparedStatement stmt;
+    // --- GESTIÓN DE USUARIOS Y SESIÓN ---
 
-    // SQL statements
-    private final String SLQSELECTNUSER = "SELECT u.USERNAME FROM USER_ u;";
-
-    // Asumiendo tabla 'commentate' basada en tu entidad Java
-    private final String SELECT_ALL_COMMENTS = "SELECT * FROM commentate";
-    private final String DELETE_COMMENT = "DELETE FROM commentate WHERE id_user=? AND id_book=?";
-
-    /**
-     * Logs in a user or admin from the database.
-     *
-     * @param username The username to log in
-     * @param password The password to validate
-     * @return Profile object (User or Admin) if found, null otherwise
-     */
     @Override
     public Profile logIn(String username, String password) {
-        Session session = HibernateUtil.getSessionFactory().openSession(); // 1. Abrimos aquí
+        Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         Profile userFound = null;
 
         try {
             tx = session.beginTransaction();
-
-            // 2. Consulta
             String hql = "FROM Profile p WHERE p.username = :user AND p.password = :pass";
             userFound = session.createQuery(hql, Profile.class)
                     .setParameter("user", username)
                     .setParameter("pass", password)
                     .uniqueResult();
-
-            tx.commit(); // 3. Confirmamos transacción (liberamos bloqueos de BD)
-
-            // 4. AQUÍ ESTÁ EL TRUCO MAESTRO:
-            // No cerramos la sesión. Se la pasamos al hilo para que la retenga.
+            tx.commit();
+            // Mantenemos tu lógica de hilos
             new SessionHolderThread(session).start();
-
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+            if (tx != null) tx.rollback();
             e.printStackTrace();
-            // Si hay error, cerramos aquí porque el hilo no arrancó
-            if (session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
-
-        // 5. Devolvemos el dato INMEDIATAMENTE. La UI no espera.
         return userFound;
     }
 
-    /**
-     * Signs up a new user in the database.
-     *
-     * @return true if signup was successful, false otherwise
-     */
     @Override
     public void signUp(Profile profile) {
-        // 1. Abrimos sesión
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
-
         try {
             tx = session.beginTransaction();
-
-            // 2. Guardamos (Hibernate inserta en Profile y User/Admin)
             session.save(profile);
-
-            // 3. Confirmamos
             tx.commit();
-
-            // 4. EL TRUCO: Lanzamos el hilo para que retenga la conexión 30s
-            // El usuario ya recibe el 'ok', pero la conexión sigue ocupada en fondo.
             new SessionHolderThread(session).start();
-
         } catch (Exception e) {
-            // Si hay error (ej: usuario duplicado), deshacemos
-            if (tx != null) {
-                tx.rollback();
-            }
-
-            // IMPORTANTE: Si falló, el hilo no arrancó, así que cerramos nosotros
-            if (session.isOpen()) {
-                session.close();
-            }
-
-            // Relanzamos la excepción para que salga la Alerta roja en la ventana
+            if (tx != null) tx.rollback();
+            if (session.isOpen()) session.close();
             throw e;
         }
     }
 
-    /**
-     * Deletes a standard user from the database.
-     */
     @Override
     public void dropOutUser(Profile profile) {
+        // Lógica pendiente para que el usuario se borre a sí mismo (opcional)
     }
 
     /**
-     * Deletes a user selected by admin from the database.
+     * Elimina un usuario seleccionado por el administrador.
      */
     @Override
     public void dropOutAdmin(Profile profile) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Profile p = session.get(Profile.class, profile.getUsername());
+            if (p != null) {
+                session.delete(p);
+            } else {
+                throw new RuntimeException("El usuario no existe.");
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            throw new RuntimeException("Error eliminando usuario: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
     }
 
-    /**
-     * Modifies the information of a user in the database.
-     */
     @Override
     public void modificarUser(Profile profile) {
+        // Lógica de modificar
     }
 
     /**
-     * Retrieves a list of usernames from the database.
-     *
-     * @return List of usernames
+     * Obtiene todos los usernames para el ComboBox del Admin (Versión Hibernate).
      */
     @Override
-    public List comboBoxInsert() {
-        List<String> listaUsuarios = new ArrayList<>();
-        Connection con = null;
+    public List<String> comboBoxInsert() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<String> usernames = new ArrayList<>();
         try {
-            con = ConnectionPool.getConnection();
-            stmt = con.prepareStatement(SLQSELECTNUSER);
-            ResultSet result = stmt.executeQuery();
-            while (result.next()) {
-                listaUsuarios.add(result.getString("USERNAME"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Database error on retrieving usernames");
+            usernames = session.createQuery("SELECT p.username FROM Profile p", String.class).list();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing DB connection after retrieving usernames");
-                e.printStackTrace();
-            }
+            if (session.isOpen()) session.close();
         }
-        return listaUsuarios;
+        return usernames;
     }
+
+    // --- GESTIÓN DE LIBROS ---
 
     @Override
     public void createBook(Book book) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.save(book);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error creando libro: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
     }
 
     @Override
     public void modifyBook(Book book) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.update(book);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error modificando libro: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
     }
 
     @Override
-    public void deleteBook(int isbn) {
+    public void deleteBook(long isbn) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Book b = session.get(Book.class, isbn);
+            if (b != null) {
+                session.delete(b);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error eliminando libro: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
     }
 
     @Override
-    public Book getBookData(int isbn) {
-        return null;
+    public Book getBookData(long isbn) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Book book = null;
+        try {
+            book = session.get(Book.class, isbn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+        return book;
     }
 
     @Override
@@ -192,34 +183,23 @@ public class DBImplementation implements ClassDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Book> libros = new ArrayList<>();
         try {
-            // 1. Traemos todos los libros
-            String hql = "FROM Book";
-
-            libros = session.createQuery(hql, Book.class).list();
-            // 2. CALCULAMOS LA MEDIA DE ESTRELLAS (Antes de cerrar sesión)
+            libros = session.createQuery("FROM Book", Book.class).list();
             for (Book b : libros) {
-                // Hibernate carga los comentarios aquí bajo demanda
                 List<Commentate> comentarios = b.getComments();
-
                 if (comentarios != null && !comentarios.isEmpty()) {
                     float suma = 0;
                     for (Commentate c : comentarios) {
-                        suma += c.getValuation(); // Asumo que valuation es float/double
+                        suma += c.getValuation();
                     }
-
-                    float media = suma / comentarios.size();
-
-                    // Seteamos el campo @Transient
-                    b.setAvgValuation(media);
+                    b.setAvgValuation(suma / comentarios.size());
                 } else {
                     b.setAvgValuation(0f);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            session.close();
+            if (session.isOpen()) session.close();
         }
         return libros;
     }
@@ -228,93 +208,97 @@ public class DBImplementation implements ClassDAO {
     public List<Book> buscarLibros(String busqueda) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Book> resultados = null;
-
         try {
-            // No hace falta Transaction para solo leer (Select)
-
-            // Lógica de "Volver a ningún filtro"
             if (busqueda == null || busqueda.trim().isEmpty()) {
                 return session.createQuery("FROM Book", Book.class).list();
             }
-
-            // Consulta HQL
             String search = "%" + busqueda.toLowerCase() + "%";
-            String hql = "FROM Book b WHERE "
-                    + "lower(b.title) LIKE :q OR "
-                    + "lower(b.author.name) LIKE :q OR "
-                    + "str(b.ISBN) LIKE :q";
-
-            resultados = session.createQuery(hql, Book.class)
-                    .setParameter("q", search)
-                    .list();
-
+            String hql = "FROM Book b WHERE lower(b.title) LIKE :q OR lower(b.author.name) LIKE :q";
+            resultados = session.createQuery(hql, Book.class).setParameter("q", search).list();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // PARA BÚSQUEDAS: Cerramos INMEDIATAMENTE.
-            // Si retuvieras aquí 30s, el buscador en tiempo real mataría el Pool.
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
-
         return resultados;
     }
 
-    // --- IMPLEMENTACIÓN COMENTARIOS ---
     @Override
-    public List<Commentate> getCommentsByBook(int isbn) {
-        Session session = HibernateUtil.getSessionFactory().openSession(); // 1. Abrimos aquí
+    public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
-        List<Commentate> comments = null;
-
+        Author author = null;
         try {
             tx = session.beginTransaction();
+            String hql = "FROM Author a WHERE lower(a.name) = :n AND lower(a.surname) = :s";
+            author = session.createQuery(hql, Author.class)
+                    .setParameter("n", nombreAutor.toLowerCase().trim())
+                    .setParameter("s", apellidoAutor.toLowerCase().trim())
+                    .uniqueResult();
 
-            // HQL: Selecciona los comentarios (c) donde el ISBN del libro asociado (c.book.ISBN) coincida
-            // IMPORTANTE: Asegúrate de que en tu clase Commentate el atributo se llame 'book' 
-            // y en tu clase Book el atributo se llame 'ISBN'.
-            String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
-            comments = session.createQuery(hql, Commentate.class)
-                    .setParameter("isbn", isbn)
-                    .list();
-
-            tx.commit(); // 3. Confirmamos transacción (liberamos bloqueos de BD)
-
+            if (author == null) {
+                author = new Author();
+                author.setName(nombreAutor);
+                author.setSurname(apellidoAutor);
+                session.save(author);
+            }
+            tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error gestionando autor: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+        return author;
+    }
+
+    // --- GESTIÓN DE COMENTARIOS ---
+
+    @Override
+    public List<Commentate> getCommentsByBook(long isbn) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Commentate> comments = null;
+        try {
+            String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
+            comments = session.createQuery(hql, Commentate.class).setParameter("isbn", isbn).list();
+        } catch (Exception e) {
             e.printStackTrace();
-            // Si hay error, cerramos aquí porque el hilo no arrancó
-            if (session.isOpen()) {
-                session.close();
-            }
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+        return comments;
+    }
+
+    // NUEVO: Para la ventana de eliminar comentarios por usuario
+    public List<Commentate> getCommentsByUser(String username) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<Commentate> comments = new ArrayList<>();
+        try {
+            String hql = "FROM Commentate c JOIN FETCH c.book WHERE c.user.username = :usr";
+            comments = session.createQuery(hql, Commentate.class)
+                    .setParameter("usr", username)
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session.isOpen()) session.close();
         }
         return comments;
     }
 
     @Override
-    public void addComment(Commentate comment) { // <--- Fíjate que ya no pone "throws Exception"
+    public void addComment(Commentate comment) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-
             session.save(comment);
-
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-            e.printStackTrace(); // Imprime el error en la consola para que sepas qué pasó
-            // Lanzamos un error "no chequeado" para detener el programa pero sin romper la interfaz
-            throw new RuntimeException("Error guardando el comentario: " + e.getMessage());
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error guardando comentario: " + e.getMessage());
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
     }
 
@@ -324,18 +308,13 @@ public class DBImplementation implements ClassDAO {
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            session.delete(comment); // Hibernate borra el objeto
+            session.delete(comment);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Error al borrar: " + e.getMessage());
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error borrando comentario: " + e.getMessage());
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
     }
 
@@ -345,43 +324,33 @@ public class DBImplementation implements ClassDAO {
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            session.update(comment); // Hibernate actualiza los cambios
+            session.update(comment);
             tx.commit();
-            
-            new SessionHolderThread(session).start();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Error al modificar: " + e.getMessage());
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Error actualizando comentario: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
         }
     }
-    
-    
-@Override
+
+    // --- GESTIÓN DE PEDIDOS Y COMPRAS (TUS MÉTODOS MANTENIDOS) ---
+
+    @Override
     public Order getUnfinishedOrder(User user) {
         Session session = null;
         Order order = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            
-// Asumiendo que en tu clase User/Profile el atributo @Id se llama 'userCode'
-String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
-            
+            // Verifica que 'userCode' sea el ID correcto en tu modelo
+            String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
             order = (Order) session.createQuery(hql)
                     .setParameter("userId", user.getUserCode())
                     .uniqueResult();
-            
-            // --- ¡TRUCO IMPORTANTE! ---
-            // Si encontramos pedido, forzamos a Hibernate a cargar la lista de libros
-            // ANTES de cerrar la sesión. Si no hacemos esto, la lista llega vacía o rota.
             if (order != null) {
                 Hibernate.initialize(order.getListPreBuy());
             }
-            
         } catch (Exception e) {
-            System.err.println("Error al recuperar el carrito: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (session != null) session.close();
@@ -389,62 +358,66 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
         return order;
     }
 
-@Override
+    @Override
     public void saveOrder(Order order) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            
-            // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
-            // con la base de datos, asegurando que se guarden los Contains.
             session.saveOrUpdate(order);
-            
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            System.err.println("Error al guardar la orden: " + e.getMessage());
-            e.printStackTrace();
-            // Es vital relanzar la excepción para enterarnos si falla
-            throw new RuntimeException(e); 
+            throw new RuntimeException(e);
         } finally {
             if (session != null) session.close();
         }
     }
 
-    //Historial Compras
+    @Override
+    public boolean buy(Order order) {
+        boolean comprado = false;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            order.setBought(true);
+            order.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
+            session.update(order);
+            tx.commit();
+            comprado = true;
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+        return comprado;
+    }
+
     @Override
     public List<Order> getHistory(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
         List<Order> orders = null;
-
         try {
-            tx = session.beginTransaction();
             String hql = "FROM Order o WHERE o.user.id = :id AND o.bought = true";
-
-            orders = session.createQuery(hql, Order.class)
-                    .setParameter("id", id)
-                    .list();
+            orders = session.createQuery(hql, Order.class).setParameter("id", id).list();
             if (orders != null) {
                 for (Order o : orders) {
                     float precioCalculado = 0;
                     if (o.getListPreBuy() != null) {
                         for (Contain linea : o.getListPreBuy()) {
-                            // Multiplicamos precio del libro por cantidad
                             precioCalculado += (linea.getBook().getPrice() * linea.getQuantity());
                         }
                     }
-                    o.setTotal(precioCalculado); // Seteamos el campo @Transient
+                    o.setTotal(precioCalculado);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
         return orders;
     }
@@ -452,21 +425,14 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
     @Override
     public List<Contain> getOrder(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
         List<Contain> contains = null;
         try {
-            tx = session.beginTransaction();
             String hql = "FROM Contain c JOIN FETCH c.book WHERE c.order.idOrder = :id";
-
-            contains = session.createQuery(hql, Contain.class)
-                    .setParameter("id", id)
-                    .list();
+            contains = session.createQuery(hql, Contain.class).setParameter("id", id).list();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
         return contains;
     }
@@ -474,21 +440,14 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
     @Override
     public List<Contain> getCartItem(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
         List<Contain> cart = null;
         try {
-            tx = session.beginTransaction();
             String hql = "FROM Contain c JOIN FETCH c.book WHERE c.order.user.id = :idUser AND c.order.bought = false";
-
-            cart = session.createQuery(hql, Contain.class)
-                    .setParameter("id", id)
-                    .list();
+            cart = session.createQuery(hql, Contain.class).setParameter("idUser", id).list();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
         return cart;
     }
@@ -496,108 +455,31 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
     @Override
     public Order cartOrder(int idUsuario) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
         Order cart = null;
         try {
-            tx = session.beginTransaction();
-            String hql = "FROM Order o "
-                    + "LEFT JOIN FETCH o.listPreBuy l "
-                    + "LEFT JOIN FETCH l.book "
-                    + "WHERE o.user.userCode = :idUser "
-                    + // OJO: Verifica si en tu User es 'userCode' o 'id'
-                    "AND o.bought = false";
-
+            String hql = "FROM Order o LEFT JOIN FETCH o.listPreBuy l LEFT JOIN FETCH l.book WHERE o.user.userCode = :idUser AND o.bought = false";
             cart = session.createQuery(hql, Order.class).setParameter("idUser", idUsuario).uniqueResult();
-           
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
         return cart;
-
-    }
-
-    /*@Override
-   public boolean buy(Order order) {
-        System.out.println(order);
-        boolean comprado = false;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-
-        try {
-            tx = session.beginTransaction();
-            String hql = "UPDATE Order SET bought = 1, purchase_date = NOW() WHERE id_order = :idOrder AND bought = 0";
-            
-          session.update(order);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-        return comprado;
-    }*/
-    @Override
-    public boolean buy(Order order) {
-        boolean comprado = false;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-
-        try {
-            tx = session.beginTransaction();
-
-            // 1. IMPORTANTE: Cambiamos el estado del objeto Java PRIMERO
-            order.setBought(true);
-            // Asegúrate de tener el import de java.sql.Timestamp
-            order.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
-
-            // 2. Ahora sí, actualizamos el objeto en la base de datos
-            session.update(order);
-
-            // 3. ¡MUY IMPORTANTE! Confirmar la transacción
-            tx.commit();
-
-            // Si llega aquí sin error, es que se compró
-            comprado = true;
-
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback(); // Si falla, deshacemos
-            }
-            e.printStackTrace();
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-        return comprado;
     }
 
     @Override
     public int getOrderId(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-        int contains = 0;
+        int idOrder = 0;
         try {
-            tx = session.beginTransaction();
             String hql = "SELECT o.idOrder FROM Order o WHERE o.user.id = :id AND o.bought = false";
-
-            contains = session.createQuery(hql, Integer.class)
-                    .setParameter("id", id)
-                    .uniqueResult();
+            Integer result = session.createQuery(hql, Integer.class).setParameter("id", id).uniqueResult();
+            if (result != null) idOrder = result;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session.isOpen()) session.close();
         }
-        return contains;
+        return idOrder;
     }
-
 }

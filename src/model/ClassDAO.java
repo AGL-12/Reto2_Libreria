@@ -21,14 +21,14 @@ public interface ClassDAO {
     // --- GESTIÓN DE LIBROS (Book_) ---
     public void createBook(Book book);
     public void modifyBook(Book book);
-    public void deleteBook(int isbn); // El SQL define ISBN como char(13), pero en Java lo tienes como int. Ojo con esto.
-    public Book getBookData(int isbn); // Para comprobar si existe o cargar datos
+    public void deleteBook(long isbn); // El SQL define ISBN como char(13), pero en Java lo tienes como int. Ojo con esto.
+    public Book getBookData(long isbn); // Para comprobar si existe o cargar datos
     public List<Book> getAllBooks(); // Útil para la tienda o listados
 
     // --- GESTIÓN DE COMENTARIOS ---
     // Nota: No vi la tabla de comentarios en el snippet del SQL, asumo que existe 
     // y se llama 'commentate' o similar basada en tu entidad Java.
-    public List<Commentate> getCommentsByBook(int isbn);
+    public List<Commentate> getCommentsByBook(long isbn);
     public void addComment(Commentate comment);
     public void updateComment(Commentate comment);
     public void deleteComment(Commentate comment);
@@ -56,4 +56,6 @@ public interface ClassDAO {
      * Guarda o actualiza un pedido y sus líneas en la base de datos.
      */
     public void saveOrder(Order order);
+
+    public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor);
 }
