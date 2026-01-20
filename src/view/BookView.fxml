@@ -18,24 +18,35 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookViewController">
    <children>
       <fx:include fx:id="header" source="Header.fxml" />
-     <MenuBar>
-      <menus>
-        <Menu text="Actions">
-          <items>
-            <MenuItem onAction="#handleReportAction" text="Report" />
-          </items>
-        </Menu>
-        <Menu text="Help">
-          <items>
-            <MenuItem onAction="#handleHelpAction" text="Manual de Usuario" />
-          </items>
-        </Menu>
-      </menus>
-    </MenuBar>
+<MenuBar>
+  <menus>
+    <Menu mnemonicParsing="true" text="_Archivo"> <items>
+        <MenuItem text="Cerrar Sesión" onAction="#handleLogOut" accelerator="Ctrl+L"/>
+        <SeparatorMenuItem />
+        <MenuItem text="Salir" onAction="#handleExit" accelerator="Ctrl+Q"/>
+      </items>
+    </Menu>
+
+    <Menu mnemonicParsing="true" text="A_cciones">
+      <items>
+        <MenuItem fx:id="menuItemReport" text="Generar Informe de Stock" onAction="#handleReportAction" accelerator="Ctrl+P"/>
+      </items>
+    </Menu>
+
+    <Menu mnemonicParsing="true" text="A_yuda">
+      <items>
+        <MenuItem text="Manual de Usuario" onAction="#handleHelpAction" accelerator="F1"/>
+        <SeparatorMenuItem />
+        <MenuItem text="Acerca de..." onAction="#handleAboutAction"/>
+      </items>
+    </Menu>
+  </menus>
+</MenuBar>
 
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
          <content>
