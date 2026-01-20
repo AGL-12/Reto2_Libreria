@@ -399,7 +399,7 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
             
             // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
             // con la base de datos, asegurando que se guarden los Contains.
-            session.merge(order);
+            session.saveOrUpdate(order);
             
             tx.commit();
         } catch (Exception e) {

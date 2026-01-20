@@ -165,6 +165,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 cartOder = null;
                 lblTotal.setText("Total: 0.00 €");
                 btnComprar.setDisable(true);
+                UserSession.getInstance().setOrder(null);
 
             } else {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo finalizar la compra.");

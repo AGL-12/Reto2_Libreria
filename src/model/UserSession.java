@@ -10,13 +10,13 @@ public class UserSession {
 
     // 2. El dato del usuario logueado
     private Profile user;
-    
+
     // 3. NUEVO: El carrito actual (Order)
-    private Order currentOrder; 
-    
+    private Order currentOrder;
+
     // 4. NUEVO: Instancia del DAO para guardar en caliente
     private final ClassDAO dao = new DBImplementation();
-    
+
     // Constructor privado
     private UserSession() {
     }
@@ -28,34 +28,43 @@ public class UserSession {
         }
         return instance;
     }
-    
+
     // --- Getters y Setters de Usuario ---
-    public Profile getUser() { return user; }
-    
-    public void setUser(Profile user) { this.user = user; }
+    public Profile getUser() {
+        return user;
+    }
+
+    public void setUser(Profile user) {
+        this.user = user;
+    }
 
     public void cleanUserSession() {
         this.user = null;
         this.currentOrder = null; // Limpiamos también el carrito
     }
 
-    public boolean isLoggedIn() { return user != null; }
-    
+    public boolean isLoggedIn() {
+        return user != null;
+    }
+
     // --- NUEVO: Getter del pedido para usarlo en la vista de pago ---
-    public Order getCurrentOrder() { return currentOrder; }
-    
+    public Order getCurrentOrder() {
+        return currentOrder;
+    }
 
     /**
      * LÓGICA PRINCIPAL: Añadir al carrito y persistir en BD
      */
-public void addToCart(Book book) {
-        if (!(this.user instanceof User)) return;
+    public void addToCart(Book book) {
+        if (!(this.user instanceof User)) {
+            return;
+        }
         User cliente = (User) this.user;
 
         // 1. OBTENER / CREAR PEDIDO
         if (currentOrder == null) {
             currentOrder = dao.getUnfinishedOrder(cliente); // Buscar en BD
-            
+
             if (currentOrder == null) {
                 // CREAR NUEVO
                 currentOrder = new Order();
@@ -63,16 +72,18 @@ public void addToCart(Book book) {
                 currentOrder.setBought(false);
                 currentOrder.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
                 currentOrder.setListPreBuy(new ArrayList<>());
-                
+
                 // --- PASO CLAVE ---
                 // Guardamos YA para tener ID. Esto hace que saveOrUpdate futuro funcione bien.
-                dao.saveOrder(currentOrder); 
+                dao.saveOrder(currentOrder);
             }
         }
 
         // 2. BUSCAR SI YA EXISTE EL LIBRO
         boolean encontrado = false;
-        if(currentOrder.getListPreBuy() == null) currentOrder.setListPreBuy(new ArrayList<>());
+        if (currentOrder.getListPreBuy() == null) {
+            currentOrder.setListPreBuy(new ArrayList<>());
+        }
 
         for (Contain linea : currentOrder.getListPreBuy()) {
             if (linea.getBook().getISBN() == book.getISBN()) {
@@ -96,13 +107,14 @@ public void addToCart(Book book) {
     }
 
     /**
-     * Recupera el carrito de la BD al loguearse (se llama desde LogInWindowController)
+     * Recupera el carrito de la BD al loguearse (se llama desde
+     * LogInWindowController)
      */
     public void loadCartFromDB() {
         if (this.user != null && this.user instanceof User) {
             User cliente = (User) this.user;
             Order savedOrder = dao.getUnfinishedOrder(cliente);
-            
+
             if (savedOrder != null) {
                 this.currentOrder = savedOrder;
                 System.out.println("Carrito recuperado con " + savedOrder.getListPreBuy().size() + " productos.");
@@ -112,5 +124,10 @@ public void addToCart(Book book) {
         } else {
             this.currentOrder = null;
         }
+    }
+
+    // Añade este método para poder limpiar el pedido desde fuera
+    public void setOrder(Order order) {
+        this.currentOrder = order; // Asegúrate de que tu variable se llame 'currentOrder'
     }
 }
