@@ -54,9 +54,41 @@ public class DBImplementation implements ClassDAO {
     }
 
     @Override public void dropOutUser(Profile p) {}
-    @Override public void dropOutAdmin(Profile p) {}
+    @Override 
+    public void dropOutAdmin(Profile profile) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            // Cargar el objeto persistente antes de borrarlo
+            Profile p = session.get(Profile.class, profile.getUsername());
+            if (p != null) {
+                session.delete(p);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            throw new RuntimeException("Error al eliminar el usuario: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+    }
     @Override public void modificarUser(Profile p) {}
-    @Override public List comboBoxInsert() { return new ArrayList(); }
+    @Override 
+    public List<String> comboBoxInsert() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<String> usernames = new ArrayList<>();
+        try {
+            // Obtenemos solo los nombres de usuario de la tabla Profile
+            usernames = session.createQuery("SELECT p.username FROM Profile p", String.class).list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session.isOpen()) session.close();
+        }
+        return usernames;
+    }
 
     // --- ¡AQUÍ ESTÁ LA CORRECCIÓN! MÉTODOS CRUD DE LIBRO RELLENADOS ---
 
