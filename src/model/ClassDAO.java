@@ -34,4 +34,26 @@ public interface ClassDAO {
     public void deleteComment(Commentate comment);
     public List<Book> buscarLibros(String busqueda);
     public List comboBoxInsert();
+    
+    
+   //Historial Compras
+    public List<Order> getHistory(int id);
+    public List<Contain> getOrder (int id);
+    
+    //Carrtito
+    public List<Contain> getCartItem(int id);
+    public Order cartOrder (int id);
+
+    public boolean buy(Order order);
+
+    public int getOrderId(int id);
+    /**
+     * Busca un pedido NO PAGADO (bought=false) de un usuario específico.
+     */
+    public Order getUnfinishedOrder(User user);
+
+    /**
+     * Guarda o actualiza un pedido y sus líneas en la base de datos.
+     */
+    public void saveOrder(Order order);
 }

@@ -24,29 +24,17 @@ import model.Profile;
 
 public class BookCRUDWindowController implements Initializable {
 
-    @FXML
     private Button btnConfirmar;
-    @FXML
     private Button btnVolver;
-    @FXML
     private TextField txtISBN;
-    @FXML
     private TextField txtTitulo;
-    @FXML
     private TextField txtIdAutor;
-    @FXML
     private TextField txtHojas;
-    @FXML
     private TextField txtStock;
-    @FXML
     private TextField txtSinopsis;
-    @FXML
     private TextField txtPrecio;
-    @FXML
     private TextField txtEditorial;
-    @FXML
     private ImageView idPortada;
-    @FXML
     private Button btnSubirArchivo;
 
     private File archivoPortada;
@@ -138,7 +126,6 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     // --- LÓGICA DE BOTONES ---
-    @FXML
     private void confirmarAccion() {
         try {
             // Recoger datos (Validar que sean números)
@@ -171,7 +158,6 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
-    @FXML
     private void volver() {
         cerrarVentana();
     }
@@ -216,7 +202,6 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     // --- TUS MÉTODOS DE IMAGEN EXISTENTES ---
-    @FXML
     private void arrastrarSobre(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasFiles()) {
@@ -225,7 +210,6 @@ public class BookCRUDWindowController implements Initializable {
         event.consume();
     }
 
-    @FXML
     private void soltarImagen(DragEvent event) {
         Dragboard db = event.getDragboard();
         boolean success = false;
@@ -243,7 +227,6 @@ public class BookCRUDWindowController implements Initializable {
         event.consume();
     }
 
-    @FXML
     private void subirPortada() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar portada");

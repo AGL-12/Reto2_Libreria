@@ -8,6 +8,7 @@ package controller;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,7 +16,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
@@ -57,6 +60,12 @@ public class CommentViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
+        ContextMenu cm = new ContextMenu();
+        MenuItem miBorrar = new MenuItem("Borrar Comentario");
+        miBorrar.setOnAction(this::handleDelete); // Reusamos tu método borrar
+        cm.getItems().add(miBorrar);
+
         if (txtComment != null) {
             txtComment.setEditable(false);
         }
@@ -202,20 +211,24 @@ public class CommentViewController implements Initializable {
                 showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING);
                 return;
             }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Actualizar DB y Objeto
+                        currentComment.setCommentary(nuevoTexto);
+                        dao.updateComment(currentComment);
 
-            try {
-                // Actualizar DB y Objeto
-                currentComment.setCommentary(nuevoTexto);
-                dao.updateComment(currentComment);
+                        // Volver a estado normal
+                        Platform.runLater(() -> finalizarEdicion());
 
-                // Volver a estado normal
-                finalizarEdicion();
-
-                // Mensaje opcional (puedes quitarlo si te molesta)
-                // showAlert("Comentario guardado", Alert.AlertType.INFORMATION); 
-            } catch (Exception e) {
-                showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR);
-            }
+                        // Mensaje opcional (puedes quitarlo si te molesta)
+                        // showAlert("Comentario guardado", Alert.AlertType.INFORMATION); 
+                    } catch (Exception e) {
+                        Platform.runLater(() -> showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR));
+                    }
+                }
+            }).start();
         }
     }
 

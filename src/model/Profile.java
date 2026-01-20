@@ -129,4 +129,8 @@ public abstract class Profile implements Serializable {
      * Performs login logic for the profile. Must be implemented by subclasses.
      */
     public abstract void logIn();
+
+    public int getId() {
+        return this.userCode;
+    }
 }

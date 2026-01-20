@@ -52,11 +52,11 @@ public class BookViewController {
     @FXML
     private Label stockBook;
     @FXML
-    private Button btnSaveComment;
-    @FXML
     private Button btnAddComment;
     @FXML
     private VBox commentsContainer;
+    @FXML
+    private Button btnAddToCart;
     @FXML
     public HeaderController headerController;
 
@@ -77,6 +77,7 @@ public class BookViewController {
     private Button btnPublicar;
     @FXML
     private TextArea txtNuevoComentario;
+    
     @FXML
     private StarRateController estrellasController;
 
@@ -174,6 +175,15 @@ public class BookViewController {
         stockBook.setText("Stock: " + book.getStock());
 
         refreshList();
+        // --- LÓGICA DE BOTÓN ---
+        Profile user = UserSession.getInstance().getUser();
+        if (user instanceof Admin) {
+            btnAddToCart.setVisible(false); // Admin no compra
+            btnAddToCart.setManaged(false); // No ocupa sitio
+        } else {
+            btnAddToCart.setVisible(true);
+            btnAddToCart.setManaged(true);
+        }
     }
 
     @FXML
@@ -275,6 +285,27 @@ public class BookViewController {
             showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
+    
+    //Barra menu logica
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        // Muestra un mensaje simulando la generación del reporte
+        showAlert("Generando informe de comentarios...", Alert.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        // Muestra la ventana de ayuda requerida
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Ayuda del Sistema");
+        alert.setHeaderText("Manual de Usuario");
+        alert.setContentText("Guía rápida:\n"
+                           + "1. Selecciona un libro para ver detalles.\n"
+                           + "2. Escribe en el cuadro inferior y pulsa 'Publicar' para opinar.\n"
+                           + "3. Si eres Admin, usa el botón 'Borrar' para moderar.\n"
+                           + "4. Usa el menú Actions > Report para informes.");
+        alert.showAndWait();
+    }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView
@@ -308,6 +339,33 @@ public class BookViewController {
         imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
         imageView.setSmooth(true); // Suavizado para mejor calidad
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
+    }
+    
+    
+    @FXML
+    private void handleAddToCart(ActionEvent event) {
+        // 1. Validar que hay un libro seleccionado
+        if (currentBook == null) {
+            showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        // 2. Validar que el usuario puede comprar
+        // (Aunque ya ocultamos el botón al Admin, doble seguridad no sobra)
+        if (!UserSession.getInstance().isLoggedIn()) {
+            showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            UserSession.getInstance().addToCart(currentBook);
+            // 4. Feedback visual
+            showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
 }

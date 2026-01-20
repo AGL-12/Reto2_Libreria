@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import threads.SessionHolderThread;
@@ -346,16 +347,257 @@ public class DBImplementation implements ClassDAO {
             tx = session.beginTransaction();
             session.update(comment); // Hibernate actualiza los cambios
             tx.commit();
+            
+            new SessionHolderThread(session).start();
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
             e.printStackTrace();
             throw new RuntimeException("Error al modificar: " + e.getMessage());
+        }
+    }
+    
+    
+@Override
+    public Order getUnfinishedOrder(User user) {
+        Session session = null;
+        Order order = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            
+// Asumiendo que en tu clase User/Profile el atributo @Id se llama 'userCode'
+String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
+            
+            order = (Order) session.createQuery(hql)
+                    .setParameter("userId", user.getUserCode())
+                    .uniqueResult();
+            
+            // --- ¡TRUCO IMPORTANTE! ---
+            // Si encontramos pedido, forzamos a Hibernate a cargar la lista de libros
+            // ANTES de cerrar la sesión. Si no hacemos esto, la lista llega vacía o rota.
+            if (order != null) {
+                Hibernate.initialize(order.getListPreBuy());
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error al recuperar el carrito: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (session != null) session.close();
+        }
+        return order;
+    }
+
+@Override
+    public void saveOrder(Order order) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+            
+            // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
+            // con la base de datos, asegurando que se guarden los Contains.
+            session.saveOrUpdate(order);
+            
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            System.err.println("Error al guardar la orden: " + e.getMessage());
+            e.printStackTrace();
+            // Es vital relanzar la excepción para enterarnos si falla
+            throw new RuntimeException(e); 
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    //Historial Compras
+    @Override
+    public List<Order> getHistory(int id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        List<Order> orders = null;
+
+        try {
+            tx = session.beginTransaction();
+            String hql = "FROM Order o WHERE o.user.id = :id AND o.bought = true";
+
+            orders = session.createQuery(hql, Order.class)
+                    .setParameter("id", id)
+                    .list();
+            if (orders != null) {
+                for (Order o : orders) {
+                    float precioCalculado = 0;
+                    if (o.getListPreBuy() != null) {
+                        for (Contain linea : o.getListPreBuy()) {
+                            // Multiplicamos precio del libro por cantidad
+                            precioCalculado += (linea.getBook().getPrice() * linea.getQuantity());
+                        }
+                    }
+                    o.setTotal(precioCalculado); // Seteamos el campo @Transient
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
             }
         }
+        return orders;
     }
+
+    @Override
+    public List<Contain> getOrder(int id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        List<Contain> contains = null;
+        try {
+            tx = session.beginTransaction();
+            String hql = "FROM Contain c JOIN FETCH c.book WHERE c.order.idOrder = :id";
+
+            contains = session.createQuery(hql, Contain.class)
+                    .setParameter("id", id)
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return contains;
+    }
+
+    @Override
+    public List<Contain> getCartItem(int id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        List<Contain> cart = null;
+        try {
+            tx = session.beginTransaction();
+            String hql = "FROM Contain c JOIN FETCH c.book WHERE c.order.user.id = :idUser AND c.order.bought = false";
+
+            cart = session.createQuery(hql, Contain.class)
+                    .setParameter("id", id)
+                    .list();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return cart;
+    }
+
+    @Override
+    public Order cartOrder(int idUsuario) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        Order cart = null;
+        try {
+            tx = session.beginTransaction();
+            String hql = "FROM Order o "
+                    + "LEFT JOIN FETCH o.listPreBuy l "
+                    + "LEFT JOIN FETCH l.book "
+                    + "WHERE o.user.userCode = :idUser "
+                    + // OJO: Verifica si en tu User es 'userCode' o 'id'
+                    "AND o.bought = false";
+
+            cart = session.createQuery(hql, Order.class).setParameter("idUser", idUsuario).uniqueResult();
+           
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return cart;
+
+    }
+
+    /*@Override
+   public boolean buy(Order order) {
+        System.out.println(order);
+        boolean comprado = false;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+            String hql = "UPDATE Order SET bought = 1, purchase_date = NOW() WHERE id_order = :idOrder AND bought = 0";
+            
+          session.update(order);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return comprado;
+    }*/
+    @Override
+    public boolean buy(Order order) {
+        boolean comprado = false;
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            // 1. IMPORTANTE: Cambiamos el estado del objeto Java PRIMERO
+            order.setBought(true);
+            // Asegúrate de tener el import de java.sql.Timestamp
+            order.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
+
+            // 2. Ahora sí, actualizamos el objeto en la base de datos
+            session.update(order);
+
+            // 3. ¡MUY IMPORTANTE! Confirmar la transacción
+            tx.commit();
+
+            // Si llega aquí sin error, es que se compró
+            comprado = true;
+
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback(); // Si falla, deshacemos
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return comprado;
+    }
+
+    @Override
+    public int getOrderId(int id) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        int contains = 0;
+        try {
+            tx = session.beginTransaction();
+            String hql = "SELECT o.idOrder FROM Order o WHERE o.user.id = :id AND o.bought = false";
+
+            contains = session.createQuery(hql, Integer.class)
+                    .setParameter("id", id)
+                    .uniqueResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return contains;
+    }
+
 }

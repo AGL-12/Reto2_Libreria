@@ -27,6 +27,10 @@ public class Contain implements Serializable {
     @MapsId("isbnBook") // <-- "Usa el campo 'isbnBook' de ContainId para mi FK"
     @JoinColumn(name = "isbn_book")
     private Book book;
+    
+    // --- CONSTRUCTOR VACÍO OBLIGATORIO PARA HIBERNATE ---
+    public Contain() {
+    }
 
     public Contain(int quantity, Order order, Book book) {
         this.quantity = quantity;
@@ -36,6 +40,9 @@ public class Contain implements Serializable {
         // Creamos el ID automáticamente usando los datos de los objetos
         this.id = new ContainId(order.getIdOrder(), book.getISBN());
     }
+
+
+
 
     public ContainId getId() {
         return id;
@@ -83,5 +90,27 @@ public class Contain implements Serializable {
     public float getSum() {
         return sum;
     }
+    
+// ==========================================
+    // MÉTODOS PARA LA VISTA (TABLA)
+    // ==========================================
 
+    /**
+     * Puente para sacar el Título. La tabla llama aquí cuando pones: new
+     * PropertyValueFactory<>("nombreLibro")
+     */
+    public String getNombreLibro() {
+        // Gracias al JOIN FETCH, 'this.book' ya no es null, tiene datos.
+        return this.book.getTitle();
+    }
+
+    /**
+     * Puente para sacar el Precio Total. La tabla llama aquí cuando pones: new
+     * PropertyValueFactory<>("totalEuros")
+     */
+    public String getTotalEuros() {
+        // Multiplicamos el precio del libro (Book) por la cantidad (Contain)
+        float total = this.book.getPrice() * this.quantity;
+        return total + " €";
+    }
 }

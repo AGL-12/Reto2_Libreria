@@ -45,7 +45,7 @@ public class HeaderController {
     private Button btnOption;
     @FXML
     private Button btnLogOut;
-    
+
     // --- NUEVO GETTER ---
     // Esto permite que el MainBookStoreController escuche lo que escribes aquí
     public TextField getSearchTextField() {
@@ -99,8 +99,10 @@ public class HeaderController {
     private void seeAllPurchase(ActionEvent event) {
     }
 
+
     @FXML
-    private void backToMain(ActionEvent event) {
+    private void backToMain(ActionEvent event
+    ) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
@@ -132,7 +134,8 @@ public class HeaderController {
     }
 
     @FXML
-    private void logIn(ActionEvent event) {
+    private void logIn(ActionEvent event
+    ) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LoginWindow.fxml"));
             Parent root = fxmlLoader.load();
@@ -168,7 +171,8 @@ public class HeaderController {
     }
 
     @FXML
-    private void option(ActionEvent event) {
+    private void option(ActionEvent event
+    ) {
         Profile pf = UserSession.getInstance().getUser();
         try {
             FXMLLoader fxmlLoader;
@@ -208,11 +212,12 @@ public class HeaderController {
     }
 
     @FXML
-    private void logOut(ActionEvent event) {
+    private void logOut(ActionEvent event
+    ) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
-            
+
             MainBookStoreController main = fxmlLoader.getController();
             main.headerController.setMode(UserSession.getInstance().getUser(), null);
 
