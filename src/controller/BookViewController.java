@@ -32,6 +32,23 @@ import model.User;
 import model.UserSession;
 import model.Admin;
 
+//Imports para informe
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+
+//Imports para click derecho
+
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.input.ContextMenuEvent;
+
+
 /**
  * FXML Controller class
  *
@@ -60,6 +77,11 @@ public class BookViewController {
     @FXML
     public HeaderController headerController;
 
+    @FXML
+    private javafx.scene.control.MenuItem menuItemReport;
+    @FXML
+    private VBox rootPane;
+
     private Book currentBook;
 
     private final ClassDAO dao = new DBImplementation();
@@ -80,11 +102,14 @@ public class BookViewController {
 
     @FXML
     private StarRateController estrellasController;
+    
+    private ContextMenu globalMenu;
 
     private Profile currentUser = UserSession.getInstance().getUser();
 
     public void initialize() {
         initContextMenu();
+        initGlobalContextMenu();
     }
 
     /**
@@ -175,12 +200,15 @@ public class BookViewController {
         stockBook.setText("Stock: " + book.getStock());
 
         refreshList();
-        // --- LÓGICA DE BOTÓN ---
+
         Profile user = UserSession.getInstance().getUser();
+
         if (user instanceof Admin) {
-            btnAddToCart.setVisible(false); // Admin no compra
-            btnAddToCart.setManaged(false); // No ocupa sitio
+            // El Admin NO compra
+            btnAddToCart.setVisible(false);
+            btnAddToCart.setManaged(false);
         } else {
+            // El Usuario SÍ compra
             btnAddToCart.setVisible(true);
             btnAddToCart.setManaged(true);
         }
@@ -286,11 +314,37 @@ public class BookViewController {
         }
     }
 
-    //Barra menu logica
     @FXML
     private void handleReportAction(ActionEvent event) {
-        // Muestra un mensaje simulando la generación del reporte
-        showAlert("Generando informe de comentarios...", Alert.AlertType.INFORMATION);
+
+        // --- HEMOS BORRADO EL BLOQUE IF DE SEGURIDAD ---
+        // Ahora entra cualquier usuario (Admin o Normal)
+        try {
+            // CAMBIO: Ahora apuntamos al Manual de Usuario en vez de al Informe de Stock
+            String resourcePath = "/documents/Manual_Usuario.pdf";
+
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("Error: No se puede abrir el visor de PDF.", Alert.AlertType.ERROR);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
@@ -379,26 +433,31 @@ public class BookViewController {
     @FXML
     private void handleHelpAction(ActionEvent event) {
         try {
-            // Opción PRO: Abrir una vista dedicada de ayuda (HelpView.fxml)
-            // Si no tienes tiempo, abre un PDF o una web externa:
-            /* java.awt.Desktop.getDesktop().browse(new java.net.URI("https://tuweb.com/ayuda"));
-             */
+            // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
+            String resourcePath = "/documents/Manual_Usuario.pdf";
 
-            // Opción RÚBRICA ESTÁNDAR (Ventana Secundaria):
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Ayuda");
-            alert.setHeaderText("Gestión de Libros");
-            // Usar un WebView aquí sería la matrícula de honor, pero un texto largo formateado sirve para aprobar.
-            alert.setContentText("ATAJOS:\n"
-                    + "- Ctrl+P: Imprimir Informe (Solo Admin)\n"
-                    + "- Ctrl+L: Cerrar Sesión\n"
-                    + "- F1: Esta ayuda\n\n"
-                    + "INSTRUCCIONES:\n"
-                    + "Selecciona un libro para ver sus detalles y stock.");
-            alert.showAndWait();
+            // 2. Cargar archivo
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. Crear temporal y abrir
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -407,4 +466,48 @@ public class BookViewController {
         showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
     }
 
+/**
+     * Configura el menú global de clic derecho para toda la ventana.
+     */
+    private void initGlobalContextMenu() {
+        // 1. Crear el menú y las opciones
+        ContextMenu globalMenu = new ContextMenu();
+        globalMenu.setAutoHide(true);
+
+        MenuItem itemLogOut = new MenuItem("Cerrar Sesión");
+        itemLogOut.setOnAction(event -> handleLogOut(event));
+
+        MenuItem itemExit = new MenuItem("Salir");
+        itemExit.setOnAction(event -> handleExit(event));
+
+        SeparatorMenuItem separator = new SeparatorMenuItem();
+
+        MenuItem itemManual = new MenuItem("Manual de Usuario");
+        itemManual.setOnAction(event -> handleHelpAction(event));
+
+        MenuItem itemAbout = new MenuItem("Acerca de...");
+        itemAbout.setOnAction(event -> handleAboutAction(event));
+
+        globalMenu.getItems().addAll(itemLogOut, itemExit, separator, itemManual, itemAbout);
+
+        // 2. ACTIVAR EL CLICK DERECHO EN EL PANEL PRINCIPAL (SOLUCIÓN)
+        // Usamos 'rootPane' directamente. Esto funciona siempre.
+        if (rootPane != null) {
+            rootPane.setOnContextMenuRequested(event -> {
+                // Mostrar el menú justo donde está el ratón
+                globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
+                event.consume(); 
+            });
+            
+            // B) CERRAR CON CLICK IZQUIERDO (¡ESTA ES LA SOLUCIÓN!)
+            // Detectamos si pulsas el botón principal (izquierdo) en cualquier sitio del panel
+            rootPane.setOnMousePressed(event -> {
+                if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
+                    globalMenu.hide();
+                }
+            });
+        } else {
+            System.out.println("Error: rootPane es null. Revisa el fx:id en el FXML.");
+        }
+    }
 }

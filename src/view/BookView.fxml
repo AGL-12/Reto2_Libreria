@@ -20,7 +20,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookViewController">
+<VBox fx:id="rootPane" stylesheets="@../css/style.css" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookViewController">
    <children>
       <fx:include fx:id="header" source="Header.fxml" />
 <MenuBar>
@@ -34,13 +34,12 @@
 
     <Menu mnemonicParsing="true" text="A_cciones">
       <items>
-        <MenuItem fx:id="menuItemReport" text="Generar Informe de Stock" onAction="#handleReportAction" accelerator="Ctrl+P"/>
+        <MenuItem fx:id="menuItemReport" text="Manual De Usuario" onAction="#handleReportAction" accelerator="Ctrl+P"/>
       </items>
     </Menu>
 
     <Menu mnemonicParsing="true" text="A_yuda">
       <items>
-        <MenuItem text="Manual de Usuario" onAction="#handleHelpAction" accelerator="F1"/>
         <SeparatorMenuItem />
         <MenuItem text="Acerca de..." onAction="#handleAboutAction"/>
       </items>
@@ -67,7 +66,7 @@
                      <children>
                         <VBox alignment="TOP_CENTER" spacing="10.0">
                            <children>
-                              <ImageView fx:id="coverBook" fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="coverBook" styleClass="image-view-cover" fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../images/mood-heart.png" />
                                  </image>

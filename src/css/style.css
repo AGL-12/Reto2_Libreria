@@ -259,3 +259,91 @@
     -fx-font-size: 14px;
     -fx-text-fill: #333;
 }
+
+
+/* =============================================================================
+   DISEÑO DE MENÚ "MODERNO PRO" (Compatible JavaFX 8)
+   ============================================================================= */
+
+/* 1. LA BARRA PRINCIPAL 
+   Fondo blanco puro con una línea muy sutil abajo para separar del contenido */
+.menu-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #e0e0e0 transparent; /* Solo borde inferior */
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 2 5; /* Un poco de aire arriba y abajo */
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* 2. LOS BOTONES PRINCIPALES (Archivo, Acciones, Ayuda) 
+   Estado normal: Limpio */
+.menu-bar .menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #444444; /* Gris oscuro, no negro puro (más elegante) */
+    -fx-font-weight: bold;
+    -fx-padding: 6 12; /* Botones cómodos */
+    
+    /* MATAR EL AZUL DE JAVAFX 8 */
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* 3. ESTADO HOVER (Pasar el ratón)
+   Efecto suave gris claro con bordes ligeramente redondeados */
+.menu-bar .menu-button:hover {
+    -fx-background-color: #f2f2f2;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+/* 4. ESTADO ACTIVADO (Clicado/Desplegado)
+   Un gris un poco más oscuro para indicar que está abierto */
+.menu-bar .menu-button:showing,
+.menu-bar .menu-button:focused {
+    -fx-background-color: #e5e5e5;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 0; /* Vital para quitar resplandores */
+}
+
+/* 5. EL DESPLEGABLE (La caja que cae)
+   Sombra "Drop Shadow" para darle profundidad 3D */
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d0d0d0;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px; /* Bordes redondeados modernos */
+    -fx-border-radius: 6px;
+    
+    /* Sombra elegante */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 4, 4);
+    -fx-padding: 4 0;
+}
+
+/* 6. CADA OPCIÓN DENTRO DE LA LISTA */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 8 15; /* Espaciado interno generoso */
+}
+
+/* Texto de las opciones */
+.menu-item .label {
+    -fx-text-fill: #333333;
+    -fx-font-size: 12px;
+}
+
+/* 7. OPCIÓN SELECCIONADA (Hover en la lista)
+   Usamos un acento muy suave en vez del azul fuerte */
+.menu-item:focused {
+    -fx-background-color: #f7f7f7; 
+    /* Borde izquierdo decorativo para indicar selección (estilo VS Code) */
+    -fx-border-color: transparent transparent transparent #444444;
+    -fx-border-width: 0 0 0 3; 
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: #000000;
+    -fx-font-weight: bold;
+}
