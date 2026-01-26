@@ -469,11 +469,28 @@ public class BookViewController {
 /**
      * Configura el menú global de clic derecho para toda la ventana.
      */
-    private void initGlobalContextMenu() {
-        // 1. Crear el menú y las opciones
-        ContextMenu globalMenu = new ContextMenu();
+private void initGlobalContextMenu() {
+        // 1. Inicializamos el menú
+        globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
 
+        // =========================================================
+        // --- NUEVO: OPCIÓN AÑADIR AL CARRITO ---
+        // =========================================================
+        MenuItem itemAddCart = new MenuItem("Añadir al Carrito");
+        
+        // Conectamos con tu método de compra existente. 
+        // Pasamos 'null' porque ese método no usa el evento para nada importante.
+        itemAddCart.setOnAction(event -> handleAddToCart(null));
+
+        // TRUCO PRO: Si es Admin, deshabilitamos esta opción (igual que el botón)
+        if (UserSession.getInstance().getUser() instanceof Admin) {
+            itemAddCart.setDisable(true); 
+            // Opcional: itemAddCart.setVisible(false); si prefieres que no se vea
+        }
+        // =========================================================
+
+        // 2. Resto de opciones (Las que ya tenías)
         MenuItem itemLogOut = new MenuItem("Cerrar Sesión");
         itemLogOut.setOnAction(event -> handleLogOut(event));
 
@@ -488,26 +505,29 @@ public class BookViewController {
         MenuItem itemAbout = new MenuItem("Acerca de...");
         itemAbout.setOnAction(event -> handleAboutAction(event));
 
-        globalMenu.getItems().addAll(itemLogOut, itemExit, separator, itemManual, itemAbout);
+        // 3. AÑADIR TODO AL MENÚ (Ponemos "Añadir al Carrito" arriba del todo para que destaque)
+        globalMenu.getItems().addAll(
+                itemAddCart, 
+                new SeparatorMenuItem(), // Una línea para separar acciones de libro del resto
+                itemLogOut, 
+                itemExit, 
+                separator, 
+                itemManual, 
+                itemAbout
+        );
 
-        // 2. ACTIVAR EL CLICK DERECHO EN EL PANEL PRINCIPAL (SOLUCIÓN)
-        // Usamos 'rootPane' directamente. Esto funciona siempre.
+        // 4. Asignar eventos al rootPane (Igual que antes)
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
-                // Mostrar el menú justo donde está el ratón
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
                 event.consume(); 
             });
-            
-            // B) CERRAR CON CLICK IZQUIERDO (¡ESTA ES LA SOLUCIÓN!)
-            // Detectamos si pulsas el botón principal (izquierdo) en cualquier sitio del panel
+
             rootPane.setOnMousePressed(event -> {
                 if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
                     globalMenu.hide();
                 }
             });
-        } else {
-            System.out.println("Error: rootPane es null. Revisa el fx:id en el FXML.");
         }
     }
 }
