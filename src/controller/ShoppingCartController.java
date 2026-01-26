@@ -89,15 +89,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
                 VBox libroBox = fxmlLoader.load();
 
-                // Añadimos CheckBox
-                CheckBox cb = new CheckBox("Seleccionar");
-                cb.setSelected(true);
-                cb.setOnAction(this); // Vinculamos evento
-                libroBox.getChildren().add(cb);
-
                 // Configuramos el controlador pequeño
                 PreOrderController preOrderController = fxmlLoader.getController();
-                preOrderController.setData(lib);
+                preOrderController.setData(lib, this);
+                libroBox.setUserData(preOrderController);
 
                 // Añadimos al VBox principal
                 vBoxContenedorLibros.getChildren().add(libroBox);
@@ -111,47 +106,45 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
-    private void actualizarPrecioTotal() {
+    public void actualizarPrecioTotal() {
         double total = 0;
-        int indice = 0;
 
-        // Protección si la lista está vacía
-        if (libros == null || libros.isEmpty()) {
-            lblTotal.setText("Total: 0.00 €");
-            return;
-        }
+        // Recorremos todas las tarjetas de libros que hay en la pantalla del carrito
+        for (javafx.scene.Node nodo : vBoxContenedorLibros.getChildren()) {
+            if (nodo instanceof VBox) {
+                // Recuperamos el controlador que guardamos antes con "setUserData"
+                PreOrderController itemCtrl = (PreOrderController) nodo.getUserData();
 
-        for (Node nodoLibro : vBoxContenedorLibros.getChildren()) {
-            if (nodoLibro instanceof VBox) {
-                VBox libroVBox = (VBox) nodoLibro;
+                if (itemCtrl != null) {
+                    double precioUnidad = itemCtrl.getBook().getPrice();
+                    int cantidad = itemCtrl.getCantidadSeleccionada(); // Lo que diga el Spinner
 
-                for (Node hijo : libroVBox.getChildren()) {
-                    if (hijo instanceof CheckBox) {
-                        CheckBox cb = (CheckBox) hijo;
-
-                        if (cb.isSelected()) {
-                            // --- PROTECCIÓN ANTI-CRASH ---
-                            // Verificamos que el índice existe antes de usarlo
-                            if (indice < libros.size()) {
-                                total += libros.get(indice).getPrice();
-                            }
-                        }
-                    }
+                    total += (precioUnidad * cantidad);
                 }
-                indice++;
             }
         }
         lblTotal.setText("Total: " + String.format("%.2f", total) + " €");
     }
 
     @Override
-    public void handle(ActionEvent event) {
+    public void handle(ActionEvent event
+    ) {
         actualizarPrecioTotal();
     }
 
     @FXML
-    private void handleComprar(ActionEvent event) {
+    private void handleComprar(ActionEvent event
+    ) {
         if (cartOder != null) {
+            // Sincronizamos las cantidades del Spinner con el objeto pedido antes de enviar a BD
+            for (Node nodo : vBoxContenedorLibros.getChildren()) {
+                PreOrderController ctrl = (PreOrderController) nodo.getUserData();
+                for (Contain c : cartOder.getListPreBuy()) {
+                    if (c.getBook().getISBN() == ctrl.getBook().getISBN()) {
+                        c.setQuantity(ctrl.getCantidadSeleccionada());
+                    }
+                }
+            }
             // Usamos el ID del pedido que ya tenemos cargado en memoria
             // Asegúrate de que tu DAO tiene el método 'buy(int idPedido)'
             boolean exito = dao.buy(cartOder);

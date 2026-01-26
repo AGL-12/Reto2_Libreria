@@ -347,7 +347,7 @@ public class DBImplementation implements ClassDAO {
             tx = session.beginTransaction();
             session.update(comment); // Hibernate actualiza los cambios
             tx.commit();
-            
+
             new SessionHolderThread(session).start();
         } catch (Exception e) {
             if (tx != null) {
@@ -357,59 +357,64 @@ public class DBImplementation implements ClassDAO {
             throw new RuntimeException("Error al modificar: " + e.getMessage());
         }
     }
-    
-    
-@Override
+
+    @Override
     public Order getUnfinishedOrder(User user) {
         Session session = null;
         Order order = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            
+
 // Asumiendo que en tu clase User/Profile el atributo @Id se llama 'userCode'
-String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
-            
+            String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false";
+
             order = (Order) session.createQuery(hql)
                     .setParameter("userId", user.getUserCode())
                     .uniqueResult();
-            
+
             // --- ¡TRUCO IMPORTANTE! ---
             // Si encontramos pedido, forzamos a Hibernate a cargar la lista de libros
             // ANTES de cerrar la sesión. Si no hacemos esto, la lista llega vacía o rota.
             if (order != null) {
                 Hibernate.initialize(order.getListPreBuy());
             }
-            
+
         } catch (Exception e) {
             System.err.println("Error al recuperar el carrito: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         }
         return order;
     }
 
-@Override
+    @Override
     public void saveOrder(Order order) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            
+
             // USAR MERGE: Esto coge tu pedido (con los libros nuevos) y lo fusiona 
             // con la base de datos, asegurando que se guarden los Contains.
             session.saveOrUpdate(order);
-            
+
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             System.err.println("Error al guardar la orden: " + e.getMessage());
             e.printStackTrace();
             // Es vital relanzar la excepción para enterarnos si falla
-            throw new RuntimeException(e); 
+            throw new RuntimeException(e);
         } finally {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -508,7 +513,7 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
                     "AND o.bought = false";
 
             cart = session.createQuery(hql, Order.class).setParameter("idUser", idUsuario).uniqueResult();
-           
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -520,59 +525,45 @@ String hql = "FROM Order o WHERE o.user.userCode = :userId AND o.bought = false"
 
     }
 
-    /*@Override
-   public boolean buy(Order order) {
-        System.out.println(order);
-        boolean comprado = false;
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-
-        try {
-            tx = session.beginTransaction();
-            String hql = "UPDATE Order SET bought = 1, purchase_date = NOW() WHERE id_order = :idOrder AND bought = 0";
-            
-          session.update(order);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-        return comprado;
-    }*/
     @Override
     public boolean buy(Order order) {
         boolean comprado = false;
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        Session session = HibernateUtil.getSessionFactory().openSession(); //
         Transaction tx = null;
-
         try {
-            tx = session.beginTransaction();
+            tx = session.beginTransaction(); //
 
-            // 1. IMPORTANTE: Cambiamos el estado del objeto Java PRIMERO
-            order.setBought(true);
-            // Asegúrate de tener el import de java.sql.Timestamp
-            order.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
+            // 1. Cambiamos el estado del pedido a comprado y ponemos la fecha actual
+            order.setBought(true); //
+            order.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis())); //
 
-            // 2. Ahora sí, actualizamos el objeto en la base de datos
-            session.update(order);
+            // 2. DESCONTAR STOCK REAL: Recorremos las líneas del pedido (Contain)
+            if (order.getListPreBuy() != null) { //
+                for (model.Contain linea : order.getListPreBuy()) { //
+                    model.Book libro = linea.getBook(); //
 
-            // 3. ¡MUY IMPORTANTE! Confirmar la transacción
-            tx.commit();
+                    // Obtenemos la cantidad que el usuario eligió en el carrito
+                    int cantidadComprada = linea.getQuantity(); //
 
-            // Si llega aquí sin error, es que se compró
+                    // Restamos esa cantidad específica al stock que hay en la base de datos
+                    int nuevoStock = libro.getStock() - cantidadComprada; //
+
+                    libro.setStock(nuevoStock); //
+                    session.update(libro); // Actualizamos el libro con su nuevo stock
+                }
+            }
+
+            session.update(order); // Actualizamos el pedido a comprado
+            tx.commit(); // Guardamos todos los cambios
             comprado = true;
-
         } catch (Exception e) {
             if (tx != null) {
-                tx.rollback(); // Si falla, deshacemos
+                tx.rollback(); // Si algo falla, no se toca el stock
             }
             e.printStackTrace();
         } finally {
             if (session != null && session.isOpen()) {
-                session.close();
+                session.close(); //
             }
         }
         return comprado;
