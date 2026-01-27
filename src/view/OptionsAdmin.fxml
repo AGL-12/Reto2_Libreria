@@ -45,7 +45,7 @@
             <Insets />
          </GridPane.margin>
       </Button>
-      <Button fx:id="btnLogOut" alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="77.0" text="Log Out" textFill="#0a0a0a" GridPane.columnIndex="2">
+      <Button fx:id="btnReturn" alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="26.0" prefWidth="77.0" text="Return" textFill="#0a0a0a" GridPane.columnIndex="2">
          <GridPane.margin>
             <Insets bottom="70.0" left="70.0" right="70.0" top="70.0" />
          </GridPane.margin>

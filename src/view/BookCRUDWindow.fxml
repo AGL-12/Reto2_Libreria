@@ -22,32 +22,33 @@
         <RowConstraints maxHeight="39.19998779296875" minHeight="10.0" prefHeight="39.19998779296875" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="38.4" minHeight="10.0" prefHeight="38.4" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="63.59998168945313" minHeight="10.0" prefHeight="34.799963378906256" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="63.59998168945313" minHeight="10.0" prefHeight="34.799963378906256" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="86.20001831054688" minHeight="10.0" prefHeight="46.20001831054688" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="83.4" minHeight="10.0" prefHeight="48.80000305175784" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="66.59999694824216" minHeight="10.0" prefHeight="42.40001220703124" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="55.19998779296873" minHeight="10.0" prefHeight="55.19998779296873" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints maxHeight="55.19998779296873" minHeight="10.0" prefHeight="41.19999999999999" vgrow="SOMETIMES" />
+        <RowConstraints maxHeight="40.39999999999998" minHeight="10.0" prefHeight="40.39999999999998" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <children>
-        <Button fx:id="btnConfirm" mnemonicParsing="false" text="Confirmar" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
-        <Button fx:id="btnReturn" mnemonicParsing="false" text="Volver" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
+        <Button fx:id="btnConfirmar" mnemonicParsing="false" text="Confirmar" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
+        <Button fx:id="btnReturn" mnemonicParsing="false" text="Volver" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
         <Label text="ISBN" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
         <Label text="Titulo" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-        <Label text="ID Autor" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-        <Label text="Hojas" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-        <Label text="Stock" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
-        <Label text="Sinopsis" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-        <Label text="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
-        <Label text="Editorial" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+        <Label text="Author name" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+        <Label text="Hojas" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+        <Label text="Stock" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+        <Label text="Sinopsis" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+        <Label text="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+        <Label text="Editorial" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
         <TextField fx:id="txtISBN" prefHeight="26.0" prefWidth="184.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
         <TextField fx:id="txtTitle" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-        <TextField fx:id="txtIdAuthor" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-        <TextField fx:id="txtPages" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-        <TextField fx:id="txtStock" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-        <TextField fx:id="txtSinopsis" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-        <TextField fx:id="txtPrice" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-        <TextField fx:id="txtEditorial" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+        <TextField fx:id="txtAuthorName" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+        <TextField fx:id="txtPages" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+        <TextField fx:id="txtStock" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+        <TextField fx:id="txtSinopsis" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+        <TextField fx:id="txtPrice" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+        <TextField fx:id="txtEditorial" GridPane.columnIndex="2" GridPane.rowIndex="9" />
         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="3" GridPane.rowSpan="3">
             <children>
                 <Label text="Portada de libro" />
@@ -60,5 +61,7 @@
                 <Button fx:id="btnUploadFile" mnemonicParsing="false" onAction="#uploadFrontPage" text="Subir archivo" />
             </children>
         </VBox>
+      <Label text="Author lastname" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+      <TextField fx:id="txtAuthorLastname" GridPane.columnIndex="2" GridPane.rowIndex="4" />
     </children>
 </GridPane>

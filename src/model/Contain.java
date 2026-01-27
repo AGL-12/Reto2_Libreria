@@ -38,7 +38,7 @@ public class Contain implements Serializable {
         this.book = book;
 
         // Creamos el ID automáticamente usando los datos de los objetos
-        this.id = new ContainId(order.getIdOrder(), book.getISBN());
+        this.id = new ContainId(order.getIdOrder(),book.getISBN());
     }
 
 

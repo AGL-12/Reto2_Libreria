@@ -8,12 +8,12 @@ import javax.persistence.Embeddable;
 public class CommentateId implements Serializable {
 
     private int userCode; // Coincide con el PK de User/Profile
-    private int isbnBook;
+    private long isbnBook;
 
     public CommentateId() {
     }
 
-    public CommentateId(int userCode, int isbnBook) {
+    public CommentateId(int userCode, long isbnBook) {
         this.userCode = userCode;
         this.isbnBook = isbnBook;
     }
@@ -27,11 +27,11 @@ public class CommentateId implements Serializable {
         this.userCode = userCode;
     }
 
-    public int getIsbnBook() {
+    public long getIsbnBook() {
         return isbnBook;
     }
 
-    public void setIsbnBook(int isbnBook) {
+    public void setIsbnBook(long isbnBook) {
         this.isbnBook = isbnBook;
     }
 

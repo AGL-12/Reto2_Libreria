@@ -1,190 +1,144 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
-import exception.passwordequalspassword;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import model.Profile;
+import model.DBImplementation;
 import model.User;
+import model.UserSession;
 
-/**
- * FXML Controller class for modifying a user's profile.
- */
-public class ModifyWindowController implements Initializable {
+public class ModifyWindowController {
 
+    private static final Logger LOGGER = Logger.getLogger(ModifyWindowController.class.getName());
+
+    private Stage stage;
+    private DBImplementation db = new DBImplementation(); 
+    private User currentUser;
+
+    // --- Componentes FXML ---
     @FXML
-    private Label LabelUsername; // Label showing current username
+    private TextField txtName;
     @FXML
-    private Label LabelEmail; // Label showing current email
+    private TextField txtLastName; // Asegúrate de que este fx:id coincida con tu FXML
     @FXML
-    private TextField TextField_Name; // Field to modify name
+    private TextField txtEmail;
     @FXML
-    private TextField TextField_Surname; // Field to modify surname
+    private TextField txtAddress;  // Asegúrate de que este fx:id coincida con tu FXML
     @FXML
-    private TextField TextField_Telephone; // Field to modify telephone
+    private PasswordField pwdNewPassword;
     @FXML
-    private TextField TextField_NewPass; // Field to enter new password
+    private PasswordField pwdConfirmPassword;
     @FXML
-    private TextField TextField_CNewPass; // Field to confirm new password
+    private Button btnSave;
     @FXML
-    private Button Button_Cancel;
+    private Button btnCancel;
 
-    @FXML
-    private void save(ActionEvent event) throws passwordequalspassword {
-        // Read all input values
-        String name = TextField_Name.getText();
-        String surname = TextField_Surname.getText();
-        String telephone = TextField_Telephone.getText();
-        String newPass = TextField_NewPass.getText();
-        String cNewPass = TextField_CNewPass.getText();
-        String gender = "";
-        String username;
-        String email;
-
-        // obtener el genero actual si es un User
-        /*
-        if (profile instanceof User) {
-            gender = ((User) profile).getGender();
-        }
-
-        username = profile.getUsername();
-        email = profile.getEmail();
-
-        if (name == null || name.isEmpty() || name.equals("Insert your new name")) {
-            name = profile.getName();
-        }
-        if (surname == null || surname.isEmpty() || surname.equals("Insert your new surname")) {
-            surname = profile.getSurname();
-        }
-        if (telephone == null || telephone.isEmpty() || telephone.equals("Insert your new telephone")) {
-            telephone = profile.getTelephone();
-        }
-        if (newPass == null || newPass.isEmpty() || cNewPass == null || cNewPass.isEmpty()
-                || newPass.equals("New Password") || cNewPass.equals("Confirm New Password")) {
-            newPass = profile.getPassword();
-
-            Boolean success = cont.modificarUser(newPass, email, name, telephone, surname, username, gender);
-            if (success) {
-                // actualizar el objeto profile con los nuevos valores
-                profile.setName(name);
-                profile.setSurname(surname);
-                profile.setTelephone(telephone);
-                profile.setPassword(newPass);
-
-                javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                successAlert.setTitle("Success");
-                successAlert.setHeaderText(null);
-                successAlert.setContentText("User data has been successfully updated.");
-                successAlert.showAndWait();
-
-                try {
-                    javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                    javafx.scene.Parent root = fxmlLoader.load();
-
-                    controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-                    controllerWindow.setUsuario(profile);
-                    controllerWindow.setCont(this.cont);
-                    javafx.stage.Stage stage = new javafx.stage.Stage();
-                    stage.setScene(new javafx.scene.Scene(root));
-                    stage.show();
-                    Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-                    currentStage.close();
-
-                } catch (IOException ex) {
-                    Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else {
-                javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                error.setTitle("Error");
-                error.setHeaderText("Update failed");
-                error.setContentText("Could not update user data.");
-                error.showAndWait();
-            }
-        } else {
-            // If passwords are not equal, throw exception
-            if (!newPass.equals(cNewPass)) {
-                throw new passwordequalspassword("Las contraseñas no coinciden");
-            } else {
-                Boolean success = cont.modificarUser(newPass, email, name, telephone, surname, username, gender);
-                if (success) {
-                    // actualizar el objeto profile con los nuevos valores
-                    profile.setName(name);
-                    profile.setSurname(surname);
-                    profile.setTelephone(telephone);
-                    profile.setPassword(newPass);
-
-                    javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Success");
-                    successAlert.setHeaderText(null);
-                    successAlert.setContentText("User data has been successfully updated.");
-                    successAlert.showAndWait();
-
-                    try {
-                        javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                        javafx.scene.Parent root = fxmlLoader.load();
-
-                        controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-                        controllerWindow.setUsuario(profile);
-                        controllerWindow.setCont(this.cont);
-
-                        Stage stage = new Stage();
-                        stage.setScene(new javafx.scene.Scene(root));
-                        stage.show();
-
-                        Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-                        currentStage.close();
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                    error.setTitle("Error");
-                    error.setHeaderText("Update failed");
-                    error.setContentText("Could not update user data.");
-                    error.showAndWait();
-                }
-            }
-        }
-         */
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 
-    // Cancel button action: returns to MenuWindow without saving
-    @FXML
-    private void cancel() {
-        try {
-            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new javafx.scene.Scene(root));
-            stage.show();
+    public void initStage(Parent root) {
+        LOGGER.info("Inicializando ventana de Modificar Perfil...");
 
-            Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-            currentStage.close();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Modificar Perfil - Book&Bugs");
+        stage.setResizable(false);
+
+        // 1. OBTENER EL USUARIO DE LA SESIÓN
+        currentUser = (User) UserSession.getInstance().getUser();
+
+        // 2. RELLENAR LOS CAMPOS
+        if (currentUser != null) {
+            txtName.setText(currentUser.getName());
+            // Si tienes estos campos en el FXML, descoméntalos:
+            // txtLastName.setText(currentUser.getSurname());
+            // txtEmail.setText(currentUser.getEmail());
+            // txtAddress.setText(currentUser.getAddress());
+
+            // Bloquear email
+            if(txtEmail != null) {
+                txtEmail.setDisable(true);
+            }
+        }
+        stage.show();
+    }
+
+    // --- CORRECCIÓN AQUÍ: EL NOMBRE DEL MÉTODO DEBE SER 'cancel' ---
+    @FXML
+    private void cancel(ActionEvent event) {
+        LOGGER.info("Cancelando modificación...");
+        goBackToMenu();
+    }
+
+    // --- CORRECCIÓN AQUÍ: COMPRUEBA SI TU FXML LLAMA A 'save' O 'handleSaveAction' ---
+    // He puesto 'save' porque suele ser lo estándar si 'cancel' falló.
+    @FXML
+    private void save(ActionEvent event) {
+        LOGGER.info("Validando y guardando cambios de perfil...");
+
+        if (txtName.getText().trim().isEmpty()) {
+            showAlert("Error", "El nombre no puede estar vacío.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        String newPass = pwdNewPassword.getText();
+        String confirmPass = pwdConfirmPassword.getText();
+
+        if (!newPass.isEmpty()) {
+            if (!newPass.equals(confirmPass)) {
+                showAlert("Error", "Las nuevas contraseñas no coinciden.", Alert.AlertType.ERROR);
+                return;
+            }
+            currentUser.setPassword(newPass); 
+        }
+
+        currentUser.setName(txtName.getText());
+        // currentUser.setSurname(txtLastName.getText());
+        // currentUser.setAddress(txtAddress.getText());
+
+        try {
+            // db.updateUser(currentUser); // Descomenta cuando tengas el método update
+            
+            UserSession.getInstance().setUser(currentUser); // Actualizar sesión
+            showAlert("Éxito", "Perfil actualizado correctamente.", Alert.AlertType.INFORMATION);
+            goBackToMenu();
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error al actualizar en la BD", ex);
+            showAlert("Error", "No se pudo actualizar el perfil.", Alert.AlertType.ERROR);
+        }
+    }
+
+    private void goBackToMenu() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = loader.load();
+            
+            MenuWindowController controller = loader.getController();
+            controller.setStage(this.stage);
+            controller.initStage(root);
 
         } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "Error al volver al menú", ex);
         }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic (if needed) can be added here
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

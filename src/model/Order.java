@@ -12,17 +12,21 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_order")
     private int idOrder;
+
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
     private User user; // Hibernate creará la columna id_user (FK)
+
     @Transient
     private float total;
+
     @Column(name = "purchase_date")
     private Timestamp purchaseDate;
+
     private boolean bought;
-    // Relación 1 Pedido -> Muchos "Contain" (Líneas de pedido)
-    // 'mappedBy' indica que la clase Contain es la dueña de la relación
-    // CascadeType.ALL: Si guardas el Pedido, se guardan sus líneas automáticamente.
+
+    // --- CAMBIO: CascadeType.ALL hacia Contain ---
+    // Si se borra este pedido (porque se borró su usuario), se borran sus líneas de detalle.
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Contain> listPreBuy;
 
@@ -73,5 +77,4 @@ public class Order {
     public void setListPreBuy(List<Contain> listPreBuy) {
         this.listPreBuy = listPreBuy;
     }
-
 }

@@ -1,12 +1,23 @@
 package controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -21,7 +32,6 @@ import model.Author;
 import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
-import model.Profile;
 
 public class BookCRUDWindowController implements Initializable {
 
@@ -49,22 +59,33 @@ public class BookCRUDWindowController implements Initializable {
     private ImageView idFrontPage;
     @FXML
     private Button btnUploadFile;
+    @FXML
+    private TextField txtNombreAutor;
+    @FXML
+    private TextField txtApellidoAutor;
 
+    // --- VARIABLES LÓGICAS ---
     private File archivoPortada;
-    private Profile profile;
-    private String modo; // "create", "modify", "delete"
+    private String modo;
     private final ClassDAO dao = new DBImplementation();
+    private Book libroActual;
+
+    // RUTA DEFINITIVA: Guardar dentro de src/images/
+    private final String RUTA_IMAGENES = "src/images/";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Configuramos el campo ISBN para que busque al pulsar ENTER
+        btnConfirm.setOnAction(this::confirmAction);
+        btnReturn.setOnAction(this::returnAction);
+
+        // Listener para buscar libro al pulsar Enter en ISBN
         txtISBN.setOnAction(event -> {
             if (!"create".equals(modo)) {
                 buscarLibro();
             }
         });
 
-        // También podemos buscar si el campo pierde el foco (opcional)
+        // Listener para buscar libro al perder el foco del campo ISBN
         txtISBN.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal && !txtISBN.getText().isEmpty() && !"create".equals(modo)) {
                 buscarLibro();
@@ -72,32 +93,24 @@ public class BookCRUDWindowController implements Initializable {
         });
     }
 
-    /**
-     * Configura la interfaz según la acción que vamos a realizar. Este método
-     * se llama desde LibroOptionWindowController.
-     */
     public void setModo(String modo) {
         this.modo = modo;
-
         switch (modo) {
             case "create":
                 btnConfirm.setText("Añadir Libro");
                 limpiarCampos();
-                habilitarCampos(true); // Todo editable
+                habilitarCampos(true);
                 break;
-
             case "modify":
                 btnConfirm.setText("Modificar Libro");
                 limpiarCampos();
-                habilitarCampos(false); // Bloqueado hasta que busque ISBN
-                txtISBN.setDisable(false); // ISBN siempre editable para buscar
-                txtISBN.setPromptText("Escribe ISBN y pulsa Enter");
+                habilitarCampos(false);
+                txtISBN.setDisable(false); // Se habilita para buscar primero
                 break;
-
             case "delete":
                 btnConfirm.setText("Eliminar Libro");
                 limpiarCampos();
-                habilitarCampos(false); // Todo bloqueado (solo lectura)
+                habilitarCampos(false);
                 txtISBN.setDisable(false);
                 txtISBN.setPromptText("Escribe ISBN y pulsa Enter");
                 // En delete, el botón confirmar se deshabilita hasta encontrar el libro
@@ -106,11 +119,201 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
-    // --- LÓGICA DE BÚSQUEDA ---
+    // --- MÉTODOS DE EVENTOS FXML (DRAG & DROP Y UPLOAD) ---
+    @FXML
+    private void dragOver(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasFiles()) {
+            event.acceptTransferModes(TransferMode.COPY);
+        }
+        event.consume();
+    }
+
+    @FXML
+    private void dropImage(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        boolean success = false;
+        if (db.hasFiles()) {
+            List<File> files = db.getFiles();
+            File file = files.get(0);
+            String name = file.getName().toLowerCase();
+            if (name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg")) {
+                archivoPortada = file;
+                idFrontPage.setImage(new Image(file.toURI().toString()));
+                success = true;
+            }
+        }
+        event.setDropCompleted(success);
+        event.consume();
+    }
+
+    @FXML
+    private void uploadFrontPage(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleccionar portada");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg")
+        );
+        Stage stage = (Stage) btnUploadFile.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            archivoPortada = file;
+            idFrontPage.setImage(new Image(file.toURI().toString()));
+        }
+    }
+
+    // --- LÓGICA PRINCIPAL ---
+    private void confirmAction(ActionEvent event) {
+        try {
+            if (txtISBN.getText().trim().isEmpty()) {
+                mostrarAlerta("Datos faltantes", "El ISBN es obligatorio.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            long isbn = Long.parseLong(txtISBN.getText());
+
+            // Lógica para ELIMINAR
+            if ("delete".equals(modo)) {
+                dao.deleteBook(isbn);
+                mostrarAlerta("Éxito", "Libro eliminado correctamente.", Alert.AlertType.INFORMATION);
+                closeWindow();
+                return;
+            }
+
+            // Validación de campos vacíos para Crear/Modificar
+            if (txtTitle.getText().isEmpty()
+                    || txtNombreAutor.getText().isEmpty()
+                    || txtApellidoAutor.getText().isEmpty()
+                    || txtPages.getText().isEmpty()
+                    || txtStock.getText().isEmpty()
+                    || txtPrice.getText().isEmpty()) {
+
+                mostrarAlerta("Datos faltantes", "Rellena los campos obligatorios.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            // Recogida de datos
+            String titulo = txtTitle.getText();
+            String nombreAutor = txtNombreAutor.getText().trim();
+            String apellidoAutor = txtApellidoAutor.getText().trim();
+            int hojas = Integer.parseInt(txtPages.getText());
+            int stock = Integer.parseInt(txtStock.getText());
+            String sinopsis = txtSinopsis.getText();
+            float precio = Float.parseFloat(txtPrice.getText());
+            String editorial = txtEditorial.getText();
+
+            // --- LÓGICA DE GUARDADO DE IMAGEN ---
+            String nombrePortada;
+
+            if (archivoPortada != null) {
+                // Si hay nueva imagen, la guardamos y obtenemos el nuevo nombre (UUID)
+                nombrePortada = guardarImagenEnDisco(archivoPortada);
+            } else {
+                // Si no hay nueva imagen, mantenemos la anterior o ponemos default
+                if (libroActual != null && libroActual.getCover() != null) {
+                    nombrePortada = libroActual.getCover();
+                } else {
+                    nombrePortada = "default.png";
+                }
+            }
+
+            // Gestión del Autor
+            Author autor = dao.getOrCreateAuthor(nombreAutor, apellidoAutor);
+
+            // Creación del objeto Libro
+            Book libro = new Book(isbn, nombrePortada, titulo, autor, hojas, stock, sinopsis, precio, editorial, 0f);
+
+            if ("create".equals(modo)) {
+                dao.createBook(libro);
+                mostrarAlerta("Éxito", "Libro creado.", Alert.AlertType.INFORMATION);
+            } else if ("modify".equals(modo)) {
+                dao.modifyBook(libro);
+                mostrarAlerta("Éxito", "Libro modificado.", Alert.AlertType.INFORMATION);
+            }
+
+            this.closeWindow();
+
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Error", "Revisa los campos numéricos (ISBN, Páginas, Stock, Precio).", Alert.AlertType.ERROR);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "Error inesperado: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Copia el archivo seleccionado a la carpeta src/images del proyecto usando
+     * UUID.
+     */
+    private String guardarImagenEnDisco(File source) {
+        try {
+            // Generar nombre único para evitar sobreescribir otras portadas
+            String ext = "";
+            int i = source.getName().lastIndexOf('.');
+            if (i > 0) {
+                ext = source.getName().substring(i);
+            }
+            String nombreFinal = UUID.randomUUID().toString() + ext;
+
+            // 1. Definimos la carpeta de destino: "src/images"
+            File carpeta = new File(RUTA_IMAGENES);
+            if (!carpeta.exists()) {
+                carpeta.mkdirs();
+            }
+
+            // 2. Copiamos a src/images (Persistencia)
+            Path destinoPath = Paths.get(RUTA_IMAGENES, nombreFinal);
+            Files.copy(source.toPath(), destinoPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Imagen guardada en: " + destinoPath.toAbsolutePath());
+
+            // 3. Copiamos también a "build/classes/images" (Para verla al instante sin recompilar)
+            String buildPath = "build/classes/images";
+            File carpetaBuild = new File(buildPath);
+            if (carpetaBuild.exists()) {
+                Path destinoBuild = Paths.get(buildPath, nombreFinal);
+                Files.copy(source.toPath(), destinoBuild, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Imagen copiada también a build: " + destinoBuild.toAbsolutePath());
+            }
+
+            return nombreFinal; // Retornamos el nombre generado para la BD
+
+        } catch (IOException e) {
+            System.err.println("Error al copiar la imagen: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void returnAction(ActionEvent event) {
+        closeWindow();
+    }
+
     private void buscarLibro() {
-        String isbn = txtISBN.getText().trim();
-        if (isbn.isEmpty()) {
+        String isbnText = txtISBN.getText().trim();
+        if (isbnText.isEmpty()) {
             return;
+        }
+        try {
+            long isbn = Long.parseLong(isbnText);
+            Book libro = dao.getBookData(isbn);
+
+            if (libro != null) {
+                this.libroActual = libro;
+                rellenarDatos(libro);
+                if ("modify".equals(modo)) {
+                    habilitarCampos(true);
+                    txtISBN.setDisable(true); // Bloqueamos ISBN tras encontrarlo
+                } else if ("delete".equals(modo)) {
+                    btnConfirm.setDisable(false);
+                }
+            } else {
+                mostrarAlerta("No encontrado", "No existe ese ISBN.", Alert.AlertType.WARNING);
+                limpiarCampos();
+                // Restauramos el texto del ISBN para que el usuario pueda corregirlo
+                txtISBN.setText(isbnText);
+            }
+        } catch (Exception e) {
+            mostrarAlerta("Error", "ISBN inválido o error de conexión.", Alert.AlertType.ERROR);
         }
     }
 
@@ -118,6 +321,10 @@ public class BookCRUDWindowController implements Initializable {
         txtTitle.setText(libro.getTitle());
         // Manejo seguro del autor por si es null
         //txtIdAutor.setText(String.valueOf(libro.getIdAuthor()));
+        if (libro.getAuthor() != null) {
+            txtNombreAutor.setText(libro.getAuthor().getName());
+            txtApellidoAutor.setText(libro.getAuthor().getSurname());
+        }
         txtPages.setText(String.valueOf(libro.getSheets()));
         txtStock.setText(String.valueOf(libro.getStock()));
         txtSinopsis.setText(libro.getSypnosis());
@@ -140,15 +347,22 @@ public class BookCRUDWindowController implements Initializable {
 
     // --- LÓGICA DE BOTONES ---
     private void confirmarAccion() {
+        // Cargar imagen
+        String nombreFoto = libroActual.getCover();
         try {
-            // Recoger datos (Validar que sean números)
-            int isbn = Integer.parseInt(txtISBN.getText());
-
-            if ("delete".equals(modo)) {
-                dao.deleteBook(isbn);
-                return; // Salimos, no hace falta leer el resto de campos para borrar
+            if (nombreFoto != null && !nombreFoto.isEmpty()) {
+                // Buscamos primero en el sistema de archivos (src/images)
+                File fotoFisica = new File(RUTA_IMAGENES + nombreFoto);
+                if (fotoFisica.exists()) {
+                    idFrontPage.setImage(new Image(fotoFisica.toURI().toString()));
+                } else {
+                    // Si no está, intentamos cargar desde recursos compilados
+                    URL recurso = getClass().getResource("/images/" + nombreFoto);
+                    if (recurso != null) {
+                        idFrontPage.setImage(new Image(recurso.toString()));
+                    }
+                }
             }
-
             // Para Create y Modify leemos el resto de campos
             String titulo = txtTitle.getText();
             int idAutor = Integer.parseInt(txtIdAuthor.getText());
@@ -171,39 +385,54 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
-    private void volver() {
-        cerrarVentana();
-    }
-
     // --- UTILIDADES ---
-    private void habilitarCampos(boolean habilitar) {
-        txtTitle.setDisable(!habilitar);
-        txtIdAuthor.setDisable(!habilitar);
-        txtPages.setDisable(!habilitar);
-        txtStock.setDisable(!habilitar);
-        txtSinopsis.setDisable(!habilitar);
-        txtPrice.setDisable(!habilitar);
-        txtEditorial.setDisable(!habilitar);
-        btnUploadFile.setDisable(!habilitar);
-        // El ISBN se controla aparte
+    private void habilitarCampos(boolean b) {
+        txtTitle.setDisable(!b);
+        txtNombreAutor.setDisable(!b);
+        txtApellidoAutor.setDisable(!b);
+        txtPages.setDisable(!b);
+        txtStock.setDisable(!b);
+        txtSinopsis.setDisable(!b);
+        txtPrice.setDisable(!b);
+        txtEditorial.setDisable(!b);
+        btnUploadFile.setDisable(!b);
+        // El ISBN se gestiona por separado
     }
 
     private void limpiarCampos() {
-        txtISBN.setText("");
-        txtTitle.setText("");
-        txtIdAuthor.setText("");
-        txtPages.setText("");
-        txtStock.setText("");
-        txtSinopsis.setText("");
-        txtPrice.setText("");
-        txtEditorial.setText("");
+        txtISBN.clear();
+        txtTitle.clear();
+        txtNombreAutor.clear();
+        txtApellidoAutor.clear();
+        txtPages.clear();
+        txtStock.clear();
+        txtSinopsis.clear();
+        txtPrice.clear();
+        txtEditorial.clear();
         idFrontPage.setImage(null);
+        archivoPortada = null;
+        libroActual = null;
     }
 
-    private void cerrarVentana() {
-        Stage stage = (Stage) btnReturn.getScene().getWindow();
-        stage.close();
-        // Opcional: Podrías reabrir la ventana anterior aquí si quisieras
+    private void closeWindow() {
+        try {
+            // 1. Cargar la vista anterior (BookOptionWindow)
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookOptionWindow.fxml"));
+            Parent root = fxmlLoader.load();
+
+            // 2. Crear nueva ventana
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestión de Libros");
+            stage.show();
+
+            // 3. Cerrar la ventana actual
+            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
+            currentStage.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(BookCRUDWindowController.class.getName()).log(Level.SEVERE, "Error al volver al menú de opciones", ex);
+        }
     }
 
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
@@ -252,15 +481,4 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
-    @FXML
-    private void dragOver(DragEvent event) {
-    }
-
-    @FXML
-    private void dropImage(DragEvent event) {
-    }
-
-    @FXML
-    private void uploadFrontPage(ActionEvent event) {
-    }
 }
