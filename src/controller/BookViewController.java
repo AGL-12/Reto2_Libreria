@@ -456,7 +456,7 @@ public class BookViewController {
 
             // 2. CARGAR EL ARCHIVO .JRXML
             // Busca en el paquete 'reports' que creamos anteriormente
-            InputStream reportStream = getClass().getResourceAsStream("/reports/newReport.jrxml");
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
             
             if (reportStream == null) {
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
