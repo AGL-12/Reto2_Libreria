@@ -27,7 +27,7 @@ public class DeleteAccountAdminController implements Initializable{
 
     private static final Logger LOGGER = Logger.getLogger(DeleteAccountAdminController.class.getName());
 
-    private Stage stage;
+
     private final ClassDAO dao = new DBImplementation(); 
 
     // --- CORRECCIÓN: El nombre debe coincidir con fx:id="ComboBoxUser" del FXML ---
@@ -40,9 +40,7 @@ public class DeleteAccountAdminController implements Initializable{
     private Button Button_Delete;
     @FXML
     private Button Button_Cancel;
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
+   
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
