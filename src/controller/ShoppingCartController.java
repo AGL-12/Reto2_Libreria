@@ -115,15 +115,16 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     public void actualizarPrecioTotal() {
         double total = 0;
 
-        // Recorremos todas las tarjetas de libros que hay en la pantalla del carrito
+        // Recorremos todas las tarjetas de libros
         for (javafx.scene.Node nodo : vBoxContenedorLibros.getChildren()) {
-            if (nodo instanceof VBox) {
-                // Recuperamos el controlador que guardamos antes con "setUserData"
+            // CAMBIO: Verificar si es HBox, ya que PreOrder.fxml usa un HBox como raíz
+            if (nodo instanceof HBox) {
+                // Recuperamos el controlador desde el userData
                 PreOrderController itemCtrl = (PreOrderController) nodo.getUserData();
 
                 if (itemCtrl != null) {
                     double precioUnidad = itemCtrl.getBook().getPrice();
-                    int cantidad = itemCtrl.getCantidadSeleccionada(); // Lo que diga el Spinner
+                    int cantidad = itemCtrl.getCantidadSeleccionada();
 
                     total += (precioUnidad * cantidad);
                 }
