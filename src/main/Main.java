@@ -203,19 +203,19 @@ public class Main extends Application {
             System.out.println(">> ¡Datos precargados con éxito!");
 
             // ==========================================
-// 4. CREAR HISTORIAL DE COMPRAS (Orders y Contain)
-// ==========================================
+            // 4. CREAR HISTORIAL DE COMPRAS (Orders y Contain)
+            // ==========================================
             System.out.println(">> Generando historial de compras para user1 (Pepe)...");
 
-// --- PEDIDO 1: Finalizado (Aparecerá en el historial) ---
+            // --- PEDIDO 1: Finalizado (Aparecerá en el historial) ---
             Order o1 = new Order();
             o1.setIdUsuer(user1); // Asociamos a Pepe
             o1.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis() - 86400000)); // Ayer
             o1.setBought(true); // Status = true
             session.save(o1);
 
-// Creamos las líneas usando tu constructor: public Contain(int quantity, Order order, Book book)
-// El constructor se encarga de crear el ContainId internamente
+            // Creamos las líneas usando tu constructor: public Contain(int quantity, Order order, Book book)
+            // El constructor se encarga de crear el ContainId internamente
             Contain line1 = new Contain(1, o1, b1); // 1 unidad de Harry Potter
             line1.setSum(b1.getPrice()); // Seteamos el precio final en el campo transient o propio
             session.save(line1);
@@ -224,7 +224,7 @@ public class Main extends Application {
             line2.setSum(b2.getPrice() * 2);
             session.save(line2);
 
-// --- PEDIDO 2: Finalizado ---
+            // --- PEDIDO 2: Finalizado ---
             Order o2 = new Order();
             o2.setIdUsuer(user1);
             o2.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis())); // Hoy
@@ -235,11 +235,11 @@ public class Main extends Application {
             line3.setSum(b3.getPrice());
             session.save(line3);
 
-// --- PEDIDO 3: Carrito pendiente (NO debe salir en historial) ---
-            Order o3 = new Order();
+        // --- PEDIDO 3: Carrito pendiente (NO debe salir en historial) ---
+            /*Order o3 = new Order();
             o3.setIdUsuer(user1);
             o3.setBought(false); // Status = false
-            session.save(o3);
+            session.save(o3);*/
             tx.commit();
         } catch (Exception e) {
             if (tx != null) {

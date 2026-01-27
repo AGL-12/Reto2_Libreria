@@ -56,4 +56,6 @@ public interface ClassDAO {
      * Guarda o actualiza un pedido y sus líneas en la base de datos.
      */
     public void saveOrder(Order order);
+
+    public void removeBookFromOrder(Contain contain);
 }

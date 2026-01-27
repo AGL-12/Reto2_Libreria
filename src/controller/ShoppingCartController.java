@@ -18,12 +18,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import model.Book;
 import model.ClassDAO;
 import model.Contain;
 import model.DBImplementation;
 import model.Order;
 import model.Profile;
+import model.User;
 import model.UserSession;
 
 /**
@@ -49,6 +51,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     // --- VARIABLES GLOBALES ---
     private List<Book> libros = new ArrayList<>(); // Lista para cálculos de precio
     private Order cartOder = null; // Objeto del pedido actual
+    private List<Contain> containLine = null;
 
     private final ClassDAO dao = new DBImplementation();
 
@@ -71,9 +74,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     private void cargarVistaLibros() {
+        Profile userLogged = UserSession.getInstance().getUser();
         // 1. LIMPIEZA OBLIGATORIA: Borramos lo visual y lo lógico para empezar de cero
         vBoxContenedorLibros.getChildren().clear();
         libros.clear();
+        cartOder = dao.cartOrder(userLogged.getId());
 
         // 2. Llenamos la lista GLOBAL 'libros' con los datos del pedido
         // (Antes creabas una lista local 'books' aquí, por eso fallaba el precio luego)
@@ -87,7 +92,8 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             // 3. Generamos la parte visual para cada libro
             for (Book lib : libros) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
-                VBox libroBox = fxmlLoader.load();
+                //VBox libroBox = fxmlLoader.load();
+                HBox libroBox = fxmlLoader.load();
 
                 // Configuramos el controlador pequeño
                 PreOrderController preOrderController = fxmlLoader.getController();
@@ -175,4 +181,33 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         alert.setContentText(contenido);
         alert.showAndWait();
     }
+
+    public void eliminarLibroDelCarrito(Book libroAEliminar) {
+        Profile userLogged = UserSession.getInstance().getUser();
+        try {
+            // 1. Obtienes la orden (que ya trae su List<Contain> cargada por Hibernate)
+            Order cartOrder = dao.cartOrder(userLogged.getId());
+
+            // 2. Buscamos el objeto Contain preciso dentro de la lista de la orden
+            Contain lineaABorrar = null;
+            for (Contain c : cartOrder.getListPreBuy()) {
+                if (c.getBook().getISBN() == libroAEliminar.getISBN()) {
+                    lineaABorrar = c;
+                    break;
+                }
+            }
+
+            dao.removeBookFromOrder(lineaABorrar);
+
+            cargarVistaLibros();
+            actualizarPrecioTotal();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Aquí podrías mostrar una alerta de error al usuario
+        }
+        cargarVistaLibros();
+        actualizarPrecioTotal();
+    }
+
 }

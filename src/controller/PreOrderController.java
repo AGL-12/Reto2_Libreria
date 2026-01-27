@@ -7,14 +7,17 @@ package controller;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Book;
 
@@ -28,44 +31,42 @@ public class PreOrderController {
     @FXML
     private Spinner<Integer> spinnerCantidad;
     @FXML
-    private VBox padre;
+    private ImageView imgBook;
     @FXML
-    private ImageView portada;
+    private Label lblTitle;
     @FXML
-    private Label titulo;
-    @FXML
-    private Label precio;
-    @FXML
-    private Label cantidadLabel;
+    private Label lblPrice;
 
     private Book libro;
     private ShoppingCartController shoppingCartController;
+    @FXML
+    private HBox rootPreOrder;
+    @FXML
+    private Button btnDelete;
 
     public void setData(Book libro, ShoppingCartController cartController) {
         this.libro = libro;
         this.shoppingCartController = cartController;
 
-        titulo.setText(libro.getTitle());
-        precio.setText(String.valueOf(libro.getPrice()));
-        Image imagenOriginal = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
+        lblTitle.setText(libro.getTitle());
+        lblPrice.setText(String.format("%.2f €", libro.getPrice()));
 
-        // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
-        recortarImagen(portada, imagenOriginal, 80, 80);
-
+        // Esta es la parte que fallaba (Línea 57 aprox)
+        // Ahora funcionará porque el FXML está bien importado
         SpinnerValueFactory<Integer> valueFactory
                 = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, libro.getStock(), 1);
         spinnerCantidad.setValueFactory(valueFactory);
 
-        // Escuchador sin lambdas para actualizar el total al cambiar cantidad
-        spinnerCantidad.valueProperty().addListener(new javafx.beans.value.ChangeListener<Integer>() {
-            @Override
-            public void changed(javafx.beans.value.ObservableValue<? extends Integer> obs, Integer oldVal, Integer newVal) {
-                if (shoppingCartController != null) {
-                    shoppingCartController.actualizarPrecioTotal();
-                }
+        spinnerCantidad.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (shoppingCartController != null) {
+                shoppingCartController.actualizarPrecioTotal();
             }
         });
 
+        if (libro.getCover() != null) {
+            Image img = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
+            recortarImagen(imgBook, img, 80, 80);
+        }
     }
 
     private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
@@ -109,6 +110,14 @@ public class PreOrderController {
     public int getCantidadSeleccionada() {
         // Devolvemos el número que el usuario ha elegido en el selector
         return spinnerCantidad.getValue();
+    }
+
+    @FXML
+    private void handleDelete(ActionEvent event) {
+        if (shoppingCartController != null) {
+            // Llamamos a un nuevo método que crearemos en el ShoppingCartController
+            shoppingCartController.eliminarLibroDelCarrito(libro);
+        }
     }
 
 }

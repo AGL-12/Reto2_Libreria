@@ -591,4 +591,25 @@ public class DBImplementation implements ClassDAO {
         return contains;
     }
 
+    @Override
+    public void removeBookFromOrder(Contain contain) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // Usamos delete directamente con el objeto que encontramos en el controlador
+            session.delete(contain);
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
 }

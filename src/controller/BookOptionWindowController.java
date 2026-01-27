@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,77 +17,53 @@ import javafx.stage.Stage;
 import model.Profile;
 
 /**
- * Controlador para el menú de opciones de Libro (Añadir, Modificar, Eliminar).
- * Actúa como intermediario enviando el "modo" a BookCRUDWindow.
+ * Controlador para el menú de opciones de Libro.
  */
 public class BookOptionWindowController implements Initializable {
 
-    @FXML
-    private Button btnVolver;
-    @FXML
-    private Button btnAñadirLibro;
-    @FXML
-    private Button btnModificarLibro;
-    @FXML
-    private Button btnEliminarLibro;
+    @FXML private Button btnVolver;
+    @FXML private Button btnAñadirLibro;
+    @FXML private Button btnModificarLibro;
+    @FXML private Button btnEliminarLibro;
 
     private Profile profile; 
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Inicialización si fuera necesaria
+        // Init
     }
 
-    /**
-     * Acción para el botón "Añadir Libro".
-     * Abre la ventana CRUD en modo "create".
-     */
     @FXML
     private void createBook(ActionEvent event) {
-        abrirCRUD("create");
+        abrirCRUD("create", event);
     }
 
-    /**
-     * Acción para el botón "Modificar Libro".
-     * Abre la ventana CRUD en modo "modify".
-     */
     @FXML
     private void modifyBook(ActionEvent event) {
-        abrirCRUD("modify");
+        abrirCRUD("modify", event);
     }
 
-    /**
-     * Acción para el botón "Eliminar Libro".
-     * Abre la ventana CRUD en modo "delete".
-     */
     @FXML
     private void deleteBook(ActionEvent event) {
-        abrirCRUD("delete");
+        abrirCRUD("delete", event);
     }
 
-    /**
-     * Método auxiliar para cargar la ventana y pasar los datos.
-     * Evita repetir código en cada botón.
-     */
-    private void abrirCRUD(String modo) {
+    private void abrirCRUD(String modo, ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
             Parent root = fxmlLoader.load();
 
-            // Obtener el controlador de la siguiente ventana
             BookCRUDWindowController controllerWindow = fxmlLoader.getController();
-            
-            // PASAR LOS DATOS VITALES
-            controllerWindow.setModo(modo);           // <--- AQUÍ PASAMOS EL MODO ("create", "modify", etc.)
+            controllerWindow.setModo(modo);
 
-            // Mostrar la nueva ventana
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
             stage.show();
 
-            // Cerrar la ventana actual (LibroOptionWindow)
-            Stage currentStage = (Stage) btnAñadirLibro.getScene().getWindow();
+            // Cerrar ventana actual de forma segura
+            Node source = (Node) event.getSource();
+            Stage currentStage = (Stage) source.getScene().getWindow();
             currentStage.close();
 
         } catch (IOException ex) {
@@ -94,17 +71,20 @@ public class BookOptionWindowController implements Initializable {
         }
     }
 
+    // --- CORRECCIÓN AQUÍ ---
+    // El método se ha renombrado de 'volver' a 'Return' para coincidir con tu FXML
     @FXML
-    private void volver(ActionEvent event) {
+    private void Return(ActionEvent event) {
         try {
-            // Volver al menú de Admin (OptionsAdmin)
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
 
-            Stage currentStage = (Stage) btnVolver.getScene().getWindow();
+            // Cerrar ventana actual de forma segura
+            Node source = (Node) event.getSource();
+            Stage currentStage = (Stage) source.getScene().getWindow();
             currentStage.close();
 
         } catch (IOException ex) {
