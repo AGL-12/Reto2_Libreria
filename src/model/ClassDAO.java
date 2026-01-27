@@ -7,10 +7,6 @@ package model;
 
 import java.util.List;
 
-/**
- * Data Access Object interface for database operations.
- * Provides methods to interact with user and admin records in the database.
- */
 public interface ClassDAO {
 
     public Profile logIn(String username, String password);
@@ -27,14 +23,17 @@ public interface ClassDAO {
 
     // --- GESTIÓN DE COMENTARIOS ---
     // Nota: No vi la tabla de comentarios en el snippet del SQL, asumo que existe 
-    // y se llama 'commentate' o similar basada en tu entidad Java.
+
+    // --- GESTIÓN DE COMENTARIOS --
     public List<Commentate> getCommentsByBook(long isbn);
     public void addComment(Commentate comment);
     public void updateComment(Commentate comment);
     public void deleteComment(Commentate comment);
+    public List<Commentate> getCommentsByUser(String username);
     public List<Book> buscarLibros(String busqueda);
     public List comboBoxInsert();
     
+
     
    //Historial Compras
     public List<Order> getHistory(int id);
@@ -59,3 +58,5 @@ public interface ClassDAO {
 
     public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor);
 }
+
+

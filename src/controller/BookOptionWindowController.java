@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import model.Profile;
 
 /**
  * Controlador para el menú de opciones de Libro.
+<<<<<<< HEAD
  * Corregido para coincidir con los IDs y onAction del FXML.
  */
 public class BookOptionWindowController implements Initializable {
@@ -31,54 +33,29 @@ public class BookOptionWindowController implements Initializable {
     @FXML
     private Button btnDelete;
 
-    private Profile profile; 
+   
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Inicialización
     }
 
     @FXML
     private void createBook(ActionEvent event) {
-        abrirCRUD("create");
+        abrirCRUD("create", event);
     }
 
     @FXML
     private void modifyBook(ActionEvent event) {
-        abrirCRUD("modify");
+        abrirCRUD("modify", event);
     }
 
     @FXML
     private void deleteBook(ActionEvent event) {
-        abrirCRUD("delete");
+        abrirCRUD("delete", event);
     }
 
-    // CAMBIO 2: El nombre del método debe ser EXACTAMENTE "Return" como pusiste en el FXML
-    @FXML
-    private void Return(ActionEvent event) {
-        try {
-            // Volver al menú de Admin
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
-            Parent root = fxmlLoader.load();
-            
-            // Si OptionsAdminController necesita el perfil, recupéralo de la sesión o pásalo aquí
-            // OptionsAdminController controller = fxmlLoader.getController();
-            // controller.setProfile(...);
 
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            // Cerrar la ventana actual usando el botón correcto
-            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void abrirCRUD(String modo) {
+    private void abrirCRUD(String modo, ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
             Parent root = fxmlLoader.load();
@@ -91,12 +68,36 @@ public class BookOptionWindowController implements Initializable {
             stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
             stage.show();
 
-            // Cerrar ventana actual
-            Stage currentStage = (Stage) btnAdd.getScene().getWindow();
+            // Cerrar ventana actual de forma segura
+            Node source = (Node) event.getSource();
+            Stage currentStage = (Stage) source.getScene().getWindow();
             currentStage.close();
 
         } catch (IOException ex) {
             Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, "Error al abrir BookCRUDWindow", ex);
         }
     }
+
+    // --- CORRECCIÓN AQUÍ ---
+    // El método se ha renombrado de 'volver' a 'Return' para coincidir con tu FXML
+    @FXML
+    private void Return(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            Parent root = fxmlLoader.load();
+            
+            // Si OptionsAdminController necesita el perfil, recupéralo de la sesión o pásalo aquí
+            // OptionsAdminController controller = fxmlLoader.getController();
+            // controller.setProfile(...);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException ex) {
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    
 }

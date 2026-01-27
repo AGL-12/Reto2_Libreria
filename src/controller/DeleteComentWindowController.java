@@ -2,120 +2,146 @@ package controller;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import model.ClassDAO;
 import model.Commentate;
 import model.DBImplementation;
-import model.Profile;
 
 public class DeleteComentWindowController implements Initializable {
 
-    @FXML private Button btnVolver;
-    @FXML private TextField txtNameUsu;
+    // --- ELEMENTOS FXML ---
+    @FXML
+    private Button btnReturn;
+    @FXML
+    private TextField txtNameUsu; // Campo de búsqueda
     
-    // Asegúrate de tener fx:id="tableComments" en el FXML
-    @FXML private TableView<Commentate> tableComments; 
+    // IMPORTANTE: Debes añadir fx:id="tblComentarios" a tu TableView en el FXML
+    @FXML
+    private TableView<Commentate> tblComentarios; 
     
-    @FXML private TableColumn<Commentate, String> columnTitle;
-    @FXML private TableColumn<Commentate, String> columnComent;
-    @FXML private TableColumn<Commentate, String> columnDate;
+    @FXML
+    private TableColumn<Commentate, String> columnTitle; // Título del libro
+    @FXML
+    private TableColumn<Commentate, String> columnComent; // Texto del comentario
+    @FXML
+    private TableColumn<Commentate, Date> columnDate;     // Fecha
     
-    @FXML private Button btnDeleteComent;
+    @FXML
+    private Button btnDeleteComent;
 
-    private final DBImplementation dao = new DBImplementation();
-    private final ObservableList<Commentate> commentsData = FXCollections.observableArrayList();
-    private Profile adminProfile; 
+    // --- VARIABLES ---
+    private final ClassDAO dao = new DBImplementation();
+    private ObservableList<Commentate> commentsData = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        columnTitle.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getBook().getTitle()));
+        configurarTabla();
+        cargarDatos(""); // Cargar todo al principio
+
+        // Listener para buscar mientras escribes (opcional)
+        txtNameUsu.textProperty().addListener((observable, oldValue, newValue) -> {
+            cargarDatos(newValue);
+        });
         
+        // Configurar botones
+        btnDeleteComent.setOnAction(event -> eliminarComentario());
+        btnReturn.setOnAction(event -> cerrarVentana());
+    }
+
+    private void configurarTabla() {
+        // 1. Columna Título del Libro
+        // Como 'title' está dentro del objeto 'Book', usamos una lambda para extraerlo
+        columnTitle.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getBook() != null) {
+                return new SimpleStringProperty(cellData.getValue().getBook().getTitle());
+            } else {
+                return new SimpleStringProperty("Sin título");
+            }
+        });
+
+        // 2. Columna Texto del Comentario
+        // Asumo que tu atributo en Commentate se llama 'text' o similar.
+        // Si usas PropertyValueFactory, el nombre debe coincidir con el atributo de la clase.
+        // Ejemplo: new PropertyValueFactory<>("comentaryText");
+        // Aquí uso lambda para ser más flexible:
         columnComent.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getCommentary()));
-            
-        columnDate.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getDateCreation().toString()));
-        
-        if (tableComments != null) {
-            tableComments.setItems(commentsData);
-        }
+            new SimpleStringProperty(cellData.getValue().getCommentary()) // ¡Ajusta este getter!
+        );
 
-        txtNameUsu.setOnAction(event -> buscarComentarios());
-        btnDeleteComent.setOnAction(event -> borrarComentario());
-        btnVolver.setOnAction(event -> volver());
-    }
-    
-    public void setProfile(Profile profile){
-        this.adminProfile = profile;
+        // 3. Columna Fecha
+        columnDate.setCellValueFactory(new PropertyValueFactory<>("commentDate")); // ¡Ajusta este nombre de atributo!
+
+        // Asignar la lista a la tabla
+        tblComentarios.setItems(commentsData);
     }
 
-    private void buscarComentarios() {
-        String username = txtNameUsu.getText().trim();
-        if (!username.isEmpty()) {
-            List<Commentate> encontrados = dao.getCommentsByUser(username);
-            commentsData.clear();
-            commentsData.addAll(encontrados);
-            
-            if(encontrados.isEmpty()){
-                mostrarAlerta("Info", "Sin comentarios para este usuario.", Alert.AlertType.INFORMATION);
-            }
-        }
-    }
-
-    private void borrarComentario() {
-        if (tableComments == null) return;
-        Commentate selected = tableComments.getSelectionModel().getSelectedItem();
-        
-        if (selected != null) {
-            try {
-                dao.deleteComment(selected);
-                commentsData.remove(selected);
-                mostrarAlerta("Éxito", "Comentario eliminado.", Alert.AlertType.INFORMATION);
-            } catch (Exception e) {
-                mostrarAlerta("Error", "Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR);
-            }
-        } else {
-            mostrarAlerta("Aviso", "Selecciona un comentario primero.", Alert.AlertType.WARNING);
-        }
-    }
-
-    private void volver() {
+    private void cargarDatos(String username) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
-            Parent root = fxmlLoader.load();
-            
-            OptionsAdminController controller = fxmlLoader.getController();
+            commentsData.clear();
+            List<Commentate> lista = dao.getCommentsByUser(username);
+            commentsData.addAll(lista);
+        } catch (Exception e) {
+            mostrarAlerta("Error", "Error al cargar comentarios: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
 
+    private void eliminarComentario() {
+        Commentate selectedComment = tblComentarios.getSelectionModel().getSelectedItem();
+        
+        if (selectedComment == null) {
+            mostrarAlerta("Selección vacía", "Por favor, selecciona un comentario para eliminar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            // Llamada al DAO para borrar (ya implementado en tu DBImplementation)
+            dao.deleteComment(selectedComment);
+            
+            mostrarAlerta("Éxito", "Comentario eliminado correctamente.", Alert.AlertType.INFORMATION);
+            
+            // Recargar la tabla para ver que desaparece
+            cargarDatos(txtNameUsu.getText());
+            
+        } catch (Exception e) {
+            mostrarAlerta("Error", "No se pudo eliminar el comentario: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void cerrarVentana() {
+        try {
+            // Aquí puedes reabrir el menú de Admin si quieres
+            /*
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            Parent root = loader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
-            ((Stage) btnVolver.getScene().getWindow()).close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(DeleteComentWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            */
+            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
+            currentStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    
+
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
+        alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
     }

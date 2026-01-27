@@ -31,7 +31,7 @@ public class CommentateId implements Serializable {
         return isbnBook;
     }
 
-    public void setIsbnBook(int isbnBook) {
+    public void setIsbnBook(long isbnBook) {
         this.isbnBook = isbnBook;
     }
 

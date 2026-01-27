@@ -12,19 +12,19 @@ import org.hibernate.Transaction;
 import threads.SessionHolderThread;
 import utilities.HibernateUtil;
 
-/**
- * Implementation of ClassDAO using database operations.
- */
+
 public class DBImplementation implements ClassDAO {
 
     // --- GESTIÓN DE USUARIOS Y SESIÓN ---
+
+
+    // --- MÉTODOS DE USUARIO (LogIn, SignUp, etc.) ---
 
     @Override
     public Profile logIn(String username, String password) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         Profile userFound = null;
-
         try {
             tx = session.beginTransaction();
             String hql = "FROM Profile p WHERE p.username = :user AND p.password = :pass";
@@ -33,11 +33,9 @@ public class DBImplementation implements ClassDAO {
                     .setParameter("pass", password)
                     .uniqueResult();
             tx.commit();
-            // Mantenemos tu lógica de hilos
             new SessionHolderThread(session).start();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            e.printStackTrace();
             if (session.isOpen()) session.close();
         }
         return userFound;
@@ -58,6 +56,7 @@ public class DBImplementation implements ClassDAO {
             throw e;
         }
     }
+
 
     @Override
     public void dropOutUser(Profile profile) {
@@ -106,18 +105,17 @@ public class DBImplementation implements ClassDAO {
         return usernames;
     }
 
-    // --- GESTIÓN DE LIBROS ---
-
     @Override
     public void createBook(Book book) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            session.save(book);
+            session.save(book); // Esta línea es la que faltaba: guarda el libro en BD
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            e.printStackTrace();
             throw new RuntimeException("Error creando libro: " + e.getMessage());
         } finally {
             if (session.isOpen()) session.close();
@@ -130,10 +128,12 @@ public class DBImplementation implements ClassDAO {
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            session.update(book);
+            session.update(book); // Actualiza los datos
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            e.printStackTrace();
+
             throw new RuntimeException("Error modificando libro: " + e.getMessage());
         } finally {
             if (session.isOpen()) session.close();
@@ -153,6 +153,8 @@ public class DBImplementation implements ClassDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            e.printStackTrace();
+
             throw new RuntimeException("Error eliminando libro: " + e.getMessage());
         } finally {
             if (session.isOpen()) session.close();
@@ -172,6 +174,9 @@ public class DBImplementation implements ClassDAO {
         }
         return book;
     }
+
+    // --- RESTO DE MÉTODOS (Listar, Comentarios, Autores) ---
+    // Se mantienen igual que antes, solo asegúrate de no borrar getOrCreateAuthor
 
     @Override
     public List<Book> getAllBooks() {
@@ -208,17 +213,20 @@ public class DBImplementation implements ClassDAO {
                 return session.createQuery("FROM Book", Book.class).list();
             }
             String search = "%" + busqueda.toLowerCase() + "%";
-            String hql = "FROM Book b WHERE lower(b.title) LIKE :q OR lower(b.author.name) LIKE :q";
+            // Nota: str(b.ISBN) convierte el long a string para buscar
+            String hql = "FROM Book b WHERE lower(b.title) LIKE :q OR lower(b.author.name) LIKE :q OR str(b.ISBN) LIKE :q";
             resultados = session.createQuery(hql, Book.class).setParameter("q", search).list();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (session.isOpen()) session.close();
+
         }
         return resultados;
     }
 
     @Override
+
     public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
@@ -247,19 +255,19 @@ public class DBImplementation implements ClassDAO {
         return author;
     }
 
-    // --- GESTIÓN DE COMENTARIOS ---
-
-    @Override
+ 
     public List<Commentate> getCommentsByBook(long isbn) {
         Session session = HibernateUtil.getSessionFactory().openSession();
-        List<Commentate> comments = null;
+        List<Commentate> comments = new ArrayList<>();
         try {
-            String hql = "FROM Commentate c WHERE c.book.ISBN = :isbn";
-            comments = session.createQuery(hql, Commentate.class).setParameter("isbn", isbn).list();
+            comments = session.createQuery("FROM Commentate c WHERE c.book.ISBN = :isbn", Commentate.class)
+                    .setParameter("isbn", isbn).list();
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (session.isOpen()) session.close();
+
         }
         return comments;
     }
@@ -277,6 +285,7 @@ public class DBImplementation implements ClassDAO {
             e.printStackTrace();
         } finally {
             if (session.isOpen()) session.close();
+
         }
         return comments;
     }
@@ -285,6 +294,7 @@ public class DBImplementation implements ClassDAO {
     public void addComment(Commentate comment) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
+        Author author = null;
         try {
             tx = session.beginTransaction();
             session.save(comment);
@@ -312,6 +322,7 @@ public class DBImplementation implements ClassDAO {
             if (session.isOpen()) session.close();
         }
     }
+
 
     @Override
     public void updateComment(Commentate comment) {
@@ -507,5 +518,4 @@ public class DBImplementation implements ClassDAO {
         
         return users;
     }
-    
 }

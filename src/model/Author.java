@@ -17,14 +17,22 @@ public class Author implements Serializable {
     @OneToMany(mappedBy = "author")
     private List<Book> books;
 
-    public Author(int idAuthor, String nombre, String apellido, List<Book> books) {
+    public Author(int idAuthor, String nombre, String apellido) {
         this.idAuthor = idAuthor;
         this.name = nombre;
         this.surname = apellido;
-        this.books = books;
     }
 
     public Author() {}
+
+    public Author(int idAuthor, String name, String surname, List<Book> books) {
+        this.idAuthor = idAuthor;
+        this.name = name;
+        this.surname = surname;
+        this.books = books;
+    }
+
+    
 
     public int getIdAuthor() {
         return idAuthor;

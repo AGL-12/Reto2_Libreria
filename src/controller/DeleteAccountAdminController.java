@@ -40,7 +40,6 @@ public class DeleteAccountAdminController implements Initializable{
     private Button Button_Delete;
     @FXML
     private Button Button_Cancel;
-
     public void setStage(Stage stage) {
         this.stage = stage;
     }
