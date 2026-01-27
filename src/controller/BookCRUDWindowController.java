@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -24,18 +25,30 @@ import model.Profile;
 
 public class BookCRUDWindowController implements Initializable {
 
-    private Button btnConfirmar;
-    private Button btnVolver;
+    @FXML
     private TextField txtISBN;
-    private TextField txtTitulo;
-    private TextField txtIdAutor;
-    private TextField txtHojas;
+    @FXML
     private TextField txtStock;
+    @FXML
     private TextField txtSinopsis;
-    private TextField txtPrecio;
+    @FXML
     private TextField txtEditorial;
-    private ImageView idPortada;
-    private Button btnSubirArchivo;
+    @FXML
+    private Button btnConfirm;
+    @FXML
+    private Button btnReturn;
+    @FXML
+    private TextField txtTitle;
+    @FXML
+    private TextField txtIdAuthor;
+    @FXML
+    private TextField txtPages;
+    @FXML
+    private TextField txtPrice;
+    @FXML
+    private ImageView idFrontPage;
+    @FXML
+    private Button btnUploadFile;
 
     private File archivoPortada;
     private Profile profile;
@@ -68,13 +81,13 @@ public class BookCRUDWindowController implements Initializable {
 
         switch (modo) {
             case "create":
-                btnConfirmar.setText("Añadir Libro");
+                btnConfirm.setText("Añadir Libro");
                 limpiarCampos();
                 habilitarCampos(true); // Todo editable
                 break;
 
             case "modify":
-                btnConfirmar.setText("Modificar Libro");
+                btnConfirm.setText("Modificar Libro");
                 limpiarCampos();
                 habilitarCampos(false); // Bloqueado hasta que busque ISBN
                 txtISBN.setDisable(false); // ISBN siempre editable para buscar
@@ -82,13 +95,13 @@ public class BookCRUDWindowController implements Initializable {
                 break;
 
             case "delete":
-                btnConfirmar.setText("Eliminar Libro");
+                btnConfirm.setText("Eliminar Libro");
                 limpiarCampos();
                 habilitarCampos(false); // Todo bloqueado (solo lectura)
                 txtISBN.setDisable(false);
                 txtISBN.setPromptText("Escribe ISBN y pulsa Enter");
                 // En delete, el botón confirmar se deshabilita hasta encontrar el libro
-                btnConfirmar.setDisable(true);
+                btnConfirm.setDisable(true);
                 break;
         }
     }
@@ -102,13 +115,13 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     private void rellenarDatos(Book libro) {
-        txtTitulo.setText(libro.getTitle());
+        txtTitle.setText(libro.getTitle());
         // Manejo seguro del autor por si es null
         //txtIdAutor.setText(String.valueOf(libro.getIdAuthor()));
-        txtHojas.setText(String.valueOf(libro.getSheets()));
+        txtPages.setText(String.valueOf(libro.getSheets()));
         txtStock.setText(String.valueOf(libro.getStock()));
         txtSinopsis.setText(libro.getSypnosis());
-        txtPrecio.setText(String.valueOf(libro.getPrice()));
+        txtPrice.setText(String.valueOf(libro.getPrice()));
         txtEditorial.setText(libro.getEditorial());
 
         // Cargar imagen si existe
@@ -117,7 +130,7 @@ public class BookCRUDWindowController implements Initializable {
                 // Intenta cargar desde recursos o ruta absoluta
                 String ruta = "/images/" + libro.getCover();
                 Image img = new Image(getClass().getResourceAsStream(ruta));
-                idPortada.setImage(img);
+                idFrontPage.setImage(img);
             } catch (Exception e) {
                 // Si falla, no rompemos la app, solo no mostramos imagen
                 System.out.println("No se pudo cargar la imagen: " + libro.getCover());
@@ -137,12 +150,12 @@ public class BookCRUDWindowController implements Initializable {
             }
 
             // Para Create y Modify leemos el resto de campos
-            String titulo = txtTitulo.getText();
-            int idAutor = Integer.parseInt(txtIdAutor.getText());
-            int hojas = Integer.parseInt(txtHojas.getText());
+            String titulo = txtTitle.getText();
+            int idAutor = Integer.parseInt(txtIdAuthor.getText());
+            int hojas = Integer.parseInt(txtPages.getText());
             int stock = Integer.parseInt(txtStock.getText());
             String sinopsis = txtSinopsis.getText();
-            float precio = Float.parseFloat(txtPrecio.getText());
+            float precio = Float.parseFloat(txtPrice.getText());
             String editorial = txtEditorial.getText();
             String nombrePortada = (archivoPortada != null) ? archivoPortada.getName() : "default.png";
 
@@ -164,31 +177,31 @@ public class BookCRUDWindowController implements Initializable {
 
     // --- UTILIDADES ---
     private void habilitarCampos(boolean habilitar) {
-        txtTitulo.setDisable(!habilitar);
-        txtIdAutor.setDisable(!habilitar);
-        txtHojas.setDisable(!habilitar);
+        txtTitle.setDisable(!habilitar);
+        txtIdAuthor.setDisable(!habilitar);
+        txtPages.setDisable(!habilitar);
         txtStock.setDisable(!habilitar);
         txtSinopsis.setDisable(!habilitar);
-        txtPrecio.setDisable(!habilitar);
+        txtPrice.setDisable(!habilitar);
         txtEditorial.setDisable(!habilitar);
-        btnSubirArchivo.setDisable(!habilitar);
+        btnUploadFile.setDisable(!habilitar);
         // El ISBN se controla aparte
     }
 
     private void limpiarCampos() {
         txtISBN.setText("");
-        txtTitulo.setText("");
-        txtIdAutor.setText("");
-        txtHojas.setText("");
+        txtTitle.setText("");
+        txtIdAuthor.setText("");
+        txtPages.setText("");
         txtStock.setText("");
         txtSinopsis.setText("");
-        txtPrecio.setText("");
+        txtPrice.setText("");
         txtEditorial.setText("");
-        idPortada.setImage(null);
+        idFrontPage.setImage(null);
     }
 
     private void cerrarVentana() {
-        Stage stage = (Stage) btnVolver.getScene().getWindow();
+        Stage stage = (Stage) btnReturn.getScene().getWindow();
         stage.close();
         // Opcional: Podrías reabrir la ventana anterior aquí si quisieras
     }
@@ -219,7 +232,7 @@ public class BookCRUDWindowController implements Initializable {
             // Validar extensión simple
             if (file.getName().toLowerCase().endsWith(".png") || file.getName().toLowerCase().endsWith(".jpg")) {
                 archivoPortada = file;
-                idPortada.setImage(new Image(file.toURI().toString()));
+                idFrontPage.setImage(new Image(file.toURI().toString()));
                 success = true;
             }
         }
@@ -231,11 +244,23 @@ public class BookCRUDWindowController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar portada");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg"));
-        Stage stage = (Stage) btnSubirArchivo.getScene().getWindow();
+        Stage stage = (Stage) btnUploadFile.getScene().getWindow();
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             archivoPortada = file;
-            idPortada.setImage(new Image(file.toURI().toString()));
+            idFrontPage.setImage(new Image(file.toURI().toString()));
         }
+    }
+
+    @FXML
+    private void dragOver(DragEvent event) {
+    }
+
+    @FXML
+    private void dropImage(DragEvent event) {
+    }
+
+    @FXML
+    private void uploadFrontPage(ActionEvent event) {
     }
 }

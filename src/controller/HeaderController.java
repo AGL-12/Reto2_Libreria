@@ -146,7 +146,6 @@ public class HeaderController {
             Stage newStage = new Stage();
 
             // Estilo sin bordes
-            newStage.initStyle(StageStyle.UNDECORATED);
             newStage.setScene(new Scene(root));
 
             // 1. Calculamos cuánto mide la ventana nueva

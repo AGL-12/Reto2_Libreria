@@ -22,15 +22,15 @@ import model.Profile;
 public class BookOptionWindowController implements Initializable {
 
     @FXML
-    private Button btnVolver;
+    private Button btnReturn;
     @FXML
-    private Button btnAñadirLibro;
+    private Button btnAdd;
     @FXML
-    private Button btnModificarLibro;
+    private Button btnModify;
     @FXML
-    private Button btnEliminarLibro;
+    private Button btnDelete;
 
-    private Profile profile; 
+    private Profile profile;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -38,8 +38,8 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Acción para el botón "Añadir Libro".
-     * Abre la ventana CRUD en modo "create".
+     * Acción para el botón "Añadir Libro". Abre la ventana CRUD en modo
+     * "create".
      */
     @FXML
     private void createBook(ActionEvent event) {
@@ -47,8 +47,8 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Acción para el botón "Modificar Libro".
-     * Abre la ventana CRUD en modo "modify".
+     * Acción para el botón "Modificar Libro". Abre la ventana CRUD en modo
+     * "modify".
      */
     @FXML
     private void modifyBook(ActionEvent event) {
@@ -56,8 +56,8 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Acción para el botón "Eliminar Libro".
-     * Abre la ventana CRUD en modo "delete".
+     * Acción para el botón "Eliminar Libro". Abre la ventana CRUD en modo
+     * "delete".
      */
     @FXML
     private void deleteBook(ActionEvent event) {
@@ -65,8 +65,8 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Método auxiliar para cargar la ventana y pasar los datos.
-     * Evita repetir código en cada botón.
+     * Método auxiliar para cargar la ventana y pasar los datos. Evita repetir
+     * código en cada botón.
      */
     private void abrirCRUD(String modo) {
         try {
@@ -75,7 +75,7 @@ public class BookOptionWindowController implements Initializable {
 
             // Obtener el controlador de la siguiente ventana
             BookCRUDWindowController controllerWindow = fxmlLoader.getController();
-            
+
             // PASAR LOS DATOS VITALES
             controllerWindow.setModo(modo);           // <--- AQUÍ PASAMOS EL MODO ("create", "modify", etc.)
 
@@ -86,7 +86,7 @@ public class BookOptionWindowController implements Initializable {
             stage.show();
 
             // Cerrar la ventana actual (LibroOptionWindow)
-            Stage currentStage = (Stage) btnAñadirLibro.getScene().getWindow();
+            Stage currentStage = (Stage) btnAdd.getScene().getWindow();
             currentStage.close();
 
         } catch (IOException ex) {
@@ -94,7 +94,6 @@ public class BookOptionWindowController implements Initializable {
         }
     }
 
-    @FXML
     private void volver(ActionEvent event) {
         try {
             // Volver al menú de Admin (OptionsAdmin)
@@ -104,11 +103,15 @@ public class BookOptionWindowController implements Initializable {
             stage.setScene(new Scene(root));
             stage.show();
 
-            Stage currentStage = (Stage) btnVolver.getScene().getWindow();
+            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
             currentStage.close();
 
         } catch (IOException ex) {
             Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @FXML
+    private void Return(ActionEvent event) {
     }
 }
