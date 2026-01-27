@@ -32,6 +32,16 @@ import model.User;
 import model.UserSession;
 import model.Admin;
 
+
+// --- IMPORTS NUEVOS PARA EL INFORME ---
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.HashMap;
+// --------------------------------------
+
 //Imports para informe
 import java.awt.Desktop;
 import java.io.File;
@@ -429,6 +439,46 @@ public class BookViewController {
             e.printStackTrace();
         }
     }
+    
+    
+    // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            // 1. CONEXIÓN A BASE DE DATOS
+            // Ajusta el usuario y contraseña a los tuyos de MySQL
+            String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
+            String user = "root"; 
+            String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, pass);
+
+            // 2. CARGAR EL ARCHIVO .JRXML
+            // Busca en el paquete 'reports' que creamos anteriormente
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            
+            if (reportStream == null) {
+                showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. COMPILAR Y LLENAR EL INFORME
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+            
+            // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
+
+            // 4. MOSTRAR VISOR
+            JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) {}
+        }
+    }
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
@@ -470,10 +520,27 @@ public class BookViewController {
      * Configura el menú global de clic derecho para toda la ventana.
      */
     private void initGlobalContextMenu() {
-        // 1. Crear el menú y las opciones
-        ContextMenu globalMenu = new ContextMenu();
+        // 1. Inicializamos el menú
+        globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
 
+        // --- Opción 1: Añadir al Carrito ---
+        MenuItem itemAddCart = new MenuItem("Añadir al Carrito");
+        itemAddCart.setOnAction(event -> handleAddToCart(null));
+
+        // Si es Admin, deshabilitamos esta opción
+        if (UserSession.getInstance().getUser() instanceof Admin) {
+            itemAddCart.setDisable(true); 
+        }
+
+        // =========================================================
+        // --- NUEVO: OPCIÓN INFORME TÉCNICO (JASPER) ---
+        // =========================================================
+        MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
+        itemInforme.setOnAction(event -> handleInformeTecnico(event));
+        // =========================================================
+
+        // --- Resto de Opciones ---
         MenuItem itemLogOut = new MenuItem("Cerrar Sesión");
         itemLogOut.setOnAction(event -> handleLogOut(event));
 
@@ -488,26 +555,32 @@ public class BookViewController {
         MenuItem itemAbout = new MenuItem("Acerca de...");
         itemAbout.setOnAction(event -> handleAboutAction(event));
 
-        globalMenu.getItems().addAll(itemLogOut, itemExit, separator, itemManual, itemAbout);
+        // 2. AÑADIR TODO AL MENÚ EN ORDEN
+        globalMenu.getItems().addAll(
+                itemAddCart,      // 1. Comprar
+                itemInforme,      // 2. Informe Técnico (NUEVO)
+                new SeparatorMenuItem(), // Línea separadora
+                itemLogOut,       // 3. Cerrar Sesión
+                itemExit,         // 4. Salir
+                separator,        // Línea separadora
+                itemManual,       // 5. Ayuda
+                itemAbout         // 6. About
+        );
 
-        // 2. ACTIVAR EL CLICK DERECHO EN EL PANEL PRINCIPAL (SOLUCIÓN)
-        // Usamos 'rootPane' directamente. Esto funciona siempre.
+        // 3. Asignar eventos al panel principal (rootPane)
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
-                // Mostrar el menú justo donde está el ratón
+                // Mostrar el menú donde se hizo clic
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
                 event.consume(); 
             });
-            
-            // B) CERRAR CON CLICK IZQUIERDO (¡ESTA ES LA SOLUCIÓN!)
-            // Detectamos si pulsas el botón principal (izquierdo) en cualquier sitio del panel
+
+            // Ocultar el menú si se hace clic izquierdo fuera
             rootPane.setOnMousePressed(event -> {
                 if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
                     globalMenu.hide();
                 }
             });
-        } else {
-            System.out.println("Error: rootPane es null. Revisa el fx:id en el FXML.");
         }
     }
 }
