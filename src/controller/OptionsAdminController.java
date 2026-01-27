@@ -36,7 +36,7 @@ public class OptionsAdminController implements Initializable {
     @FXML
     private Button btnLibro;
     @FXML
-    private Button btnLogOut;
+    private Button btnReturn;
     @FXML
     private Label label_Username;
     
@@ -116,4 +116,20 @@ public class OptionsAdminController implements Initializable {
         }
     }
     
+    @FXML
+    private void btnVolver(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
+            Parent root = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
+            currentStage.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

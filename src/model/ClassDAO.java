@@ -16,8 +16,8 @@ public interface ClassDAO {
     public Profile logIn(String username, String password);
     public void signUp(Profile profile);
     public void dropOutUser(Profile profile);
-    public void dropOutAdmin(Profile profile);
     public void modificarUser (Profile profile);
+   public List<User> getAllUsers();
     // --- GESTIÓN DE LIBROS (Book_) ---
     public void createBook(Book book);
     public void modifyBook(Book book);

@@ -121,9 +121,10 @@ public abstract class Profile implements Serializable {
 
     @Override
     public String toString() {
-        return "Profile{" + "username=" + username + ", password=" + password + ", email=" + email
-                + ", userCode=" + userCode + ", name=" + name + ", telephone=" + telephone + ", surname=" + surname + '}';
+        return "Profile{" + "username=" + username + '}';
     }
+
+    
 
     /**
      * Performs login logic for the profile. Must be implemented by subclasses.

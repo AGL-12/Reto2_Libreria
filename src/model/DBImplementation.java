@@ -61,33 +61,28 @@ public class DBImplementation implements ClassDAO {
 
     @Override
     public void dropOutUser(Profile profile) {
-        // Lógica pendiente para que el usuario se borre a sí mismo (opcional)
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();            
+            // Usamos merge por si el objeto viene desconectado de la sesión anterior
+            session.delete(session.merge(profile));
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+            // Si falla, lanzamos el error para que salga la alerta en la ventana
+            throw new RuntimeException("Error al eliminar usuario: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) session.close();
+        }
     }
 
     /**
      * Elimina un usuario seleccionado por el administrador.
      */
-    @Override
-    public void dropOutAdmin(Profile profile) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            Profile p = session.get(Profile.class, profile.getUsername());
-            if (p != null) {
-                session.delete(p);
-            } else {
-                throw new RuntimeException("El usuario no existe.");
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-            throw new RuntimeException("Error eliminando usuario: " + e.getMessage());
-        } finally {
-            if (session.isOpen()) session.close();
-        }
-    }
+    
 
     @Override
     public void modificarUser(Profile profile) {
@@ -482,4 +477,35 @@ public class DBImplementation implements ClassDAO {
         }
         return idOrder;
     }
+
+    @Override
+    public List<User> getAllUsers() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        List<User> users = new ArrayList<>(); // Inicializamos la lista para que no sea null
+        
+        try {
+            // TRUCO: Pedimos todos los perfiles (Profile es la clase padre que seguro está mapeada)
+            List<Profile> allProfiles = session.createQuery("FROM Profile", Profile.class).getResultList();
+            
+            // Filtramos manualmente: Nos quedamos solo con los que son de clase 'User'
+            for (Profile p : allProfiles) {
+                if (p instanceof User) {
+                    users.add((User) p);
+                }
+            }
+            
+            System.out.println("Usuarios encontrados en BD: " + users.size());
+            
+        } catch (Exception e) {
+            System.err.println("Error buscando usuarios: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        
+        return users;
+    }
+    
 }

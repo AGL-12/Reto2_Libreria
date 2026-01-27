@@ -22,12 +22,15 @@ public class User extends Profile {
     @Column(name = "card_number")
     private String cardNumber;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    // --- CAMBIO 1: CascadeType.ALL en Pedidos ---
+    // Si borras el usuario, se borran sus pedidos (y las líneas de esos pedidos gracias a Order.java)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> purchaseList;
 
-    // Lista inversa: Un libro tiene muchos comentarios.
-    // fetch = FetchType.LAZY es el defecto (se cargan solo cuando los pides)
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    // --- CAMBIO 2: CascadeType.ALL en Comentarios ---
+    // Si borras el usuario, se borran sus comentarios automáticamente.
+    // Esto soluciona tu error de "Foreign Key Constraint".
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Commentate> comments;
 
     public User(String gender, String cardNumber, String username, String password, String email, int userCode, String name, String telephone, String surname, List<Order> purchaseList) {
@@ -80,8 +83,9 @@ public class User extends Profile {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    // Método extra para que el ComboBox muestre el nombre y no "model.User@..."
     @Override
     public String toString() {
-        return "User{" + "gender=" + gender + ", cardNumber=" + cardNumber + '}';
+        return this.getUsername();
     }
 }
