@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import model.UserSession;
 
 /**
  * FXML Controller class
@@ -74,6 +75,8 @@ public class OptionsAdminController implements Initializable {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
+            MainBookStoreController main = fxmlLoader.getController();
+            main.headerController.setMode(UserSession.getInstance().getUser(), null);
             
             // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

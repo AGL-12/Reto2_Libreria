@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import model.UserSession;
 
 public class MenuWindowController {
 
@@ -58,7 +59,9 @@ public class MenuWindowController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-
+            
+            MainBookStoreController main = loader.getController();
+            main.headerController.setMode(UserSession.getInstance().getUser(), null);
             // Obtenemos el Stage actual directamente desde el nodo que disparó el evento
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
