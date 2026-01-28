@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,8 +15,6 @@ import javafx.stage.Stage;
 public class MenuWindowController {
 
     private static final Logger LOGGER = Logger.getLogger(MenuWindowController.class.getName());
-
-    private Stage stage;
 
     // --- Botones del FXML ---
     @FXML
@@ -27,62 +26,46 @@ public class MenuWindowController {
     @FXML
     private Button btnBack;
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
     /**
-     * Inicialización simple: NO necesita recibir el usuario por parámetro.
+     * Maneja la acción de modificar perfil.
+     * Pasa el evento para recuperar el Stage dinámicamente.
      */
-    public void initStage(Parent root) {
-        LOGGER.info("Inicializando Menú de Usuario...");
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Mi Perfil - Book&Bugs");
-        stage.setResizable(false);
-        stage.show();
-    }
-
-    // --- Navegación: Simplemente llaman a openWindow ---
-
     @FXML
     private void handleModifyAction(ActionEvent event) {
-        openWindow("/view/ModifyWindow.fxml", "Modificar Perfil");
+        openWindow("/view/ModifyWindow.fxml", "Modificar Perfil", event);
     }
 
     @FXML
     private void handleHistoryAction(ActionEvent event) {
-        openWindow("/view/ShoppingHistory.fxml", "Mi Historial");
+        openWindow("/view/ShoppingHistory.fxml", "Mi Historial", event);
     }
 
     @FXML
     private void handleDeleteAction(ActionEvent event) {
-        openWindow("/view/DeleteAccount.fxml", "Borrar Cuenta");
+        openWindow("/view/DeleteAccount.fxml", "Borrar Cuenta", event);
     }
 
     @FXML
     private void handleBackAction(ActionEvent event) {
-        // Vuelve al MainBookStore sin preocuparse del controlador
-        openWindow("/view/MainBookStore.fxml", "Tienda de Libros");
+        openWindow("/view/MainBookStore.fxml", "Tienda de Libros", event);
     }
 
-    // --- Método Auxiliar TOTALMENTE INDEPENDIENTE ---
-    
     /**
-     * Carga la nueva ventana usando el MISMO Stage, sin interactuar con su controlador.
+     * Carga la nueva ventana usando el Stage obtenido del evento.
+     * Esto evita el NullPointerException al no depender de un atributo Stage nulo.
      */
-    private void openWindow(String fxmlPath, String title) {
+    private void openWindow(String fxmlPath, String title, ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            // Cambiamos la escena del stage actual
+            // Obtenemos el Stage actual directamente desde el nodo que disparó el evento
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
             Scene scene = new Scene(root);
-            this.stage.setScene(scene);
-            this.stage.setTitle(title);
-            
-            // ¡FIN! Ya no necesitamos el "switch" ni inyectar datos.
-            // Si la nueva ventana necesita al usuario, ella misma lo pedirá a UserSession.
+            stage.setScene(scene);
+            stage.setTitle(title);
+            stage.show();
 
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Error al abrir la ventana: " + fxmlPath, ex);

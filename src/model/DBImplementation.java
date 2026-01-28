@@ -12,14 +12,10 @@ import org.hibernate.Transaction;
 import threads.SessionHolderThread;
 import utilities.HibernateUtil;
 
-
 public class DBImplementation implements ClassDAO {
 
     // --- GESTIÓN DE USUARIOS Y SESIÓN ---
-
-
     // --- MÉTODOS DE USUARIO (LogIn, SignUp, etc.) ---
-
     @Override
     public Profile logIn(String username, String password) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -35,8 +31,12 @@ public class DBImplementation implements ClassDAO {
             tx.commit();
             new SessionHolderThread(session).start();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return userFound;
     }
@@ -51,45 +51,46 @@ public class DBImplementation implements ClassDAO {
             tx.commit();
             new SessionHolderThread(session).start();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
             throw e;
         }
     }
-
 
     @Override
     public void dropOutUser(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
-            tx = session.beginTransaction();            
+            tx = session.beginTransaction();
             // Usamos merge por si el objeto viene desconectado de la sesión anterior
             session.delete(session.merge(profile));
 
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             e.printStackTrace();
             // Si falla, lanzamos el error para que salga la alerta en la ventana
             throw new RuntimeException("Error al eliminar usuario: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
     /**
      * Elimina un usuario seleccionado por el administrador.
      */
-    
-
-    @Override
-    public void modificarUser(Profile profile) {
-        // Lógica de modificar
-    }
-
     /**
-     * Obtiene todos los usernames para el ComboBox del Admin (Versión Hibernate).
+     * Obtiene todos los usernames para el ComboBox del Admin (Versión
+     * Hibernate).
      */
     @Override
     public List<String> comboBoxInsert() {
@@ -100,7 +101,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return usernames;
     }
@@ -114,11 +117,15 @@ public class DBImplementation implements ClassDAO {
             session.save(book); // Esta línea es la que faltaba: guarda el libro en BD
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             e.printStackTrace();
             throw new RuntimeException("Error creando libro: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -131,12 +138,16 @@ public class DBImplementation implements ClassDAO {
             session.update(book); // Actualiza los datos
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             e.printStackTrace();
 
             throw new RuntimeException("Error modificando libro: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -152,12 +163,16 @@ public class DBImplementation implements ClassDAO {
             }
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             e.printStackTrace();
 
             throw new RuntimeException("Error eliminando libro: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -170,14 +185,15 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return book;
     }
 
     // --- RESTO DE MÉTODOS (Listar, Comentarios, Autores) ---
     // Se mantienen igual que antes, solo asegúrate de no borrar getOrCreateAuthor
-
     @Override
     public List<Book> getAllBooks() {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -199,7 +215,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return libros;
     }
@@ -219,7 +237,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
 
         }
         return resultados;
@@ -247,15 +267,18 @@ public class DBImplementation implements ClassDAO {
             }
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             throw new RuntimeException("Error gestionando autor: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return author;
     }
 
- 
     public List<Commentate> getCommentsByBook(long isbn) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Commentate> comments = new ArrayList<>();
@@ -266,26 +289,31 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
 
         }
         return comments;
     }
 
     // NUEVO: Para la ventana de eliminar comentarios por usuario
+    // En DBImplementation.java
     public List<Commentate> getCommentsByUser(String username) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Commentate> comments = new ArrayList<>();
         try {
-            String hql = "FROM Commentate c JOIN FETCH c.book WHERE c.user.username = :usr";
+            // HQL para traer los comentarios de un usuario específico
+            String hql = "FROM Commentate c WHERE c.user.username = :usr";
             comments = session.createQuery(hql, Commentate.class)
                     .setParameter("usr", username)
                     .list();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
-
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return comments;
     }
@@ -300,10 +328,14 @@ public class DBImplementation implements ClassDAO {
             session.save(comment);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             throw new RuntimeException("Error guardando comentario: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -316,13 +348,16 @@ public class DBImplementation implements ClassDAO {
             session.delete(comment);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             throw new RuntimeException("Error borrando comentario: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
-
 
     @Override
     public void updateComment(Commentate comment) {
@@ -333,15 +368,18 @@ public class DBImplementation implements ClassDAO {
             session.update(comment);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             throw new RuntimeException("Error actualizando comentario: " + e.getMessage());
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
     // --- GESTIÓN DE PEDIDOS Y COMPRAS (TUS MÉTODOS MANTENIDOS) ---
-
     @Override
     public Order getUnfinishedOrder(User user) {
         Session session = null;
@@ -359,7 +397,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         }
         return order;
     }
@@ -374,10 +414,14 @@ public class DBImplementation implements ClassDAO {
             session.saveOrUpdate(order);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             throw new RuntimeException(e);
         } finally {
-            if (session != null) session.close();
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -394,10 +438,14 @@ public class DBImplementation implements ClassDAO {
             tx.commit();
             comprado = true;
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null) {
+                tx.rollback();
+            }
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return comprado;
     }
@@ -423,7 +471,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return orders;
     }
@@ -438,7 +488,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return contains;
     }
@@ -453,7 +505,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return cart;
     }
@@ -468,7 +522,9 @@ public class DBImplementation implements ClassDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return cart;
     }
@@ -480,11 +536,15 @@ public class DBImplementation implements ClassDAO {
         try {
             String hql = "SELECT o.idOrder FROM Order o WHERE o.user.id = :id AND o.bought = false";
             Integer result = session.createQuery(hql, Integer.class).setParameter("id", id).uniqueResult();
-            if (result != null) idOrder = result;
+            if (result != null) {
+                idOrder = result;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (session.isOpen()) session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return idOrder;
     }
@@ -493,20 +553,20 @@ public class DBImplementation implements ClassDAO {
     public List<User> getAllUsers() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<User> users = new ArrayList<>(); // Inicializamos la lista para que no sea null
-        
+
         try {
             // TRUCO: Pedimos todos los perfiles (Profile es la clase padre que seguro está mapeada)
             List<Profile> allProfiles = session.createQuery("FROM Profile", Profile.class).getResultList();
-            
+
             // Filtramos manualmente: Nos quedamos solo con los que son de clase 'User'
             for (Profile p : allProfiles) {
                 if (p instanceof User) {
                     users.add((User) p);
                 }
             }
-            
+
             System.out.println("Usuarios encontrados en BD: " + users.size());
-            
+
         } catch (Exception e) {
             System.err.println("Error buscando usuarios: " + e.getMessage());
             e.printStackTrace();
@@ -515,7 +575,29 @@ public class DBImplementation implements ClassDAO {
                 session.close();
             }
         }
-        
+
         return users;
+    }
+
+    @Override
+    public void modificarUser(Profile profile) {
+        Session session = HibernateUtil.getSessionFactory().openSession(); //
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            // merge actualiza el registro en la base de datos con el estado del objeto profile
+            session.merge(profile);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar el perfil: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 }

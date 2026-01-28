@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.io.IOException;
@@ -14,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node; // Importante para obtener el Stage desde el evento
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -35,101 +31,58 @@ public class OptionsAdminController implements Initializable {
     private Button btnModificarUsuario;
     @FXML
     private Button btnLibro;
-    @FXML
-    private Button btnReturn;
-    @FXML
-    private Label label_Username;
+   
     
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        // TODO: Si quieres cargar el nombre del admin, hazlo aquí
+        // UserSession.getInstance().getUser().getUsername()...
     }    
 
     @FXML
     private void deleteUserWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnDeleteUser.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo(event, "/view/DeleteAccountAdmin.fxml");
     }
 
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteComentWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnEliminarComentario.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo(event, "/view/DeleteComentWindow.fxml");
     }
 
     @FXML
     private void modificarUsuarioWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ModifyWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnModificarUsuario.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo(event, "/view/ModifyWindow.fxml");
     }
 
     @FXML
     private void opcionesLibroWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookOptionWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnLibro.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo(event, "/view/BookOptionWindow.fxml");
     }
     
     @FXML
     private void btnVolver(ActionEvent event) {
+        navigateTo(event, "/view/MainBookStore.fxml");
+    }
+
+    /**
+     * Método auxiliar para navegar reutilizando la ventana y evitar errores.
+     */
+    private void navigateTo(ActionEvent event, String fxmlPath) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
+            
+            // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            
             stage.setScene(new Scene(root));
             stage.show();
 
-            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
-            currentStage.close();
-
         } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(OptionsAdminController.class.getName()).log(Level.SEVERE, "Error navegando a " + fxmlPath, ex);
         }
     }
 }

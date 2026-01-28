@@ -1,144 +1,133 @@
 package controller;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import model.Admin;
 import model.DBImplementation;
+import model.Profile;
 import model.User;
 import model.UserSession;
 
-public class ModifyWindowController {
+public class ModifyWindowController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(ModifyWindowController.class.getName());
-
-    private Stage stage;
     private DBImplementation db = new DBImplementation(); 
-    private User currentUser;
+    private Profile profileToModify;
 
-    // --- Componentes FXML ---
-    @FXML
-    private TextField txtName;
-    @FXML
-    private TextField txtLastName; // Asegúrate de que este fx:id coincida con tu FXML
-    @FXML
-    private TextField txtEmail;
-    @FXML
-    private TextField txtAddress;  // Asegúrate de que este fx:id coincida con tu FXML
-    @FXML
-    private PasswordField pwdNewPassword;
-    @FXML
-    private PasswordField pwdConfirmPassword;
-    @FXML
-    private Button btnSave;
-    @FXML
-    private Button btnCancel;
+    @FXML private Label LabelUsername;
+    @FXML private Label LabelEmail;
+    @FXML private TextField TextField_Name;
+    @FXML private TextField TextField_Surname;
+    @FXML private TextField TextField_Telephone;
+    @FXML private PasswordField TextField_NewPass;
+    @FXML private PasswordField TextField_CNewPass;
+    @FXML private ComboBox<User> comboUsers;
 
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        Profile loggedProfile = UserSession.getInstance().getUser();
 
-    public void initStage(Parent root) {
-        LOGGER.info("Inicializando ventana de Modificar Perfil...");
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Modificar Perfil - Book&Bugs");
-        stage.setResizable(false);
-
-        // 1. OBTENER EL USUARIO DE LA SESIÓN
-        currentUser = (User) UserSession.getInstance().getUser();
-
-        // 2. RELLENAR LOS CAMPOS
-        if (currentUser != null) {
-            txtName.setText(currentUser.getName());
-            // Si tienes estos campos en el FXML, descoméntalos:
-            // txtLastName.setText(currentUser.getSurname());
-            // txtEmail.setText(currentUser.getEmail());
-            // txtAddress.setText(currentUser.getAddress());
-
-            // Bloquear email
-            if(txtEmail != null) {
-                txtEmail.setDisable(true);
+        if (loggedProfile instanceof Admin) {
+            comboUsers.setVisible(true);
+            comboUsers.setManaged(true);
+            
+            try {
+                ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
+                comboUsers.setItems(users);
+            } catch (Exception e) {
+                LOGGER.severe("Error al cargar usuarios: " + e.getMessage());
             }
+
+            comboUsers.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    fillUserData(newVal);
+                }
+            });
+        } else {
+            comboUsers.setVisible(false);
+            comboUsers.setManaged(false);
+            fillUserData(loggedProfile);
         }
-        stage.show();
     }
 
-    // --- CORRECCIÓN AQUÍ: EL NOMBRE DEL MÉTODO DEBE SER 'cancel' ---
-    @FXML
-    private void cancel(ActionEvent event) {
-        LOGGER.info("Cancelando modificación...");
-        goBackToMenu();
+    private void fillUserData(Profile p) {
+        this.profileToModify = p;
+        LabelUsername.setText(p.getUsername());
+        LabelEmail.setText(p.getEmail());
+        TextField_Name.setText(p.getName());
+        TextField_Surname.setText(p.getSurname());
+        TextField_Telephone.setText(p.getTelephone());
     }
 
-    // --- CORRECCIÓN AQUÍ: COMPRUEBA SI TU FXML LLAMA A 'save' O 'handleSaveAction' ---
-    // He puesto 'save' porque suele ser lo estándar si 'cancel' falló.
     @FXML
     private void save(ActionEvent event) {
-        LOGGER.info("Validando y guardando cambios de perfil...");
+        if (profileToModify == null) return;
 
-        if (txtName.getText().trim().isEmpty()) {
-            showAlert("Error", "El nombre no puede estar vacío.", Alert.AlertType.ERROR);
-            return;
-        }
-
-        String newPass = pwdNewPassword.getText();
-        String confirmPass = pwdConfirmPassword.getText();
-
-        if (!newPass.isEmpty()) {
-            if (!newPass.equals(confirmPass)) {
-                showAlert("Error", "Las nuevas contraseñas no coinciden.", Alert.AlertType.ERROR);
+        String pass = TextField_NewPass.getText();
+        if (!pass.isEmpty()) {
+            if (!pass.equals(TextField_CNewPass.getText())) {
+                new Alert(Alert.AlertType.ERROR, "Las contraseñas no coinciden").show();
                 return;
             }
-            currentUser.setPassword(newPass); 
+            profileToModify.setPassword(pass);
         }
 
-        currentUser.setName(txtName.getText());
-        // currentUser.setSurname(txtLastName.getText());
-        // currentUser.setAddress(txtAddress.getText());
+        profileToModify.setName(TextField_Name.getText());
+        profileToModify.setSurname(TextField_Surname.getText());
+        profileToModify.setTelephone(TextField_Telephone.getText());
 
         try {
-            // db.updateUser(currentUser); // Descomenta cuando tengas el método update
+            db.modificarUser(profileToModify);
             
-            UserSession.getInstance().setUser(currentUser); // Actualizar sesión
-            showAlert("Éxito", "Perfil actualizado correctamente.", Alert.AlertType.INFORMATION);
-            goBackToMenu();
+            if (profileToModify.getUsername().equals(UserSession.getInstance().getUser().getUsername())) {
+                UserSession.getInstance().setUser(profileToModify);
+            }
+
+            new Alert(Alert.AlertType.INFORMATION, "Usuario actualizado correctamente").show();
+            handleNavigation(event); 
 
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error al actualizar en la BD", ex);
-            showAlert("Error", "No se pudo actualizar el perfil.", Alert.AlertType.ERROR);
+            new Alert(Alert.AlertType.ERROR, "Error al guardar los cambios").show();
         }
     }
 
-    private void goBackToMenu() {
+    @FXML
+    private void cancel(ActionEvent event) {
+        handleNavigation(event);
+    }
+
+    private void handleNavigation(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Profile loggedProfile = UserSession.getInstance().getUser();
+            // Determinamos la vista según el rol para volver a la ventana correcta
+            String fxmlPath = (loggedProfile instanceof Admin) ? "/view/OptionsAdmin.fxml" : "/view/MenuWindow.fxml";
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
+
+            // Obtenemos el Stage actual desde el evento para evitar el NullPointerException
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             
-            MenuWindowController controller = loader.getController();
-            controller.setStage(this.stage);
-            controller.initStage(root);
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
 
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error al volver al menú", ex);
+            LOGGER.log(Level.SEVERE, "Error en la navegación", ex);
         }
-    }
-
-    private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }
