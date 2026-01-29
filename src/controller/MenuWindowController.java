@@ -84,9 +84,6 @@ public class MenuWindowController {
             this.stage.setScene(scene);
             this.stage.setTitle(title);
             
-            // ¡FIN! Ya no necesitamos el "switch" ni inyectar datos.
-            // Si la nueva ventana necesita al usuario, ella misma lo pedirá a UserSession.
-
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Error al abrir la ventana: " + fxmlPath, ex);
         }

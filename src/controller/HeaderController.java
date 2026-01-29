@@ -99,10 +99,8 @@ public class HeaderController {
     private void seeAllPurchase(ActionEvent event) {
     }
 
-
     @FXML
-    private void backToMain(ActionEvent event
-    ) {
+    private void backToMain(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();

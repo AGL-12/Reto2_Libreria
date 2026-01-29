@@ -581,13 +581,13 @@ public class DBImplementation implements ClassDAO {
 
     @Override
     public List<User> getAllUsers() {
+        System.out.println("sesion");
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<User> users = new ArrayList<>(); // Inicializamos la lista para que no sea null
 
         try {
             // TRUCO: Pedimos todos los perfiles (Profile es la clase padre que seguro está mapeada)
             List<Profile> allProfiles = session.createQuery("FROM Profile", Profile.class).getResultList();
-
             // Filtramos manualmente: Nos quedamos solo con los que son de clase 'User'
             for (Profile p : allProfiles) {
                 if (p instanceof User) {

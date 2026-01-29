@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import javafx.scene.control.Button;
@@ -12,11 +7,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
-import model.Profile;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 
 /**
@@ -39,6 +38,11 @@ public class DeleteAccountController implements Initializable {
     @FXML
     private Button Button_Delete;
 
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        // Initialization logic if needed
+    }
+
     /**
      * Handles cancel button action. Closes the current window and returns to
      * MenuWindow.
@@ -46,10 +50,9 @@ public class DeleteAccountController implements Initializable {
     @FXML
     private void cancel() {
         try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            Parent root = fxmlLoader.load();
 
-            controller.MenuWindowController controllerWindow = fxmlLoader.getController();
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
@@ -68,7 +71,7 @@ public class DeleteAccountController implements Initializable {
     @FXML
     private void delete() {
         if (TextFieldPassword.getText().isEmpty()) {
-            javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            Alert error = new Alert(Alert.AlertType.ERROR);
             error.setTitle("Error");
             error.setHeaderText("Password required");
             error.setContentText("Please enter your password to delete the account.");
@@ -76,13 +79,13 @@ public class DeleteAccountController implements Initializable {
             return;
         }
 
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete account");
         alert.setHeaderText("Are you sure you want to delete your account?");
         alert.setContentText("This action cannot be undone..");
 
-        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 String user, password;
                 user = LabelUsername.getText();
@@ -120,17 +123,12 @@ public class DeleteAccountController implements Initializable {
                  */
             } catch (Exception ex) {
                 ex.printStackTrace();
-                javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                Alert error = new Alert(Alert.AlertType.ERROR);
                 error.setTitle("Error");
                 error.setHeaderText("The account could not be deleted.");
                 error.setContentText(ex.getMessage());
                 error.showAndWait();
             }
         }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic if needed
     }
 }
