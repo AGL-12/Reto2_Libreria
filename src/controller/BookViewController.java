@@ -57,6 +57,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.ContextMenuEvent;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 
 /**
@@ -442,6 +444,7 @@ public class BookViewController {
     
     
     // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
+    @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
         try {
@@ -515,7 +518,7 @@ public class BookViewController {
     private void handleAboutAction(ActionEvent event) {
         showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
     }
-
+    
 /**
      * Configura el menú global de clic derecho para toda la ventana.
      */
