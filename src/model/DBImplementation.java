@@ -83,14 +83,6 @@ public class DBImplementation implements ClassDAO {
     }
 
     /**
-     * Elimina un usuario seleccionado por el administrador.
-     */
-    @Override
-    public void modificarUser(Profile profile) {
-        // Lógica de modificar
-    }
-
-    /**
      * Obtiene todos los usernames para el ComboBox del Admin (Versión
      * Hibernate).
      */
@@ -300,11 +292,13 @@ public class DBImplementation implements ClassDAO {
     }
 
     // NUEVO: Para la ventana de eliminar comentarios por usuario
+    // En DBImplementation.java
     public List<Commentate> getCommentsByUser(String username) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Commentate> comments = new ArrayList<>();
         try {
-            String hql = "FROM Commentate c JOIN FETCH c.book WHERE c.user.username = :usr";
+            // HQL para traer los comentarios de un usuario específico
+            String hql = "FROM Commentate c WHERE c.user.username = :usr";
             comments = session.createQuery(hql, Commentate.class)
                     .setParameter("usr", username)
                     .list();
@@ -314,7 +308,6 @@ public class DBImplementation implements ClassDAO {
             if (session.isOpen()) {
                 session.close();
             }
-
         }
         return comments;
     }
@@ -607,5 +600,26 @@ public class DBImplementation implements ClassDAO {
         }
 
         return users;
+    }
+    @Override
+    public void modificarUser(Profile profile) {
+        Session session = HibernateUtil.getSessionFactory().openSession(); //
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            // merge actualiza el registro en la base de datos con el estado del objeto profile
+            session.merge(profile);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Error al actualizar el perfil: " + e.getMessage());
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 }

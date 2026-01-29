@@ -1,51 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="MenuRoot" prefHeight="400.0" prefWidth="270.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ModifyWindowController">
+
+<GridPane prefHeight="339.0" prefWidth="549.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ModifyWindowController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="279.9999633789063" minWidth="10.0" prefWidth="210.39996337890625" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="270.40003662109376" minWidth="10.0" prefWidth="270.40003662109376" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="40.999975585937506" minHeight="10.0" prefHeight="40.999975585937506" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="26.600012207031227" minHeight="10.0" prefHeight="21.800024414062477" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+   </rowConstraints>
    <children>
-      <Label layoutX="98.0" prefHeight="44.0" prefWidth="73.0" text="MODIFY">
-         <font>
-            <Font size="20.0" />
-         </font>
+      <AnchorPane id="MenuRoot" prefHeight="0.0" prefWidth="285.0" GridPane.rowIndex="11" />
+      <Label prefHeight="78.0" prefWidth="120.0" text="Username" GridPane.rowIndex="2">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
       </Label>
-      <Label layoutX="42.0" layoutY="80.0" prefHeight="17.0" prefWidth="36.0" text="Email" />
-      <Label layoutX="38.0" layoutY="48.0" prefHeight="17.0" prefWidth="59.0" text="Username" />
-      <Label layoutX="42.0" layoutY="114.0" prefHeight="17.0" prefWidth="36.0" text="Name" />
-      <Label layoutX="38.0" layoutY="147.0" prefHeight="17.0" prefWidth="59.0" text="Surname" />
-      <Label layoutX="31.0" layoutY="179.0" prefHeight="17.0" prefWidth="66.0" text="Telephone" />
-      <Label layoutX="95.0" layoutY="220.0" prefHeight="17.0" prefWidth="80.0" text="New Password" />
-      <Label layoutX="72.0" layoutY="269.0" prefHeight="17.0" prefWidth="125.0" text="Confirm New Password" />
-      <Button fx:id="Button_Cancel" layoutX="17.0" layoutY="330.0" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="89.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" />
-      <Button fx:id="Button_SaveChanges" layoutX="157.0" layoutY="330.0" mnemonicParsing="false" onAction="#save" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Save changes" />
-      <TextField fx:id="TextField_Name" layoutX="102.0" layoutY="110.0" prefHeight="25.0" prefWidth="155.0" promptText="Insert your new name" />
-      <TextField fx:id="TextField_Surname" layoutX="103.0" layoutY="143.0" prefHeight="25.0" prefWidth="155.0" promptText="Insert your new surname" />
-      <TextField fx:id="TextField_Telephone" layoutX="103.0" layoutY="175.0" prefHeight="25.0" prefWidth="155.0" promptText="Insert your new telephone" />
-      <PasswordField fx:id="TextField_NewPass" layoutX="62.0" layoutY="238.0" prefHeight="17.0" prefWidth="145.0" />
-      <PasswordField fx:id="TextField_CNewPass" layoutX="60.0" layoutY="287.0" />
-      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="13.0" layoutY="80.0" opacity="0.78">
-         <image>
-            <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
-         </image>
-      </ImageView>
-      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="5.0" layoutY="44.0">
-         <image>
-            <Image url="@../images/verified_user_32dp_A7C4E5_FILL0_wght400_GRAD0_opsz40.png" />
-         </image>
-      </ImageView>
-      <ImageView fitHeight="25.0" fitWidth="23.0" layoutX="13.0" layoutY="44.0">
+      <Label fx:id="LabelUsername" prefHeight="17.0" prefWidth="149.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label fx:id="LabelEmail" prefHeight="17.0" prefWidth="149.0" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Label prefHeight="18.0" prefWidth="93.0" text="Email" GridPane.rowIndex="3">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <ImageView fitHeight="25.0" fitWidth="23.0" GridPane.rowIndex="2">
          <image>
             <Image url="@../images/verified_user_32dp_789DE5_FILL0_wght400_GRAD0_opsz40.png" />
          </image>
       </ImageView>
-      <Label fx:id="LabelUsername" layoutX="104.0" layoutY="48.0" prefHeight="17.0" prefWidth="149.0" text="Label" />
-      <Label fx:id="LabelEmail" layoutX="103.0" layoutY="80.0" prefHeight="17.0" prefWidth="149.0" text="Label" />
+      <ImageView fitHeight="25.0" fitWidth="23.0" opacity="0.78" GridPane.rowIndex="3">
+         <image>
+            <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
+         </image>
+         <GridPane.margin>
+            <Insets />
+         </GridPane.margin>
+      </ImageView>
+      <Label prefHeight="30.0" prefWidth="76.0" text="MODIFY" GridPane.columnSpan="2" GridPane.halignment="CENTER">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <TextField fx:id="TextField_Name" minHeight="-Infinity" prefHeight="26.0" prefWidth="271.0" promptText="Insert your new name" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <Label prefHeight="18.0" prefWidth="93.0" text="Name" GridPane.rowIndex="4">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <Label prefHeight="18.0" prefWidth="154.0" text="Surname" GridPane.rowIndex="5">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <Label prefHeight="18.0" prefWidth="179.0" text="Telephone" GridPane.rowIndex="6">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <TextField fx:id="TextField_Surname" prefHeight="25.0" prefWidth="155.0" promptText="Insert your new surname" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <TextField fx:id="TextField_Telephone" prefHeight="25.0" prefWidth="155.0" promptText="Insert your new telephone" GridPane.columnIndex="1" GridPane.rowIndex="6">
+         <padding>
+            <Insets right="20.0" />
+         </padding>
+      </TextField>
+      <PasswordField fx:id="TextField_NewPass" prefHeight="17.0" prefWidth="145.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <Label prefHeight="78.0" prefWidth="148.0" text="New Password" GridPane.rowIndex="7">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <Label prefHeight="78.0" prefWidth="199.0" text="Confirm New Password" GridPane.rowIndex="8">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </Label>
+      <PasswordField fx:id="TextField_CNewPass" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+      <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="89.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.halignment="CENTER" GridPane.rowIndex="10" GridPane.valignment="CENTER" />
+      <Button fx:id="Button_SaveChanges" mnemonicParsing="false" onAction="#save" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Save changes" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
+      <ComboBox fx:id="comboUsers" prefWidth="150.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
    </children>
-</AnchorPane>
+</GridPane>
