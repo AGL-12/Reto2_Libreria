@@ -35,6 +35,7 @@
     <Menu mnemonicParsing="true" text="A_cciones">
       <items>
         <MenuItem fx:id="menuItemReport" text="Manual De Usuario" onAction="#handleReportAction" accelerator="Ctrl+P"/>
+        <MenuItem text="Informe Técnico de Stock" onAction="#handleInformeTecnico" accelerator="Ctrl+I"/>
       </items>
     </Menu>
 
