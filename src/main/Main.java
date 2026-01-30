@@ -1,6 +1,10 @@
 package main;
 
 import controller.MainBookStoreController;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -89,7 +93,7 @@ public class Main extends Application {
             // ==========================================
             // --- ADMIN ---
             Admin admin = new Admin();
-            admin.setUsername("admin1");
+            admin.setUsername("admin");
             admin.setPassword("1234");
             admin.setEmail("admin@libreria.com");
             admin.setName("Jefe");
@@ -121,123 +125,84 @@ public class Main extends Application {
             user2.setCardNumber("4444-5555-6666");
             session.save(user2);
 
-            // ==========================================
-            // 2. CREAR AUTORES Y LIBROS
-            // ==========================================
-            // --- LIBRO 1: HARRY POTTER ---
-            Author rowling = new Author();
-            rowling.setName("J.K.");
-            rowling.setSurname("Rowling");
-            session.save(rowling);
+            Map<Integer, Author> autores = new HashMap<>();
 
-            Book b1 = new Book();
-            b1.setISBN(9788498386655L); // <--- CAMBIO: ISBN de 13 dígitos (con L de long)
-            b1.setTitle("Harry Potter y el Cáliz de Fuego");
-            b1.setCover("mood-heart.png");
-            b1.setAuthor(rowling);
-            b1.setPrice(25.50f);
-            b1.setStock(50);
-            b1.setSheets(600);
-            b1.setSypnosis("Harry se enfrenta a un torneo mortal de magia y dragones.");
-            b1.setEditorial("Salamandra");
-            session.save(b1);
+            String[][] datosAutores = {
+                {"1", null, null},
+                {"2", "J.K.", "Rowling"},
+                {"3", "Miguel de", "Cervantes"},
+                {"4", "George", "Orwell"},
+                {"5", "Gabriel", "García Márquez"},
+                {"6", "Brandon", "Sanderson"},
+                {"8", "Fiódor", "Dostoievski"},
+                {"9", "Osamu", "Dazai"}
+            };
 
-            // --- LIBRO 2: CLEAN CODE ---
-            Author martin = new Author();
-            martin.setName("Robert C.");
-            martin.setSurname("Martin");
-            session.save(martin);
-
-            Book b2 = new Book();
-            b2.setISBN(9780132350884L); // <--- CAMBIO: ISBN de 13 dígitos
-            b2.setTitle("Clean Code");
-            b2.setCover("images.jpg");
-            b2.setAuthor(martin);
-            b2.setPrice(45.00f);
-            b2.setStock(20);
-            b2.setSheets(464);
-            b2.setSypnosis("Manual de artesanía de software ágil. Lectura obligatoria.");
-            b2.setEditorial("Pearson");
-            session.save(b2);
-
-            // --- LIBRO 3: DON QUIJOTE ---
-            Author cervantes = new Author();
-            cervantes.setName("Miguel de");
-            cervantes.setSurname("Cervantes");
-            session.save(cervantes);
-
-            Book b3 = new Book();
-            b3.setISBN(9788420412146L); // <--- CAMBIO: ISBN de 13 dígitos
-            b3.setTitle("Don Quijote de la Mancha");
-            b3.setCover("Book&Bugs_logo.png");
-            b3.setAuthor(cervantes);
-            b3.setPrice(15.99f);
-            b3.setStock(100);
-            b3.setSheets(1000);
-            b3.setSypnosis("En un lugar de la Mancha, de cuyo nombre no quiero acordarme...");
-            b3.setEditorial("Cátedra");
-            session.save(b3);
+            for (String[] d : datosAutores) {
+                Author a = new Author();
+                a.setName(d[1]);
+                a.setSurname(d[2]);
+                session.save(a);
+                autores.put(Integer.parseInt(d[0]), a);
+            }
 
             // ==========================================
-            // 3. AÑADIR COMENTARIOS
+            // 3. CREAR LIBROS (Procesando tu lista de texto)
             // ==========================================
-            // Comentario User 1 -> Harry Potter
-            Commentate c1 = new Commentate(user1, b1, "¡Me ha encantado! No pude parar de leer.", 5.0f);
-            session.save(c1);
+            // Estructura: ISBN | Titulo | ID_Autor | Paginas | Stock | Sinopsis | Precio | Editorial | Imagen
+            Map<Long, Book> librosMap = new HashMap<>(); // Para recuperar libros luego por ISBN
 
-            // Comentario User 1 -> Clean Code
-            Commentate c2 = new Commentate(user1, b2, "Es denso pero fundamental para programar bien.", 4.5f);
-            session.save(c2);
+            Object[][] datosLibros = {
+                {9780307474728L, "Cien años de soledad", 5, 471, 8, "La saga de la familia Buendía...", 18.5f, "Cátedra", "cien_anos.jpg"},
+                {9780439139595L, "Harry Potter y el Cáliz de Fuego", 2, 636, 10, "Harry se enfrenta a desafíos...", 22.5f, "Salamandra", "hp4.jpg"},
+                {9780451524935L, "1984", 4, 328, 20, "El Gran Hermano te vigila...", 12.0f, "Debolsillo", "1984.jpg"},
+                {9788416440047L, "NOCHES BLANCAS", 8, 128, 30, "Un joven solitario e introvertido...", 17.1f, "Nórdica Libros", "noches_blancas.jpg"},
+                {9788419035769L, "INDIGNO DE SER HUMANO", 9, 240, 10, "Indigno de ser humano es la obra maestra...", 22.8f, "Satori Ediciones", "indigno_de_ser_humano.jpg"},
+                {9788419306074L, "SAKAMOTO DAYS 1", 6, 192, 20, "Taro Sakamoto era un asesino...", 7.6f, "Ivrea", "sakamoto_days1.jpg"},
+                {9788420412146L, "Don Quijote de la Mancha", 3, 1345, 5, "Las aventuras de un hidalgo...", 15.99f, "Alfaguara", "quijote.jpg"},
+                {9788466657523L, "El Imperio Final", 6, 672, 12, "En un mundo donde cae ceniza...", 21.9f, "Nova", "mistborn.jpg"}
+            };
 
-            // Comentario User 2 -> Clean Code
-            Commentate c3 = new Commentate(user2, b2, "Buenos ejemplos, aunque un poco antiguos.", 4.0f);
-            session.save(c3);
-
-            // Comentario User 1 -> Don Quijote
-            Commentate c4 = new Commentate(user1, b3, "Un clásico inmortal.", 5.0f);
-            session.save(c4);
-
-            //tx.commit();
-            System.out.println(">> ¡Datos precargados con éxito!");
+            for (Object[] d : datosLibros) {
+                Book b = new Book();
+                b.setISBN((Long) d[0]);
+                b.setTitle((String) d[1]);
+                b.setAuthor(autores.get((Integer) d[2])); // Buscamos el autor por el ID del mapa
+                b.setSheets((Integer) d[3]);
+                b.setStock((Integer) d[4]);
+                b.setSypnosis((String) d[5]);
+                b.setPrice((Float) d[6]);
+                b.setEditorial((String) d[7]);
+                b.setCover((String) d[8]);
+                session.save(b);
+                librosMap.put(b.getISBN(), b);
+            }
 
             // ==========================================
-// 4. CREAR HISTORIAL DE COMPRAS (Orders y Contain)
-// ==========================================
-            System.out.println(">> Generando historial de compras para user1 (Pepe)...");
+            // 4. AÑADIR COMENTARIOS (Usando el mapa)
+            // ==========================================
+            // Ejemplo: Comentario para Cien años de soledad (9780307474728L)
+            session.save(new Commentate(user1, librosMap.get(9780307474728L), "Simplemente magistral.", 5.0f));
+            // Ejemplo: Comentario para Harry Potter (9780439139595L)
+            session.save(new Commentate(user1, librosMap.get(9780439139595L), "Increíble.", 4.5f));
 
-// --- PEDIDO 1: Finalizado (Aparecerá en el historial) ---
+            // ==========================================
+            // 5. HISTORIAL DE COMPRAS (Usando el mapa)
+            // ==========================================
             Order o1 = new Order();
-            o1.setIdUsuer(user1); // Asociamos a Pepe
-            o1.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis() - 86400000)); // Ayer
-            o1.setBought(true); // Status = true
+            o1.setIdUsuer(user1);
+            o1.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
+            o1.setBought(true);
             session.save(o1);
 
-// Creamos las líneas usando tu constructor: public Contain(int quantity, Order order, Book book)
-// El constructor se encarga de crear el ContainId internamente
-            Contain line1 = new Contain(1, o1, b1); // 1 unidad de Harry Potter
-            line1.setSum(b1.getPrice()); // Seteamos el precio final en el campo transient o propio
-            session.save(line1);
+            // Recuperamos el libro del mapa para la línea de pedido
+            Book libroPedido = librosMap.get(9788419306074L); // Sakamoto Days
+            if (libroPedido != null) {
+                Contain line1 = new Contain(1, o1, libroPedido);
+                line1.setSum(libroPedido.getPrice());
+                session.save(line1);
+            }
 
-            Contain line2 = new Contain(2, o1, b2); // 2 unidades de Clean Code
-            line2.setSum(b2.getPrice() * 2);
-            session.save(line2);
-
-// --- PEDIDO 2: Finalizado ---
-            Order o2 = new Order();
-            o2.setIdUsuer(user1);
-            o2.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis())); // Hoy
-            o2.setBought(true);
-            session.save(o2);
-
-            Contain line3 = new Contain(1, o2, b3); // 1 unidad de Don Quijote
-            line3.setSum(b3.getPrice());
-            session.save(line3);
-
-// --- PEDIDO 3: Carrito pendiente (NO debe salir en historial) ---
-            Order o3 = new Order();
-            o3.setIdUsuer(user1);
-            o3.setBought(false); // Status = false
-            session.save(o3);
             tx.commit();
         } catch (Exception e) {
             if (tx != null) {

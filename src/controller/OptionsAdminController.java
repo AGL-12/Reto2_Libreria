@@ -31,8 +31,7 @@ public class OptionsAdminController implements Initializable {
     private Button btnModificarUsuario;
     @FXML
     private Button btnLibro;
-   
-    
+
     /**
      * Initializes the controller class.
      */
@@ -40,46 +39,46 @@ public class OptionsAdminController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO: Si quieres cargar el nombre del admin, hazlo aquí
         // UserSession.getInstance().getUser().getUsername()...
-    }    
+    }
 
     @FXML
     private void deleteUserWindow(ActionEvent event) {
-        navigateTo(event, "/view/DeleteAccountAdmin.fxml");
+        navigateTo("/view/DeleteAccountAdmin.fxml");
     }
 
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
-        navigateTo(event, "/view/DeleteComentWindow.fxml");
+        navigateTo("/view/DeleteComentWindow.fxml");
     }
 
     @FXML
     private void modificarUsuarioWindow(ActionEvent event) {
-        navigateTo(event, "/view/ModifyWindow.fxml");
+        navigateTo("/view/ModifyWindow.fxml");
     }
 
     @FXML
     private void opcionesLibroWindow(ActionEvent event) {
-        navigateTo(event, "/view/BookOptionWindow.fxml");
+        navigateTo("/view/BookOptionWindow.fxml");
     }
+
     @FXML
     private void btnVolver(ActionEvent event) {
-        navigateTo(event, "/view/MainBookStore.fxml");
+        navigateTo("/view/MainBookStore.fxml");
     }
 
     /**
      * Método auxiliar para navegar reutilizando la ventana y evitar errores.
      */
-    private void navigateTo(ActionEvent event, String fxmlPath) {
+    private void navigateTo(String fxmlPath) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
-            MainBookStoreController main = fxmlLoader.getController();
-            main.headerController.setMode(UserSession.getInstance().getUser(), null);
-            
+
             // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            
+            Stage stage = (Stage) btnDeleteUser.getScene().getWindow();
+
             stage.setScene(new Scene(root));
+            stage.centerOnScreen();
             stage.show();
 
         } catch (IOException ex) {
