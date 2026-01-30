@@ -14,11 +14,17 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import model.UserSession;
 
+/**
+ * Controlador de la ventana de opciones del usuario
+ * Es una ventana que solo tiene acceso el usuario
+ * es una ventana intermedia
+ * @author unai azkorra
+ * @version 1.0
+ */
 public class MenuWindowController {
 
     private static final Logger LOGGER = Logger.getLogger(MenuWindowController.class.getName());
 
-    // --- Botones del FXML ---
     @FXML
     private Button btnModifyProfile;
     @FXML
@@ -44,19 +50,29 @@ public class MenuWindowController {
         openWindow("/view/ShoppingHistory.fxml", "Mi Historial", "shop history");
     }
 
+    /**
+     * Abre la ventana para eli
+     * @param event 
+     */
     @FXML
     private void handleDeleteAction(ActionEvent event) {
         openWindow("/view/DeleteAccount.fxml", "Borrar Cuenta", null);
     }
 
+    /**
+     * abre la ventana principal
+     * @param event 
+     */
     @FXML
     private void handleBackAction(ActionEvent event) {
         openWindow("/view/MainBookStore.fxml", "Tienda de Libros", null);
     }
 
     /**
-     * Carga la nueva ventana usando el Stage obtenido del evento.
-     * Esto evita el NullPointerException al no depender de un atributo Stage nulo.
+     * Recive la ruta para abrir la siguente ventana de la ejecucion.
+     * @param fxmlPath
+     * @param title
+     * @param headermode 
      */
     private void openWindow(String fxmlPath, String title, String headermode) {
         try {
@@ -65,7 +81,6 @@ public class MenuWindowController {
             
             MainBookStoreController main = loader.getController();
             main.headerController.setMode(UserSession.getInstance().getUser(), headermode);
-            // Obtenemos el Stage actual directamente desde el nodo que disparó el evento
             Stage stage = (Stage) label_Username.getScene().getWindow();
 
             Scene scene = new Scene(root);

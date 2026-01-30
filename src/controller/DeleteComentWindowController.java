@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.SimpleStringProperty; // IMPORTANTE
+import javafx.beans.property.SimpleStringProperty; 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,24 +20,34 @@ import javafx.stage.Stage;
 import model.Commentate;
 import model.DBImplementation;
 import model.User;
-import model.UserSession; // Asegúrate de importar esto si usas validación de sesión
+import model.UserSession;
 
+/**
+ * Controlador de la ventana de eliminar comentarios
+ * Es una ventana que solo tiene acceso el adminsitrador
+ * filtra por usuario sus comentarios
+ * @author unai azkorra
+ * @version 1.0
+ */
 public class DeleteComentWindowController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(DeleteComentWindowController.class.getName());
     private DBImplementation db = new DBImplementation();
 
     @FXML private TableView<Commentate> tableComments;
-    // Definimos todas como String porque vamos a mostrar texto formateado
     @FXML private TableColumn<Commentate, String> colBook;    
     @FXML private TableColumn<Commentate, String> colDate;    
     @FXML private TableColumn<Commentate, String> colComment; 
     @FXML private ComboBox<User> comboUsers;
 
+    /**
+     * metodo que se usa para inicializar los parametros y establecer los valores iniciales
+     * @param location
+     * @param resources 
+     */
+    
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 1. TÍTULO DEL LIBRO
-        // Accedemos al objeto Book y luego a su título. Protegemos contra nulos.
         colBook.setCellValueFactory(cellData -> {
             if (cellData.getValue().getBook() != null) {
                 return new SimpleStringProperty(cellData.getValue().getBook().getTitle());
@@ -46,22 +56,13 @@ public class DeleteComentWindowController implements Initializable {
             }
         });
 
-        // 2. FECHA FORMATEADA
-        // Usamos tu método getFormattedDate() de Commentate.java
-        colDate.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getFormattedDate()));
+        colDate.setCellValueFactory(cellData ->  new SimpleStringProperty(cellData.getValue().getFormattedDate()));
 
-        // 3. CONTENIDO DEL COMENTARIO
-        // Usamos el getter del campo 'commentary'
-        colComment.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getCommentary()));
+        colComment.setCellValueFactory(cellData ->  new SimpleStringProperty(cellData.getValue().getCommentary()));
 
-        // Carga inicial de usuarios
         try {
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
             comboUsers.setItems(users);
-
-            // Listener para cargar comentarios al seleccionar usuario
             comboUsers.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     cargarComentarios(newVal.getUsername());
@@ -72,6 +73,10 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     *recibe por parametro el username para buscar los comentarios 
+     * @param username 
+     */
     private void cargarComentarios(String username) {
         try {
             ObservableList<Commentate> lista = FXCollections.observableArrayList(db.getCommentsByUser(username));
@@ -81,6 +86,12 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Metodo que se ejecuta al presionar eliminar el libro. 
+     * En caso de no haber elegido un comentario saltara un error avisando al usuario que debe 
+     * seleccionar un comentario.
+     * @param event 
+     */
     @FXML
     private void handleDeleteComment(ActionEvent event) {
         Commentate selected = tableComments.getSelectionModel().getSelectedItem();
@@ -97,13 +108,16 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * el metodo entra en accion al pulsar volver y aber el menu de operacion del administrador
+     * @param event 
+     */
     @FXML
     private void handleBack(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = loader.load();
             
-            // Obtener Stage desde el evento (seguro)
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();

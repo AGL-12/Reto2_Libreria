@@ -33,6 +33,13 @@ import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
 
+/**
+ * Controlador de la ventana de gestión (CRUD) de libros.
+ * Permite crear y modificar
+ * la subida de portadas mediante archivos o Drag & Drop.
+ * * @author unai azkorra
+ * @version 1.0
+ */
 public class BookCRUDWindowController implements Initializable {
 
     @FXML
@@ -70,9 +77,14 @@ public class BookCRUDWindowController implements Initializable {
     private final ClassDAO dao = new DBImplementation();
     private Book libroActual;
 
-    // RUTA DEFINITIVA: Guardar dentro de src/images/
+    // RUTA: Guardar dentro de src/images/
     private final String RUTA_IMAGENES = "src/images/";
 
+    /**
+     * Inicializa los componentes de la ventana y configura los listeners
+     * de búsqueda automática por ISBN.
+     */
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         btnConfirm.setOnAction(this::confirmAction);
@@ -93,6 +105,10 @@ public class BookCRUDWindowController implements Initializable {
         });
     }
 
+    /**
+     * Configura la interfaz según el modo establecido.
+     * * @param modo El modo de la ventana: "create" o "modify".
+     */
     public void setModo(String modo) {
         this.modo = modo;
         switch (modo) {
@@ -120,6 +136,11 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     // --- MÉTODOS DE EVENTOS FXML (DRAG & DROP Y UPLOAD) ---
+    /**
+     * Gestiona el evento de arrastre sobre el área de la interfaz. 
+     * Verifica si el contenido arrastrado contiene archivos para aceptar la transferencia.
+     * @param event El evento DragEvent capturado por la interfaz.
+     */
     @FXML
     private void dragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
@@ -129,6 +150,12 @@ public class BookCRUDWindowController implements Initializable {
         event.consume();
     }
 
+    /**
+     * Procesa la caída de un archivo de imagen. 
+     * Valida que el archivo tenga una extensión permitida (.png, .jpg, .jpeg) y 
+     * actualiza la vista previa en el ImageView.
+     * @param event El evento de DropEvent que contiene los archivos.
+     */
     @FXML
     private void dropImage(DragEvent event) {
         Dragboard db = event.getDragboard();
@@ -147,6 +174,11 @@ public class BookCRUDWindowController implements Initializable {
         event.consume();
     }
 
+    /**
+     * Abre un explorador de archivos para seleccionar una portada . 
+     * Configura filtros de extensión para asegurar que solo se seleccionen formatos de imagen válidos.
+     * @param event El evento de acción disparado por el botón "Subir Archivo".
+     */
     @FXML
     private void uploadFrontPage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -163,6 +195,11 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     // --- LÓGICA PRINCIPAL ---
+    /**
+     * Procesa la acción de confirmación (Crear o Modificar)
+     * validando los campos de entrada.
+     * * @param event El evento de acción disparado por el botón.
+     */
     private void confirmAction(ActionEvent event) {
         try {
             if (txtISBN.getText().trim().isEmpty()) {
@@ -172,13 +209,6 @@ public class BookCRUDWindowController implements Initializable {
 
             long isbn = Long.parseLong(txtISBN.getText());
 
-            // Lógica para ELIMINAR
-            if ("delete".equals(modo)) {
-                dao.deleteBook(isbn);
-                mostrarAlerta("Éxito", "Libro eliminado correctamente.", Alert.AlertType.INFORMATION);
-                closeWindow();
-                return;
-            }
 
             // Validación de campos vacíos para Crear/Modificar
             if (txtTitle.getText().isEmpty()
@@ -206,10 +236,10 @@ public class BookCRUDWindowController implements Initializable {
             String nombrePortada;
 
             if (archivoPortada != null) {
-                // Si hay nueva imagen, la guardamos y obtenemos el nuevo nombre (UUID)
+                // Si hay nueva imagen, la guardamos y obtenemos el nuevo nombre
                 nombrePortada = guardarImagenEnDisco(archivoPortada);
             } else {
-                // Si no hay nueva imagen, mantenemos la anterior o ponemos default
+                // Si no hay nueva imagen, mantenemos la anterior 
                 if (libroActual != null && libroActual.getCover() != null) {
                     nombrePortada = libroActual.getCover();
                 } else {
@@ -284,10 +314,17 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
+    /**
+     * metodo que se utiliza para volver a la pagina anterior cerrando la ventana actual
+     * @param event disparado por el boton de return
+     */
     private void returnAction(ActionEvent event) {
         closeWindow();
     }
-
+    /**
+     * metodo que se usa en el modo de modificar, introduciendo un ISBN
+     * al hacer "intro" los datos del libro se autocompletaran en los inputs
+     */
     private void buscarLibro() {
         String isbnText = txtISBN.getText().trim();
         if (isbnText.isEmpty()) {
@@ -317,6 +354,10 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
+    /**
+     * recive del metodo de buscar libro un libro y rellena los inputs
+     * @param libro 
+     */
     private void rellenarDatos(Book libro) {
         txtTitle.setText(libro.getTitle());
         // Manejo seguro del autor por si es null
@@ -344,47 +385,12 @@ public class BookCRUDWindowController implements Initializable {
             }
         }
     }
-
-    // --- LÓGICA DE BOTONES ---
-    private void confirmarAccion() {
-        // Cargar imagen
-        String nombreFoto = libroActual.getCover();
-        try {
-            if (nombreFoto != null && !nombreFoto.isEmpty()) {
-                // Buscamos primero en el sistema de archivos (src/images)
-                File fotoFisica = new File(RUTA_IMAGENES + nombreFoto);
-                if (fotoFisica.exists()) {
-                    idFrontPage.setImage(new Image(fotoFisica.toURI().toString()));
-                } else {
-                    // Si no está, intentamos cargar desde recursos compilados
-                    URL recurso = getClass().getResource("/images/" + nombreFoto);
-                    if (recurso != null) {
-                        idFrontPage.setImage(new Image(recurso.toString()));
-                    }
-                }
-            }
-            // Para Create y Modify leemos el resto de campos
-            String titulo = txtTitle.getText();
-            int idAutor = Integer.parseInt(txtIdAuthor.getText());
-            int hojas = Integer.parseInt(txtPages.getText());
-            int stock = Integer.parseInt(txtStock.getText());
-            String sinopsis = txtSinopsis.getText();
-            float precio = Float.parseFloat(txtPrice.getText());
-            String editorial = txtEditorial.getText();
-            String nombrePortada = (archivoPortada != null) ? archivoPortada.getName() : "default.png";
-
-            // Crear objeto Autor dummy (solo necesitamos el ID para la BD)
-            Author autor = new Author();
-            autor.setIdAuthor(idAutor);
-
-            // Crear objeto Book
-        } catch (NumberFormatException e) {
-            mostrarAlerta("Error de formato", "Por favor revisa que los campos numéricos (ISBN, Stock, Precio...) sean correctos.", Alert.AlertType.ERROR);
-        } catch (Exception e) {
-            mostrarAlerta("Error", "Ocurrió un error inesperado: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
-    }
-
+    
+    /**
+     * recibe un parametro boolean para habilitar los campos del formulario
+     * en el modo modificar hasta no introducir el isbn de un libro no se habilitan los cammpos
+     * @param b 
+     */
     // --- UTILIDADES ---
     private void habilitarCampos(boolean b) {
         txtTitle.setDisable(!b);
@@ -398,7 +404,10 @@ public class BookCRUDWindowController implements Initializable {
         btnUploadFile.setDisable(!b);
         // El ISBN se gestiona por separado
     }
-
+    /**
+     * Limpia todos los campos de texto, reinicia la imagen de portada y 
+     * anula las variables del libro actual para dejar la ventana lista para una nueva operación.
+     */
     private void limpiarCampos() {
         txtISBN.clear();
         txtTitle.clear();
@@ -414,6 +423,9 @@ public class BookCRUDWindowController implements Initializable {
         libroActual = null;
     }
 
+    /**
+     * cierra la ventana y abre la ventana anterior 
+     */
     private void closeWindow() {
         try {
             // 1. Cargar la vista anterior (BookOptionWindow)
@@ -434,7 +446,12 @@ public class BookCRUDWindowController implements Initializable {
             Logger.getLogger(BookCRUDWindowController.class.getName()).log(Level.SEVERE, "Error al volver al menú de opciones", ex);
         }
     }
-
+    /**
+     * se usa para mostrar errores al usuario y guiarlo por la aplicacion
+     * @param titulo
+     * @param contenido
+     * @param tipo 
+     */
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -442,43 +459,4 @@ public class BookCRUDWindowController implements Initializable {
         alert.setContentText(contenido);
         alert.showAndWait();
     }
-
-    // --- TUS MÉTODOS DE IMAGEN EXISTENTES ---
-    private void arrastrarSobre(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        if (db.hasFiles()) {
-            event.acceptTransferModes(TransferMode.COPY);
-        }
-        event.consume();
-    }
-
-    private void soltarImagen(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        boolean success = false;
-        if (db.hasFiles()) {
-            List<File> files = db.getFiles();
-            File file = files.get(0);
-            // Validar extensión simple
-            if (file.getName().toLowerCase().endsWith(".png") || file.getName().toLowerCase().endsWith(".jpg")) {
-                archivoPortada = file;
-                idFrontPage.setImage(new Image(file.toURI().toString()));
-                success = true;
-            }
-        }
-        event.setDropCompleted(success);
-        event.consume();
-    }
-
-    private void subirPortada() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Seleccionar portada");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imágenes", "*.png", "*.jpg", "*.jpeg"));
-        Stage stage = (Stage) btnUploadFile.getScene().getWindow();
-        File file = fileChooser.showOpenDialog(stage);
-        if (file != null) {
-            archivoPortada = file;
-            idFrontPage.setImage(new Image(file.toURI().toString()));
-        }
-    }
-
 }

@@ -1,24 +1,24 @@
 package controller;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 /**
- * Controlador para el menú de opciones de Libro. <<<<<<< HEAD Corregido para
- * coincidir con los IDs y onAction del FXML.
+ * Controlador de la ventana de gestión del modo del Crud de libros.
+ * Permite elegir entre crear y modificar libros en la proxima ventana.
+ * Es una ventana intermedia
+ * @author unai azkorra
+ * @version 1.0
  */
-public class BookOptionWindowController implements Initializable {
+public class BookOptionWindowController {
 
     // CAMBIO 1: Nombres de variables coincidentes con fx:id del FXML
     @FXML
@@ -28,13 +28,9 @@ public class BookOptionWindowController implements Initializable {
     @FXML
     private Button btnModify;
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-    }
-
     /**
-     * Acción para el botón "Añadir Libro". Abre la ventana CRUD en modo
-     * "create".
+     * metodo que se lanza al presionar el boton de añadir libro
+     * @param event 
      */
     @FXML
     private void createBook(ActionEvent event) {
@@ -42,8 +38,8 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Acción para el botón "Modificar Libro". Abre la ventana CRUD en modo
-     * "modify".
+     * metodo que se lanza al presionar el botn de modificar libro
+     * @param event 
      */
     @FXML
     private void modifyBook(ActionEvent event) {
@@ -51,16 +47,9 @@ public class BookOptionWindowController implements Initializable {
     }
 
     /**
-     * Acción para el botón "Eliminar Libro". Abre la ventana CRUD en modo
-     * "delete".
-     */
-    private void deleteBook(ActionEvent event) {
-        abrirCRUD("delete", event);
-    }
-
-    /**
-     * Método auxiliar para cargar la ventana y pasar los datos. Evita repetir
-     * código en cada botón.
+     * metodo que se usa para abrir la ventana de CrudBook 
+     * @param modo actualiza la interfaz dependiendo el modo
+     * @param event 
      */
     private void abrirCRUD(String modo, ActionEvent event) {
         try {
@@ -69,15 +58,15 @@ public class BookOptionWindowController implements Initializable {
 
             BookCRUDWindowController controllerWindow = fxmlLoader.getController();
 
-            // PASAR LOS DATOS VITALES
-            controllerWindow.setModo(modo);           // <--- AQUÍ PASAMOS EL MODO ("create", "modify", etc.)
+            // PASAmos el modo
+            controllerWindow.setModo(modo);           
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
             stage.show();
 
-            // Cerrar la ventana actual (LibroOptionWindow)
+            // Cerrar la ventana actual
             Stage currentStage = (Stage) btnAdd.getScene().getWindow();
             // Cerrar ventana actual de forma segura
             currentStage.close();
@@ -88,16 +77,17 @@ public class BookOptionWindowController implements Initializable {
     }
 
     // --- CORRECCIÓN AQUÍ ---
-    // El método se ha renombrado de 'volver' a 'Return' para coincidir con tu FXML
+    /**
+     * metodo para retroceder en el flujo de ventanas
+     * @param event 
+     */
     @FXML
     private void Return(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = fxmlLoader.load();
-
-            // Si OptionsAdminController necesita el perfil, recupéralo de la sesión o pásalo aquí
-            // OptionsAdminController controller = fxmlLoader.getController();
-            // controller.setProfile(...);
+            
+            
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.show();
