@@ -601,6 +601,7 @@ public class DBImplementation implements ClassDAO {
 
         return users;
     }
+
     @Override
     public void modificarUser(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession(); //
@@ -609,7 +610,7 @@ public class DBImplementation implements ClassDAO {
             tx = session.beginTransaction();
             // merge actualiza el registro en la base de datos con el estado del objeto profile
             session.merge(profile);
-            tx.commit();
+
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
@@ -622,4 +623,20 @@ public class DBImplementation implements ClassDAO {
             }
         }
     }
+
+    public void removeBookFromOrder(Contain contain) {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // Usamos delete directamente con el objeto que encontramos en el controlador
+            session.delete(contain);
+
+            tx.commit();
+        } finally {
+            session.close();
+        }
+    }
+
 }

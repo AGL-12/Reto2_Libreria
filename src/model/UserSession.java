@@ -130,4 +130,8 @@ public class UserSession {
     public void setOrder(Order order) {
         this.currentOrder = order; // Asegúrate de que tu variable se llame 'currentOrder'
     }
+
+    public Object getLibrosCarrito() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

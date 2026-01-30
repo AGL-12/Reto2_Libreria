@@ -57,6 +57,7 @@ public interface ClassDAO {
     public void saveOrder(Order order);
 
     public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor);
+    public void removeBookFromOrder(Contain contain);
 }
 
 
