@@ -20,6 +20,13 @@ import model.DBImplementation;
 import model.Profile;
 import model.UserSession;
 
+
+/**
+ * Controlador de la ventana de eliminar usuarios siendo el propio usuario
+ * Es una ventana que solo tiene acceso el usuario
+ * @author unai azkorra
+ * @version 1.0
+ */
 public class DeleteAccountController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(DeleteAccountController.class.getName());
@@ -35,8 +42,10 @@ public class DeleteAccountController implements Initializable {
     private Button Button_Delete;
 
     /**
-     * Se ejecuta al abrir la ventana.
-     * AQUÍ ESTÁ LO QUE PEDÍAS: Carga el nombre del usuario en el Label.
+     * al iniciar la ventana se establecen los parametros deseados antes de mostrar la interfaz al usuario
+     * en este caso mostramos el "username" del usuario loggeado
+     * @param location
+     * @param resources 
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -45,28 +54,29 @@ public class DeleteAccountController implements Initializable {
             LabelUsername.setText(currentUser.getUsername());
         }
     }
+    
+    
     /**
-     * Acción para borrar la cuenta propia.
+     * Accion para auto-eliminarse la cuenta
+     * @param event 
      */
     @FXML
     private void handleDelete(ActionEvent event) {
         Profile currentUser = UserSession.getInstance().getUser();
         String password = TextFieldPassword.getText();
 
-        // 1. Verificar que la contraseña escrita coincida con la del usuario logueado
+        // Verificar que la contraseña escrita coincida con la del usuario logueado
         if (currentUser != null && currentUser.getPassword().equals(password)) {
             try {
-                // 2. Llamada a la base de datos para borrar el perfil
-                // Asegúrate de tener este método en tu DBImplementation (similar al de admin)
+                
                 db.dropOutUser(currentUser); 
 
-                // 3. Cerrar la sesión local
+                // Cerrar la sesión del usuario
                 UserSession.getInstance().setUser(null);
 
-                // 4. Mostrar mensaje y redirigir al Login
+               
                 showAlert("Cuenta eliminada", "Tu cuenta ha sido borrada correctamente. Hasta pronto.", Alert.AlertType.INFORMATION);
                 
-                // Navegar al Login
                 navigateTo("/view/LogInWindow.fxml", "Login - Book&Bugs");
 
             } catch (Exception ex) {
@@ -85,7 +95,8 @@ public class DeleteAccountController implements Initializable {
     }
 
     /**
-     * Acción para cancelar y volver al menú.
+     * Accion para cancelar la operacion 
+     * @param event 
      */
     @FXML
     private void cancel(ActionEvent event) {
@@ -93,7 +104,9 @@ public class DeleteAccountController implements Initializable {
     }
 
     /**
-     * Método auxiliar para navegar reutilizando el Stage del evento (evita NullPointerException).
+     * metodo para redirigir al usuario
+     * @param fxmlPath indica a que ventana se le redigira
+     * @param title  el titulo de la ventana a la que se le redirige
      */
     private void navigateTo(String fxmlPath, String title) {
         try {
@@ -111,6 +124,12 @@ public class DeleteAccountController implements Initializable {
         }
     }
 
+    /**
+     * metodo para alertar al usuario de problemas a la hora de hacer alguna accion
+     * @param title
+     * @param content
+     * @param type 
+     */
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

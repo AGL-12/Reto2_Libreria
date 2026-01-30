@@ -23,13 +23,19 @@ import model.ClassDAO;
 import model.DBImplementation;
 import model.User;
 
+/**
+ * Controlador de la ventana de eliminar usuarios siendo admin
+ * Es una ventana que solo tiene acceso administrador
+ * Cueenta con un ComboBox para seleccionar usuario a eliminar
+ * @author unai azkorra
+ * @version 1.0
+ */
 public class DeleteAccountAdminController implements Initializable{
 
     private static final Logger LOGGER = Logger.getLogger(DeleteAccountAdminController.class.getName());
 
     private final ClassDAO dao = new DBImplementation(); 
 
-    // --- CORRECCIÓN: El nombre debe coincidir con fx:id="ComboBoxUser" del FXML ---
     @FXML
     private ComboBox<User> ComboBoxUser; 
     
@@ -40,6 +46,9 @@ public class DeleteAccountAdminController implements Initializable{
     @FXML
     private Button Button_Cancel;
 
+    /**
+     * Inicializa los componentes de la ventana y configura el comboBox para tener cargados los usuarios
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         LOGGER.info("Inicializando ventana Delete Account Admin...");
@@ -50,7 +59,6 @@ public class DeleteAccountAdminController implements Initializable{
         // 2. CONFIGURACIÓN INICIAL
         Button_Delete.setDisable(true);
 
-        // --- CORRECCIÓN: Usamos la variable correcta 'ComboBoxUser' ---
         if (ComboBoxUser != null) {
             ComboBoxUser.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> validarBoton());
         }
@@ -59,6 +67,9 @@ public class DeleteAccountAdminController implements Initializable{
 
     }
 
+    /**
+     * metodo para cargar los usuarios en el comboBox
+     */
     private void cargarUsuarios() {
         try {
             List<User> listaUsuarios = dao.getAllUsers();
@@ -76,24 +87,29 @@ public class DeleteAccountAdminController implements Initializable{
         }
     }
 
+    /**
+     * metodo para validar que los campos esten bien al momento de inicializar
+     */
     private void validarBoton() {
-        // --- CORRECCIÓN: Usamos 'ComboBoxUser' ---
         boolean usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem() != null;
         boolean contrasenaEscrita = !TextFieldPassword.getText().trim().isEmpty();
         Button_Delete.setDisable(!(usuarioSeleccionado && contrasenaEscrita));
     }
 
+    /**
+     * metodo para eliminar el usuario seleccionado
+     * @param event se dispara al confirmar la eliminacion del usuario
+     */
     @FXML
     private void delete(ActionEvent event) {
         LOGGER.info("Intentando borrar usuario desde Admin...");
 
-        // --- CORRECCIÓN: Usamos 'ComboBoxUser' ---
         User usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem();
         String passwordEscrita = TextFieldPassword.getText();
 
         if (usuarioSeleccionado == null) return;
 
-        // Validación de contraseña (aquí comparas con la del usuario a borrar)
+        // Validación de contraseña
         if (!usuarioSeleccionado.getPassword().equals(passwordEscrita)) {
             showAlert("Error de Contraseña", "La contraseña introducida no coincide con la del usuario.", Alert.AlertType.WARNING);
             return;
@@ -121,18 +137,18 @@ public class DeleteAccountAdminController implements Initializable{
         }
     }
 
+    /**
+     * se usa para cancelar la operacion y regresas a la ventana de operaciones que puede hacer el adminsitrador
+     * @param event 
+     */
     @FXML
     private void cancel(ActionEvent event) {
         try {
-            // 1. Cargar la vista directamente (sin instanciar el loader manualmente)
-            // Esto crea el controlador de OptionsAdmin automáticamente
+
             Parent root = FXMLLoader.load(getClass().getResource("/view/OptionsAdmin.fxml"));
 
-            // 2. Obtener el escenario (Stage) actual usando el botón 'Cancel'
-            // Esto es más seguro que usar 'this.stage' si alguna vez es null
             Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
 
-            // 3. Cambiar la escena
             Scene scene = new Scene(root);
             currentStage.setScene(scene);
             currentStage.show();
@@ -142,6 +158,12 @@ public class DeleteAccountAdminController implements Initializable{
         }
     }
 
+    /**
+     * se usa para avisar de psoibles errores al usuario de la aplicacion
+     * @param title
+     * @param message
+     * @param type 
+     */
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
