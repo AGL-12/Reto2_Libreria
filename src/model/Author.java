@@ -11,7 +11,9 @@ public class Author implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idAuthor;
+    @Column(name="name")
     private String name;
+    @Column(name="surname")
     private String surname;
     
     @OneToMany(mappedBy = "author")

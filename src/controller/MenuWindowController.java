@@ -37,21 +37,24 @@ public class MenuWindowController {
     private Label label_Username;
 
     /**
-     * Maneja la acción de modificar perfil.
-     * Pasa el evento para recuperar el Stage dinámicamente.
+     * abre la ventana para que el usuario modifique sus propios 
      */
     @FXML
     private void handleModifyAction(ActionEvent event) {
         openWindow("/view/ModifyWindow.fxml", "Modificar Perfil", null);
     }
 
+    /**
+     * abre el historial de compras del usuario
+     * @param event 
+     */
     @FXML
     private void handleHistoryAction(ActionEvent event) {
         openWindow("/view/ShoppingHistory.fxml", "Mi Historial", "shop history");
     }
 
     /**
-     * Abre la ventana para eli
+     * Abre la ventana para eliminar la cuenta del usuario
      * @param event 
      */
     @FXML

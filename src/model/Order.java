@@ -23,6 +23,7 @@ public class Order {
     @Column(name = "purchase_date")
     private Timestamp purchaseDate;
 
+    @Column(name="bought")
     private boolean bought;
 
     // --- CAMBIO: CascadeType.ALL hacia Contain ---
