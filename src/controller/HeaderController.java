@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import model.Admin;
 import model.Profile;
@@ -44,6 +45,8 @@ public class HeaderController {
     private Button btnOption;
     @FXML
     private Button btnLogOut;
+    @FXML
+    private StackPane stackSearch;
 
     // --- NUEVO GETTER ---
     // Esto permite que el MainBookStoreController escuche lo que escribes aquí
@@ -290,7 +293,6 @@ public class HeaderController {
     }
 
     public void setMode(Profile user, String filter) {
-        System.out.println(user);
         if (user == null) {
             btnOption.setManaged(false);
             btnLogOut.setManaged(false);
@@ -308,6 +310,8 @@ public class HeaderController {
         }
         if (filter == null) {
             btnBackMain.setManaged(false);
+        }else {
+            stackSearch.setVisible(false);
         }
         if ("buying".equals(filter)) {
             btnBuy.setManaged(false);

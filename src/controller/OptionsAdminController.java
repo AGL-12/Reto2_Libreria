@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import model.UserSession;
 
 /**
  * FXML Controller class
@@ -59,6 +60,11 @@ public class OptionsAdminController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
+
+            if ("/view/MainBookStore.fxml".equals(fxmlPath)) {
+                MainBookStoreController main = fxmlLoader.getController();
+                main.headerController.setMode(UserSession.getInstance().getUser(), null);
+            }
 
             // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
             Stage stage = (Stage) btnDeleteUser.getScene().getWindow();

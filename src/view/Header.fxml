@@ -17,7 +17,7 @@
          </image>
       </ImageView>
       <Label fx:id="lblUserName" text="Bienvenido" />
-      <StackPane HBox.hgrow="ALWAYS">
+      <StackPane fx:id="stackSearch" HBox.hgrow="ALWAYS">
          <children>
             <TextField fx:id="txtSearch" promptText="ISBN,TITULO O AUTOR">
                <opaqueInsets>

@@ -77,7 +77,7 @@ public class Main extends Application {
             // --- PASO 0: EVITAR DUPLICADOS ---
             // Comprobamos si ya existe el admin. Si existe, no hacemos nada.
             Long count = (Long) session.createQuery("SELECT count(p) FROM Profile p WHERE p.username = :u")
-                    .setParameter("u", "admin1")
+                    .setParameter("u", "admin")
                     .uniqueResult();
 
             if (count > 0) {
