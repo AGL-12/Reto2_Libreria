@@ -134,4 +134,9 @@ public class UserSession {
     public Object getLibrosCarrito() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public void refreshOrderAfterDeletion() {
+    // Forzamos a que la próxima vez que se añada algo, se busque de nuevo en la BD
+    this.currentOrder = null; 
+}
 }

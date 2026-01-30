@@ -199,7 +199,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             }
 
             dao.removeBookFromOrder(lineaABorrar);
-
+            UserSession.getInstance().refreshOrderAfterDeletion();
             cargarVistaLibros();
             actualizarPrecioTotal();
 
