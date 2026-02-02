@@ -110,7 +110,8 @@ public class BookItemController {
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
 
-    private void setComponents() {
+   private void setComponents() {
+        // Tooltips y Textos
         Tooltip cov = new Tooltip(book.getTitle());
         Tooltip.install(stackImg, cov);
 
@@ -118,37 +119,61 @@ public class BookItemController {
         title.setTooltip(new Tooltip(book.getTitle()));
 
         contador.setText("(" + book.getComments().size() + ")");
-        // 1. Verificamos que la lista no sea null ni esté vacía para evitar errores
+        
         if (book.getAuthor() != null) {
-
             String textoAutor = book.getAuthor().toString();
-
             author.setText(textoAutor);
-
-            // 3. Crear y asignar el Tooltip con el texto COMPLETO
             Tooltip tooltip = new Tooltip(textoAutor);
-
             author.setTooltip(tooltip);
-
         } else {
-            author.setText("Anónimo"); // O déjalo vacío ""
+            author.setText("Anónimo");
         }
-        Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
-        Image soldOugImage = new Image(getClass().getResourceAsStream("/images/soldOut.png"));
 
-        // Definimos el tamaño objetivo: Ancho 140, Alto 210 (Ratio 2:3)
-        cutOutImage(cover, originalImage, 140, 210);
-        cutOutImage(soldOut, soldOugImage, 140, 210);
+        // --- CORRECCIÓN DE IMÁGENES (Anti-Caídas) ---
+        
+        // 1. Determinar nombre de la imagen (evitar nulos)
+        String imageName = book.getCover();
+        if (imageName == null || imageName.isEmpty()) {
+            imageName = "default.png"; // Nombre por defecto si viene null de la BD
+        }
+        
+        // 2. Intentar cargar la imagen del libro
+        java.io.InputStream imageStream = getClass().getResourceAsStream("/images/" + imageName);
+        
+        // 3. Si no existe, cargar una imagen de respaldo QUE SEPAS QUE EXISTE (ej. el logo)
+        if (imageStream == null) {
+            System.out.println("⚠️ Imagen no encontrada: " + imageName + ". Usando respaldo.");
+            // Asegúrate de usar una imagen que SÍ tengas subida, vi que tienes 'Book&Bugs_Logo.png'
+            imageStream = getClass().getResourceAsStream("/images/Book&Bugs_Logo.png");
+        }
+
+        // 4. Cargar la imagen solo si tenemos un stream válido
+        if (imageStream != null) {
+            Image originalImage = new Image(imageStream);
+            cutOutImage(cover, originalImage, 140, 210);
+        }
+
+        // 5. Cargar imagen SoldOut con seguridad
+        java.io.InputStream soldOutStream = getClass().getResourceAsStream("/images/soldOut.png");
+        if (soldOutStream != null) {
+            Image soldOugImage = new Image(soldOutStream);
+            cutOutImage(soldOut, soldOugImage, 140, 210);
+        } else {
+            System.out.println("⚠️ No se encontró la imagen soldOut.png");
+        }
+
+        // --- FIN CORRECCIÓN ---
+
         if (book.getStock() <= 0) {
             // --- NO HAY STOCK ---
-            cover.setOpacity(0.5);      // Poner portada semitransparente (efecto deshabilitado)
+            cover.setOpacity(0.5);      
         } else {
             // --- HAY STOCK ---
-            soldOut.setVisible(false);  // Ocultar sello
+            soldOut.setVisible(false);  
         }
-        // CONFIGURACIÓN:
-        starsController.setEditable(false); // BLOQUEADO
-        starsController.setValueStars(book.getAvgValuation()); // PINTAR NOTA
+        
+        starsController.setEditable(false); 
+        starsController.setValueStars(book.getAvgValuation()); 
     }
 
 }

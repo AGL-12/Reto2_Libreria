@@ -12,8 +12,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.animation.PauseTransition;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -21,8 +24,6 @@ import javafx.util.Duration;
 import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
-import model.Profile;
-import model.User;
 
 /**
  *
@@ -41,7 +42,9 @@ public class MainBookStoreController {
     private final ClassDAO dao = new DBImplementation();
     // El temporizador para el delay
     private PauseTransition pause;
-
+    
+    private ContextMenu globalMenu;
+    
     @FXML
     public void initialize() {
         allBooks = dao.getAllBooks();
@@ -52,11 +55,14 @@ public class MainBookStoreController {
         pause = new PauseTransition(Duration.seconds(0.5));
 
         // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
-        pause.setOnFinished(event -> {
-            // Obtenemos el texto actual del header y buscamos
-            String textoABuscar = headerController.getSearchTextField().getText().trim();
-            System.out.println("Buscando en BD: " + textoABuscar); // Log para que veas el delay
-            searchBooks(textoABuscar);
+        pause.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // Obtenemos el texto actual del header y buscamos
+                String textoABuscar = headerController.getSearchTextField().getText().trim();
+                System.out.println("Buscando en BD: " + textoABuscar); // Log para que veas el delay
+                searchBooks(textoABuscar);
+            }
         });
 
         // 3. CONECTAR EL LISTENER

@@ -5,8 +5,6 @@
  */
 package controller;
 
-import static com.mchange.v2.c3p0.impl.C3P0Defaults.user;
-import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +29,31 @@ import model.Profile;
 import model.User;
 import model.UserSession;
 import model.Admin;
+
+
+// --- IMPORTS NUEVOS PARA EL INFORME ---
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+// --------------------------------------
+
+//Imports para informe
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+
+//Imports para click derecho
+
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+
 
 /**
  * FXML Controller class
@@ -57,7 +80,13 @@ public class BookViewController {
     private VBox commentsContainer;
     @FXML
     private Button btnAddToCart;
+    @FXML
     public HeaderController headerController;
+
+    @FXML
+    private MenuItem menuItemReport;
+    @FXML
+    private VBox rootPane;
 
     private Book currentBook;
 
@@ -76,14 +105,17 @@ public class BookViewController {
     private Button btnPublicar;
     @FXML
     private TextArea txtNuevoComentario;
-    
+
     @FXML
     private StarRateController estrellasController;
+    
+    private ContextMenu globalMenu;
 
     private Profile currentUser = UserSession.getInstance().getUser();
 
     public void initialize() {
         initContextMenu();
+        initGlobalContextMenu();
     }
 
     /**
@@ -174,12 +206,15 @@ public class BookViewController {
         stockBook.setText("Stock: " + book.getStock());
 
         refreshList();
-        // --- LÓGICA DE BOTÓN ---
+
         Profile user = UserSession.getInstance().getUser();
+
         if (user instanceof Admin) {
-            btnAddToCart.setVisible(false); // Admin no compra
-            btnAddToCart.setManaged(false); // No ocupa sitio
+            // El Admin NO compra
+            btnAddToCart.setVisible(false);
+            btnAddToCart.setManaged(false);
         } else {
+            // El Usuario SÍ compra
             btnAddToCart.setVisible(true);
             btnAddToCart.setManaged(true);
         }
@@ -284,26 +319,38 @@ public class BookViewController {
             showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
-    
-    //Barra menu logica
-    @FXML
-    private void handleReportAction(ActionEvent event) {
-        // Muestra un mensaje simulando la generación del reporte
-        showAlert("Generando informe de comentarios...", Alert.AlertType.INFORMATION);
-    }
 
     @FXML
-    private void handleHelpAction(ActionEvent event) {
-        // Muestra la ventana de ayuda requerida
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Ayuda del Sistema");
-        alert.setHeaderText("Manual de Usuario");
-        alert.setContentText("Guía rápida:\n"
-                           + "1. Selecciona un libro para ver detalles.\n"
-                           + "2. Escribe en el cuadro inferior y pulsa 'Publicar' para opinar.\n"
-                           + "3. Si eres Admin, usa el botón 'Borrar' para moderar.\n"
-                           + "4. Usa el menú Actions > Report para informes.");
-        alert.showAndWait();
+    private void handleReportAction(ActionEvent event) {
+
+        // --- HEMOS BORRADO EL BLOQUE IF DE SEGURIDAD ---
+        // Ahora entra cualquier usuario (Admin o Normal)
+        try {
+            // CAMBIO: Ahora apuntamos al Manual de Usuario en vez de al Informe de Stock
+            String resourcePath = "/documents/Manual_Usuario.pdf";
+
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("Error: No se puede abrir el visor de PDF.", Alert.AlertType.ERROR);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
@@ -339,8 +386,7 @@ public class BookViewController {
         imageView.setSmooth(true); // Suavizado para mejor calidad
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
-    
-    
+
     @FXML
     private void handleAddToCart(ActionEvent event) {
         // 1. Validar que hay un libro seleccionado
@@ -360,11 +406,178 @@ public class BookViewController {
             UserSession.getInstance().addToCart(currentBook);
             // 4. Feedback visual
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
+    @FXML
+    private void handleExit(ActionEvent event) {
+        // Cierra la aplicación completamente
+        javafx.application.Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // 1. Limpiar sesión
+        UserSession.getInstance().cleanUserSession();
+
+        // 2. Navegar al Login (necesitas tu lógica de navegación aquí)
+        // Ejemplo rápido:
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
+            Parent root = loader.load();
+            btnAddToCart.getScene().setRoot(root); // Usamos cualquier nodo para pillar la escena
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            // 1. CONEXIÓN A BASE DE DATOS
+            // Ajusta el usuario y contraseña a los tuyos de MySQL
+            String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
+            String user = "root"; 
+            String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, pass);
+
+            // 2. CARGAR EL ARCHIVO .JRXML
+            // Busca en el paquete 'reports' que creamos anteriormente
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            
+            if (reportStream == null) {
+                showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. COMPILAR Y LLENAR EL INFORME
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+            
+            // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
+
+            // 4. MOSTRAR VISOR
+            JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) {}
+        }
+    }
+
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        try {
+            // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
+            String resourcePath = "/documents/Manual_Usuario.pdf";
+
+            // 2. Cargar archivo
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. Crear temporal y abrir
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
+    }
+    
+/**
+     * Configura el menú global de clic derecho para toda la ventana.
+     */
+    private void initGlobalContextMenu() {
+        // 1. Inicializamos el menú
+        globalMenu = new ContextMenu();
+        globalMenu.setAutoHide(true);
+
+        // --- Opción 1: Añadir al Carrito ---
+        MenuItem itemAddCart = new MenuItem("Añadir al Carrito");
+        itemAddCart.setOnAction(event -> handleAddToCart(null));
+
+        // Si es Admin, deshabilitamos esta opción
+        if (UserSession.getInstance().getUser() instanceof Admin) {
+            itemAddCart.setDisable(true); 
+        }
+
+        // =========================================================
+        // --- NUEVO: OPCIÓN INFORME TÉCNICO (JASPER) ---
+        // =========================================================
+        MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
+        itemInforme.setOnAction(event -> handleInformeTecnico(event));
+        // =========================================================
+
+        // --- Resto de Opciones ---
+        MenuItem itemLogOut = new MenuItem("Cerrar Sesión");
+        itemLogOut.setOnAction(event -> handleLogOut(event));
+
+        MenuItem itemExit = new MenuItem("Salir");
+        itemExit.setOnAction(event -> handleExit(event));
+
+        SeparatorMenuItem separator = new SeparatorMenuItem();
+
+        MenuItem itemManual = new MenuItem("Manual de Usuario");
+        itemManual.setOnAction(event -> handleHelpAction(event));
+
+        MenuItem itemAbout = new MenuItem("Acerca de...");
+        itemAbout.setOnAction(event -> handleAboutAction(event));
+
+        // 2. AÑADIR TODO AL MENÚ EN ORDEN
+        globalMenu.getItems().addAll(
+                itemAddCart,      // 1. Comprar
+                itemInforme,      // 2. Informe Técnico (NUEVO)
+                new SeparatorMenuItem(), // Línea separadora
+                itemLogOut,       // 3. Cerrar Sesión
+                itemExit,         // 4. Salir
+                separator,        // Línea separadora
+                itemManual,       // 5. Ayuda
+                itemAbout         // 6. About
+        );
+
+        // 3. Asignar eventos al panel principal (rootPane)
+        if (rootPane != null) {
+            rootPane.setOnContextMenuRequested(event -> {
+                // Mostrar el menú donde se hizo clic
+                globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
+                event.consume(); 
+            });
+
+            // Ocultar el menú si se hace clic izquierdo fuera
+            rootPane.setOnMousePressed(event -> {
+                if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
+                    globalMenu.hide();
+                }
+            });
+        }
+    }
 }

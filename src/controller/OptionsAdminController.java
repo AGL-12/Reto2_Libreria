@@ -1,31 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import model.UserSession;
 
 /**
- * FXML Controller class
- *
- * @author uazko
+ * Controlador de la ventana de opciones para administrador
+ * es una ventana que se puede acceder desde adminsitrador
+ * es una ventana intermedia
+ * @author unai azkorra
+ * @version 1.0
  */
-public class OptionsAdminController implements Initializable {
+public class OptionsAdminController {
 
     @FXML
     private Button btnDeleteUser;
@@ -35,85 +29,75 @@ public class OptionsAdminController implements Initializable {
     private Button btnModificarUsuario;
     @FXML
     private Button btnLibro;
-    @FXML
-    private Button btnLogOut;
-    @FXML
-    private Label label_Username;
     
     /**
-     * Initializes the controller class.
+     * pasa al  metodo de navigacion la ruta para abrir la ventana de eliminar usuario
+     * @param event 
      */
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-
     @FXML
     private void deleteUserWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnDeleteUser.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo("/view/DeleteAccountAdmin.fxml");
     }
 
+     /**
+     * pasa al  metodo de navigacion la ruta para abrir la ventana de eliminar comentario
+     * @param event 
+     */
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteComentWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnEliminarComentario.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @FXML
-    private void modificarUsuarioWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ModifyWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnModificarUsuario.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @FXML
-    private void opcionesLibroWindow(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookOptionWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) btnLibro.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigateTo("/view/DeleteComentWindow.fxml");
     }
     
+    /**
+     * pasa al  metodo de navigacion la ruta para abrir la ventana de modificar usuario
+     * @param event 
+     */
+    @FXML
+    private void modificarUsuarioWindow(ActionEvent event) {
+        navigateTo("/view/ModifyWindow.fxml");
+    }
+
+     /**
+     * pasa al  metodo de navigacion la ruta para abrir la ventana de libro
+     * @param event 
+     */
+    @FXML
+    private void opcionesLibroWindow(ActionEvent event) {
+        navigateTo("/view/BookOptionWindow.fxml");
+    }
+    /**
+     * pasa al  metodo de navigacion la ruta para abrir la ventana principal de la aplicacion
+     * @param event 
+     */
+    @FXML
+    private void btnVolver(ActionEvent event) {
+        navigateTo("/view/MainBookStore.fxml");
+    }
+    
+    /**
+     * metodo para abrir la ventana correspondiente
+     * @param event
+     * @param fxmlPath 
+     */
+    private void navigateTo(String fxmlPath) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = fxmlLoader.load();
+
+            if ("/view/MainBookStore.fxml".equals(fxmlPath)) {
+                MainBookStoreController main = fxmlLoader.getController();
+                main.headerController.setMode(UserSession.getInstance().getUser(), null);
+            }
+
+            // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
+            Stage stage = (Stage) btnDeleteUser.getScene().getWindow();
+
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
+            stage.show();
+
+        } catch (IOException ex) {
+            Logger.getLogger(OptionsAdminController.class.getName()).log(Level.SEVERE, "Error navegando a " + fxmlPath, ex);
+        }
+    }
 }

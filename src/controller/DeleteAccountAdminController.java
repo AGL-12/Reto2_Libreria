@@ -1,158 +1,176 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import java.io.IOException;
-import java.util.Optional;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Stage;
-import model.Profile;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import model.ClassDAO;
+import model.DBImplementation;
+import model.User;
 
 /**
- * FXML Controller class for deleting user accounts as an Admin.
+ * Controlador de la ventana de eliminar usuarios siendo admin
+ * Es una ventana que solo tiene acceso administrador
+ * Cueenta con un ComboBox para seleccionar usuario a eliminar
+ * @author unai azkorra
+ * @version 1.0
  */
-public class DeleteAccountAdminController implements Initializable {
+public class DeleteAccountAdminController implements Initializable{
+
+    private static final Logger LOGGER = Logger.getLogger(DeleteAccountAdminController.class.getName());
+
+    private final ClassDAO dao = new DBImplementation(); 
 
     @FXML
-    private ComboBox<String> ComboBoxUser; // ComboBox with all users
-
+    private ComboBox<User> ComboBoxUser; 
+    
     @FXML
-    private TextField TextFieldPassword; // Password field for confirmation
-
-    private Profile profile; // Currently logged-in admin
-
+    private TextField TextFieldPassword;
     @FXML
-    private Button Button_Cancel; // Button to cancel the action
+    private Button Button_Delete;
     @FXML
-    private Button Button_Delete; // Button to delete selected user
+    private Button Button_Cancel;
 
-    // Set the current admin profile
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    /**
+     * Inicializa los componentes de la ventana y configura el comboBox para tener cargados los usuarios
+     */
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        LOGGER.info("Inicializando ventana Delete Account Admin...");
+
+        // 1. CARGAR USUARIOS
+        cargarUsuarios();
+
+        // 2. CONFIGURACIÓN INICIAL
+        Button_Delete.setDisable(true);
+
+        if (ComboBoxUser != null) {
+            ComboBoxUser.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> validarBoton());
+        }
+        
+        TextFieldPassword.textProperty().addListener((obs, oldVal, newVal) -> validarBoton());
+
     }
 
-    // Populate the ComboBox with users from the controller
-    public void setComboBoxUser() {
-        //List<String> users = cont.comboBoxInsert();
-        ComboBoxUser.getItems().clear();
-        //ComboBoxUser.getItems().addAll(users);
-    }
-
-    // Cancel button action: returns to MenuWindow
-    @FXML
-    private void cancel() {
+    /**
+     * metodo para cargar los usuarios en el comboBox
+     */
+    private void cargarUsuarios() {
         try {
-            FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
+            List<User> listaUsuarios = dao.getAllUsers();
+            System.out.println(listaUsuarios.toString());
+            
+            // --- CORRECCIÓN: Usamos 'ComboBoxUser' ---
+            // Aseguramos que la lista no sea nula para evitar errores
+            if (listaUsuarios != null) {
+                ComboBoxUser.setItems(FXCollections.observableArrayList(listaUsuarios));
+            }
+            
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error al cargar los usuarios", ex);
+            showAlert("Error", "No se pudieron cargar los usuarios: " + ex.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
 
-            // Close current window
+    /**
+     * metodo para validar que los campos esten bien al momento de inicializar
+     */
+    private void validarBoton() {
+        boolean usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem() != null;
+        boolean contrasenaEscrita = !TextFieldPassword.getText().trim().isEmpty();
+        Button_Delete.setDisable(!(usuarioSeleccionado && contrasenaEscrita));
+    }
+
+    /**
+     * metodo para eliminar el usuario seleccionado
+     * @param event se dispara al confirmar la eliminacion del usuario
+     */
+    @FXML
+    private void delete(ActionEvent event) {
+        LOGGER.info("Intentando borrar usuario desde Admin...");
+
+        User usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem();
+        String passwordEscrita = TextFieldPassword.getText();
+
+        if (usuarioSeleccionado == null) return;
+
+        // Validación de contraseña
+        if (!usuarioSeleccionado.getPassword().equals(passwordEscrita)) {
+            showAlert("Error de Contraseña", "La contraseña introducida no coincide con la del usuario.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
+                "¿Estás seguro de que deseas ELIMINAR al usuario: " + usuarioSeleccionado.getName() + "?", 
+                ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait();
+
+        if (confirm.getResult() == ButtonType.YES) {
+            try {
+                // LLamada al método correcto dropOutUser que implementaste en DBImplementation
+                dao.dropOutUser(usuarioSeleccionado);
+                
+                showAlert("Éxito", "Usuario eliminado correctamente.", Alert.AlertType.INFORMATION);
+
+                cargarUsuarios(); // Recargar lista
+                TextFieldPassword.clear();
+
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Error al borrar en BD", ex);
+                showAlert("Error", "No se pudo borrar el usuario.", Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    /**
+     * se usa para cancelar la operacion y regresas a la ventana de operaciones que puede hacer el adminsitrador
+     * @param event 
+     */
+    @FXML
+    private void cancel(ActionEvent event) {
+        try {
+
+            Parent root = FXMLLoader.load(getClass().getResource("/view/OptionsAdmin.fxml"));
+
             Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-            currentStage.close();
+
+            Scene scene = new Scene(root);
+            currentStage.setScene(scene);
+            currentStage.show();
 
         } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "Error al volver al menú de administración", ex);
         }
     }
 
-    // Delete button action: deletes the selected user
-    @FXML
-    private void delete() {
-        if (TextFieldPassword.getText().isEmpty()) {
-            javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            error.setTitle("Error");
-            error.setHeaderText("Password required");
-            error.setContentText("Please enter your password to delete the account.");
-            error.showAndWait();
-            return;
-        }
-        
-        if (ComboBoxUser.getValue() == null || ComboBoxUser.getValue().isEmpty()) {
-            javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            error.setTitle("Error");
-            error.setHeaderText("User not selected");
-            error.setContentText("Please select a user to delete.");
-            error.showAndWait();
-            return;
-        }
-        
-        Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete account");
-        alert.setHeaderText("Are you sure you want to delete this account?");
-        alert.setContentText("This action cannot be undone.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                String userToDelete = ComboBoxUser.getValue();
-                String adminPassword = TextFieldPassword.getText();
-                String adminUsername = profile.getUsername();
-                
-                //Boolean success = cont.dropOutAdmin(userToDelete, adminUsername, adminPassword);
-                /*
-                    controlAlert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Deleted account");
-                    successAlert.setHeaderText(null);
-                    successAlert.setContentText("The account has been successfully deleted.");
-                    successAlert.showAndWait();
-                    
-                    try {
-                        javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-                        javafx.scene.Parent root = fxmlLoader.load();
-
-                        controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-                        controllerWindow.setUsuario(profile);
-                        javafx.stage.Stage stage = new javafx.stage.Stage();
-                        stage.setScene(new javafx.scene.Scene(root));
-                        stage.show();
-                        Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-                        currentStage.close();
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                    error.setTitle("Error");
-                    error.setHeaderText("Incorrect password");
-                    error.setContentText("The password is incorrect. Please try again.");
-                    error.showAndWait();
-                }
-                */
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                error.setTitle("Error");
-                error.setHeaderText("The account could not be deleted.");
-                error.setContentText(ex.getMessage());
-                error.showAndWait();
-            }
-        } else {
-            System.out.println("Deletion cancelled by the user.");
-        }
+    /**
+     * se usa para avisar de psoibles errores al usuario de la aplicacion
+     * @param title
+     * @param message
+     * @param type 
+     */
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic can be added here if needed
-    }
+    
 }

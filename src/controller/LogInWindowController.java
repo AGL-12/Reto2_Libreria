@@ -7,17 +7,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
@@ -48,28 +45,6 @@ public class LogInWindowController {
     private Label labelIncorrecto;
 
     private final ClassDAO dao = new DBImplementation();
-
-    // 2. VARIABLES PARA EL CÁLCULO DE MOVIMIENTO
-    private double xOffset = 0;
-    private double yOffset = 0;
-
-    public void initialize() {
-        loginRoot.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                xOffset = event.getSceneX();
-                yOffset = event.getSceneY();
-            }
-        });
-        loginRoot.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                Stage stage = (Stage) loginRoot.getScene().getWindow();
-                stage.setX(event.getScreenX() - xOffset);
-                stage.setY(event.getScreenY() - yOffset);
-            }
-        });
-    }
 
     /**
      * Opens the SignUp window.
@@ -119,7 +94,7 @@ public class LogInWindowController {
                     @Override
                     public void run() {
                         Button_LogIn.setDisable(false); // Reactivar botón
-                        
+
                         if (profileEncontrado != null) {
                             UserSession.getInstance().setUser(profileEncontrado);
                             OpenMain();
@@ -132,34 +107,12 @@ public class LogInWindowController {
         }).start();
     }
 
+    /**
+     * Metodo para volver a MainBookController.java
+     */
     @FXML
     private void backToMain(ActionEvent event) {
-        try {
-            // 1. Cargamos la vista GRANDE (Main)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
-            Parent root = loader.load();
-
-            MainBookStoreController mainUser = loader.getController();
-            mainUser.headerController.setMode(UserSession.getInstance().getUser(), null);
-
-            // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
-            Stage oldStage = (Stage) Button_LogIn.getScene().getWindow();
-            Stage newStage = new Stage();
-
-            // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
-            newStage.initStyle(StageStyle.DECORATED);
-
-            newStage.setScene(new Scene(root));
-            newStage.sizeToScene();
-
-            // 3. Centramos en pantalla
-            newStage.centerOnScreen();
-
-            newStage.show();
-            oldStage.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LogInWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        OpenMain();
     }
 
     public void OpenMain() {
@@ -172,6 +125,10 @@ public class LogInWindowController {
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
+
+            stage.sizeToScene();
+            stage.centerOnScreen();
+
             stage.show();
 
             // Cerramos la ventana actual

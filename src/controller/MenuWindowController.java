@@ -1,158 +1,105 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.io.IOException;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import model.Admin;
-import model.Profile;
-import model.User;
 import model.UserSession;
 
 /**
- * Controller for the main Menu window. Handles navigation to modify, delete,
- * and logout actions.
+ * Controlador de la ventana de opciones del usuario Es una ventana que solo
+ * tiene acceso el usuario es una ventana intermedia
+ *
+ * @author unai azkorra
+ * @version 1.0
  */
-public class MenuWindowController implements Initializable {
+public class MenuWindowController {
+
+    private static final Logger LOGGER = Logger.getLogger(MenuWindowController.class.getName());
 
     @FXML
-    private Button Button_Delete;
-
+    private Button btnModifyProfile;
     @FXML
-    private Button Button_Modify;
-
+    private Button btnDeleteAccount;
     @FXML
-    private Button Button_Historial;
-
+    private Button btnHistory;
     @FXML
-    private Button Button_LogOut;
-
+    private Button btnBack;
     @FXML
     private Label label_Username;
 
     /**
-     * Opens the Modify window.
+     * abre la ventana para que el usuario modifique sus propios
      */
     @FXML
-    private void modifyVentana(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ModifyWindow.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-
-            Stage currentStage = (Stage) Button_Modify.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void handleModifyAction(ActionEvent event) {
+        openWindow("/view/ModifyWindow.fxml", "Modificar Perfil", null);
     }
 
     /**
-     * Opens the Delete Account window depending on profile type. Users open
-     * DeleteAccount; Admins open DeleteAccountAdmin.
+     * abre el historial de compras del usuario
+     *
+     * @param event
      */
     @FXML
-    private void delete() {
-        /*
-        try {
-            FXMLLoader fxmlLoader;
-            if (profile instanceof User) {
-                fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccount.fxml"));
-                Parent root = fxmlLoader.load();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.show();
-                Stage currentStage = (Stage) Button_Delete.getScene().getWindow();
-                currentStage.close();
+    private void handleHistoryAction(ActionEvent event) {
+        openWindow("/view/ShoppingHistory.fxml", "Mi Historial", "shop history");
+    }
 
-            } else if (profile instanceof Admin) {
-                fxmlLoader = new FXMLLoader(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
-                Parent root = fxmlLoader.load();
-                //controllerWindow.setComboBoxUser();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.show();
-                Stage currentStage = (Stage) Button_Delete.getScene().getWindow();
-                currentStage.close();
+    /**
+     * Abre la ventana para eliminar la cuenta del usuario
+     *
+     * @param event
+     */
+    @FXML
+    private void handleDeleteAction(ActionEvent event) {
+        openWindow("/view/DeleteAccount.fxml", "Borrar Cuenta", null);
+    }
+
+    /**
+     * abre la ventana principal
+     *
+     * @param event
+     */
+    @FXML
+    private void handleBackAction(ActionEvent event) {
+        openWindow("/view/MainBookStore.fxml", "Tienda de Libros", null);
+    }
+
+    /**
+     * Recive la ruta para abrir la siguente ventana de la ejecucion.
+     *
+     * @param fxmlPath
+     * @param title
+     * @param headermode
+     */
+    private void openWindow(String fxmlPath, String title, String headermode) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            if ("MainBookStore".contains(fxmlPath) || "ShoppingHistory".contains(fxmlPath)) {
+                MainBookStoreController main = loader.getController();
+                main.headerController.setMode(UserSession.getInstance().getUser(), headermode);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         */
-    }
+            Stage stage = (Stage) label_Username.getScene().getWindow();
 
-    /**
-     * Closes the current window (used for logout).
-     */
-    @FXML
-    private void cerrarVentana(ActionEvent event) {
-        try {
-            // 1. Cargamos la vista GRANDE (Main)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml")); // O el nombre de tu FXML principal
-            Parent root;
-            root = loader.load();
-
-            // Aquí recuperas el controlador del Main si necesitas pasarle datos de vuelta
-            // HeaderController mainController = loader.getController();
-            // mainController.setControl(Control);
-            Stage oldStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Stage newStage = new Stage();
-
-            // 2. IMPORTANTE: Volvemos al estilo con barra de título y botones
-            newStage.initStyle(StageStyle.DECORATED);
-
-            newStage.setScene(new Scene(root));
-            newStage.sizeToScene();
-
-            // 3. Centramos en pantalla
-            newStage.centerOnScreen();
-
-            newStage.show();
-            oldStage.close();
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic if needed
-    }
-
-    @FXML
-    private void historial(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle(title);
+            stage.centerOnScreen();
             stage.show();
 
-            Stage currentStage = (Stage) Button_Modify.getScene().getWindow();
-            currentStage.close();
-
         } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "Error al abrir la ventana: " + fxmlPath, ex);
         }
     }
 }

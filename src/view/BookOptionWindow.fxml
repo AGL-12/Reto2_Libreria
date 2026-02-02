@@ -15,13 +15,11 @@
       <RowConstraints maxHeight="170.00000610351563" minHeight="10.0" prefHeight="61.4000244140625" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="170.00000610351563" minHeight="0.0" prefHeight="65.60000152587892" vgrow="SOMETIMES" />
     <RowConstraints maxHeight="200.8" minHeight="10.0" prefHeight="64.79999847412108" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="263.600008392334" minHeight="10.0" prefHeight="70.00001831054689" vgrow="SOMETIMES" />
     <RowConstraints maxHeight="306.0000518798828" minHeight="10.0" prefHeight="41.59998779296876" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <Button fx:id="btnReturn" mnemonicParsing="false" onAction="#Return" text="Volver" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+      <Button fx:id="btnReturn" mnemonicParsing="false" onAction="#Return" text="Volver" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
       <Button fx:id="btnAdd" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createBook" text="Añadir Libro" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <Button fx:id="btnModify" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#modifyBook" text="Modificar Libro" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <Button fx:id="btnDelete" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#deleteBook" text="Eliminar Libro" GridPane.columnIndex="1" GridPane.rowIndex="3" />
    </children>
 </GridPane>

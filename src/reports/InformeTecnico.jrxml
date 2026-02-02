@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="InformeTecnicoPro" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+    
+    <style name="Title" forecolor="#FFFFFF" fontName="Arial" fontSize="26" isBold="true"/>
+    <style name="Header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+    <style name="Detail" fontName="Arial" fontSize="12"/>
+    <style name="StockAlerta" forecolor="#000000" fontName="Arial" fontSize="12">
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$F{stock} < 5]]></conditionExpression>
+            <style forecolor="#CC0000" isBold="true"/>
+        </conditionalStyle>
+    </style>
+
+    <queryString>
+        <![CDATA[SELECT title, editorial, stock, price FROM book ORDER BY stock ASC]]>
+    </queryString>
+
+    <field name="title" class="java.lang.String"/>
+    <field name="editorial" class="java.lang.String"/>
+    <field name="stock" class="java.lang.Integer"/>
+    <field name="price" class="java.lang.Float"/> <variable name="ValorTotal" class="java.lang.Float" calculation="Sum">
+        <variableExpression><![CDATA[$F{stock} * $F{price}]]></variableExpression>
+    </variable>
+
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+
+    <title>
+        <band height="80" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="80" backcolor="#2C3E50"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement style="Title" x="20" y="20" width="300" height="40"/>
+                <text><![CDATA[AUDITORÍA DE STOCK]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="350" y="25" width="185" height="20" forecolor="#BDC3C7"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[Reporte Oficial del Sistema]]></text>
+            </staticText>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="350" y="45" width="185" height="20" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Right">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="30" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="30" backcolor="#ECF0F1"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement style="Header" x="10" y="5" width="230" height="20"/>
+                <text><![CDATA[TÍTULO DEL LIBRO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Header" x="240" y="5" width="150" height="20"/>
+                <text><![CDATA[EDITORIAL]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Header" x="390" y="5" width="60" height="20"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[STOCK]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Header" x="460" y="5" width="85" height="20"/>
+                <textElement textAlignment="Right"/>
+                <text><![CDATA[PRECIO]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="25" splitType="Stretch">
+            <textField isStretchWithOverflow="true">
+                <reportElement style="Detail" x="10" y="2" width="230" height="20"/>
+                <textFieldExpression><![CDATA[$F{title}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement style="Detail" x="240" y="2" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{editorial}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement style="StockAlerta" x="390" y="2" width="60" height="20"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{stock}]]></textFieldExpression>
+            </textField>
+            
+            <textField pattern="#,##0.00 €">
+                <reportElement style="Detail" x="460" y="2" width="85" height="20"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{price}]]></textFieldExpression>
+            </textField>
+            
+            <line>
+                <reportElement x="0" y="24" width="555" height="1" forecolor="#E0E0E0"/>
+            </line>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="30" splitType="Stretch">
+            <frame>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="25" backcolor="#F2F2F2"/>
+                
+                <textField pattern="EEEEE dd MMMMM yyyy">
+                    <reportElement x="10" y="5" width="200" height="20" forecolor="#666666"/>
+                    <textElement verticalAlignment="Middle"/>
+                    <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+                </textField>
+                
+                <textField>
+                    <reportElement x="400" y="5" width="100" height="20" forecolor="#666666"/>
+                    <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                    <textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+                </textField>
+                
+                <textField evaluationTime="Report">
+                    <reportElement x="500" y="5" width="40" height="20" forecolor="#666666"/>
+                    <textElement verticalAlignment="Middle"/>
+                    <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+                </textField>
+            </frame>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="50">
+            <rectangle>
+                <reportElement x="320" y="10" width="235" height="30" backcolor="#F1C40F"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="330" y="15" width="100" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[VALOR TOTAL:]]></text>
+            </staticText>
+            <textField pattern="#,##0.00 €">
+                <reportElement x="440" y="15" width="105" height="20"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{ValorTotal}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

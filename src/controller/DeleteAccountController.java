@@ -1,136 +1,141 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.fxml.FXML;
-import javafx.stage.Stage;
-import model.Profile;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import model.DBImplementation;
+import model.Profile;
+import model.UserSession;
+
 
 /**
- * Controller for the Delete Account window for regular Users. This controller
- * allows a user to delete their own account.
+ * Controlador de la ventana de eliminar usuarios siendo el propio usuario
+ * Es una ventana que solo tiene acceso el usuario
+ * @author unai azkorra
+ * @version 1.0
  */
 public class DeleteAccountController implements Initializable {
 
-    // Label displaying the username of the logged-in user
+    private static final Logger LOGGER = Logger.getLogger(DeleteAccountController.class.getName());
+    private DBImplementation db = new DBImplementation();
+
     @FXML
     private Label LabelUsername;
-
-    // TextField to enter the user's password for confirmation
     @FXML
     private TextField TextFieldPassword;
-
-    // Buttons to cancel or execute deletion
     @FXML
     private Button Button_Cancel;
     @FXML
     private Button Button_Delete;
 
     /**
-     * Handles cancel button action. Closes the current window and returns to
-     * MenuWindow.
+     * al iniciar la ventana se establecen los parametros deseados antes de mostrar la interfaz al usuario
+     * en este caso mostramos el "username" del usuario loggeado
+     * @param location
+     * @param resources 
      */
-    @FXML
-    private void cancel() {
-        try {
-            javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            javafx.scene.Parent root = fxmlLoader.load();
-
-            controller.MenuWindowController controllerWindow = fxmlLoader.getController();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.show();
-            Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-            currentStage.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(MenuWindowController.class.getName()).log(Level.SEVERE, null, ex);
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        Profile currentUser = UserSession.getInstance().getUser();
+        if (currentUser != null) {
+            LabelUsername.setText(currentUser.getUsername());
         }
     }
-
+    
+    
     /**
-     * Handles delete button action. Confirms deletion and calls the Controller
-     * to remove the user account.
+     * Accion para auto-eliminarse la cuenta
+     * @param event 
      */
     @FXML
-    private void delete() {
-        if (TextFieldPassword.getText().isEmpty()) {
-            javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-            error.setTitle("Error");
-            error.setHeaderText("Password required");
-            error.setContentText("Please enter your password to delete the account.");
-            error.showAndWait();
-            return;
-        }
+    private void handleDelete(ActionEvent event) {
+        Profile currentUser = UserSession.getInstance().getUser();
+        String password = TextFieldPassword.getText();
 
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete account");
-        alert.setHeaderText("Are you sure you want to delete your account?");
-        alert.setContentText("This action cannot be undone..");
-
-        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+        // Verificar que la contraseña escrita coincida con la del usuario logueado
+        if (currentUser != null && currentUser.getPassword().equals(password)) {
             try {
-                String user, password;
-                user = LabelUsername.getText();
-                password = TextFieldPassword.getText();
-                //Boolean success = cont.dropOutUser(user, password);
-                /*
-                if (success) {
-                    javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                    successAlert.setTitle("Deleted account");
-                    successAlert.setHeaderText(null);
-                    successAlert.setContentText("Your account has been successfully deleted.");
-                    successAlert.showAndWait();
-                    
-                    try {
-                        javafx.fxml.FXMLLoader fxmlLoader = new javafx.fxml.FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
-                        javafx.scene.Parent root = fxmlLoader.load();
+                
+                db.dropOutUser(currentUser); 
 
-                        controller.LogInWindowController controllerWindow = fxmlLoader.getController();
-                        javafx.stage.Stage stage = new javafx.stage.Stage();
-                        stage.setScene(new javafx.scene.Scene(root));
-                        stage.show();
-                        Stage currentStage = (Stage) Button_Delete.getScene().getWindow();
-                        currentStage.close();
+                // Cerrar la sesión del usuario
+                UserSession.getInstance().setUser(null);
 
-                    } catch (IOException ex) {
-                        Logger.getLogger(DeleteAccountController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                    error.setTitle("Error");
-                    error.setHeaderText("Incorrect password");
-                    error.setContentText("The password is incorrect. Please try again.");
-                    error.showAndWait();
-                }
-                 */
+               
+                showAlert("Cuenta eliminada", "Tu cuenta ha sido borrada correctamente. Hasta pronto.", Alert.AlertType.INFORMATION);
+                
+                navigateTo("/view/LogInWindow.fxml", "Login - Book&Bugs");
+
             } catch (Exception ex) {
                 ex.printStackTrace();
-                javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                Alert error = new Alert(Alert.AlertType.ERROR);
                 error.setTitle("Error");
                 error.setHeaderText("The account could not be deleted.");
                 error.setContentText(ex.getMessage());
                 error.showAndWait();
+                LOGGER.log(Level.SEVERE, "Error al eliminar la cuenta", ex);
+                showAlert("Error", "No se pudo eliminar la cuenta. Inténtalo de nuevo.", Alert.AlertType.ERROR);
             }
+        } else {
+            showAlert("Error", "La contraseña introducida es incorrecta.", Alert.AlertType.ERROR);
         }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic if needed
+    /**
+     * Accion para cancelar la operacion 
+     * @param event 
+     */
+    @FXML
+    private void cancel(ActionEvent event) {
+        navigateTo("/view/MenuWindow.fxml", "Mi Menú");
     }
+
+    /**
+     * metodo para redirigir al usuario
+     * @param fxmlPath indica a que ventana se le redigira
+     * @param title  el titulo de la ventana a la que se le redirige
+     */
+    private void navigateTo(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            
+            // Obtener el Stage desde el botón que disparó el evento
+            Stage stage =  (Stage) LabelUsername.getScene().getWindow();
+            
+            stage.setScene(new Scene(root));
+            stage.setTitle(title);
+            stage.show();
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, "Error de navegación a " + fxmlPath, ex);
+        }
+    }
+
+    /**
+     * metodo para alertar al usuario de problemas a la hora de hacer alguna accion
+     * @param title
+     * @param content
+     * @param type 
+     */
+    private void showAlert(String title, String content, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
 }

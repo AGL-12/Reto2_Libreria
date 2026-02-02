@@ -12,6 +12,7 @@ public class Contain implements Serializable {
     private ContainId id;
 
     // 2. Atributos propios
+    @Column(name="quantity")
     private int quantity;
 
     @Transient
@@ -38,7 +39,7 @@ public class Contain implements Serializable {
         this.book = book;
 
         // Creamos el ID automáticamente usando los datos de los objetos
-        this.id = new ContainId(order.getIdOrder(), book.getISBN());
+        this.id = new ContainId(order.getIdOrder(),book.getISBN());
     }
 
 

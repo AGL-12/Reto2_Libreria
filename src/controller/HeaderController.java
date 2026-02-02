@@ -14,8 +14,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import model.Admin;
 import model.Profile;
 import model.User;
@@ -45,6 +45,8 @@ public class HeaderController {
     private Button btnOption;
     @FXML
     private Button btnLogOut;
+    @FXML
+    private StackPane stackSearch;
 
     // --- NUEVO GETTER ---
     // Esto permite que el MainBookStoreController escuche lo que escribes aquí
@@ -97,12 +99,35 @@ public class HeaderController {
 
     @FXML
     private void seeAllPurchase(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
+            Parent root = fxmlLoader.load();
+
+            Stage stage = (Stage) rootHeader.getScene().getWindow();
+            stage.setScene(new Scene(root));
+
+            // 1. Calculamos cuánto mide la ventana nueva
+            stage.sizeToScene();
+
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            stage.centerOnScreen();
+
+            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
+             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
+             *
+             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
+             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
+             * newStage.setX(centerX - (newStage.getWidth() / 2));
+             * newStage.setY(centerY - (newStage.getHeight() / 2));
+             */
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-
     @FXML
-    private void backToMain(ActionEvent event
-    ) {
+    private void backToMain(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
@@ -146,7 +171,6 @@ public class HeaderController {
             Stage newStage = new Stage();
 
             // Estilo sin bordes
-            newStage.initStyle(StageStyle.UNDECORATED);
             newStage.setScene(new Scene(root));
 
             // 1. Calculamos cuánto mide la ventana nueva
@@ -186,8 +210,6 @@ public class HeaderController {
             }
             Parent root = fxmlLoader.load();
 
-            //MainBookStoreController mainCont = fxmlLoader.getController();
-            //mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
             Stage stage = (Stage) rootHeader.getScene().getWindow();
             stage.setScene(new Scene(root));
 
@@ -217,6 +239,8 @@ public class HeaderController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
+            
+            UserSession.getInstance().setUser(null);
 
             MainBookStoreController main = fxmlLoader.getController();
             main.headerController.setMode(UserSession.getInstance().getUser(), null);
@@ -273,6 +297,7 @@ public class HeaderController {
             btnOption.setManaged(false);
             btnLogOut.setManaged(false);
             btnAllPurchase.setManaged(false);
+            btnBuy.setManaged(false);
         } else if (user instanceof User) {
             btnLogIn.setManaged(false);
             lblUserName.setText(user.getName());
@@ -285,8 +310,10 @@ public class HeaderController {
         }
         if (filter == null) {
             btnBackMain.setManaged(false);
+        }else {
+            stackSearch.setVisible(false);
         }
-        if (filter == "buying") {
+        if ("buying".equals(filter)) {
             btnBuy.setManaged(false);
         }
     }

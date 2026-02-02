@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
@@ -25,7 +24,6 @@ import model.Contain;
 import model.DBImplementation;
 import model.Order;
 import model.Profile;
-import model.User;
 import model.UserSession;
 
 /**
@@ -47,7 +45,6 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private Button btnComprar;
 
     // Si usas el Header incluido
-    @FXML
     public HeaderController headerController;
 
     // --- VARIABLES GLOBALES ---
@@ -154,8 +151,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     
 
     @Override
-    public void handle(ActionEvent event
-    ) {
+    public void handle(ActionEvent event) {
         actualizarPrecioTotal();
     }
 
