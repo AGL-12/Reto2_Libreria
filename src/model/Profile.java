@@ -34,7 +34,7 @@ public abstract class Profile implements Serializable {
     private String email;
     @Column(name="name")
     private String name;
-    @Column(name="telephone")
+    @Column(name="telephone", columnDefinition = "CHAR(9)")
     private String telephone;
     @Column(name="surname")
     private String surname;

@@ -79,7 +79,7 @@ public class SignUpWindowController implements Initializable {
      * Signs up a new user and navigates to MenuWindow if successful.
      */
     @FXML
-    private void signup() throws passwordequalspassword {
+    private void signup() {
         // 1. Recogida de datos
         String email = textFieldEmail.getText();
         String name = textFieldName.getText();
@@ -105,6 +105,12 @@ public class SignUpWindowController implements Initializable {
             // 2. Validaciones simples (sin BD)
             if (!pass.equals(passC)) {
                 throw new passwordequalspassword("Las contraseñas no coinciden");
+            }
+            if (!telephone.matches("\\d{9}")) {
+                 throw new passwordequalspassword("El telefono tiene que tener 9 digitos");
+            }
+             if (!cardN.matches("\\d{16}")) {
+                 throw new passwordequalspassword("La tarjeta de cuenta tiene que tener 16 digitos");
             }
         } catch (passwordequalspassword e) {
             showAlert(e.getMessage());

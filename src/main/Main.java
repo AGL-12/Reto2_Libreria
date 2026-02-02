@@ -99,7 +99,7 @@ public class Main extends Application {
             admin.setName("Jefe");
             admin.setSurname("Supremo");
             admin.setTelephone("600111222");
-            admin.setCurrentAccount("ES00-1234-5678"); // Campo específico de Admin
+            admin.setCurrentAccount("ES00123456789012"); // Campo específico de Admin
             session.save(admin);
 
             // --- USER ---

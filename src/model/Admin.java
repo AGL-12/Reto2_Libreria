@@ -16,7 +16,7 @@ import javax.persistence.*;
 @PrimaryKeyJoinColumn(name = "user_code")
 public class Admin extends Profile {
     
-    @Column(name = "current_account")
+    @Column(name = "current_account", columnDefinition = "CHAR(24)")
     private String currentAccount;
 
     public Admin(String currentAccount, String username, String password, String email, int userCode, String name, String telephone, String surname) {
