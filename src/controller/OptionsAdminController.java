@@ -81,20 +81,26 @@ public class OptionsAdminController {
      * @param fxmlPath 
      */
     private void navigateTo(ActionEvent event, String fxmlPath) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = fxmlLoader.load();
-            MainBookStoreController main = fxmlLoader.getController();
-            main.headerController.setMode(UserSession.getInstance().getUser(), null);
-            
-            // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            
-            stage.setScene(new Scene(root));
-            stage.show();
+    try {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
+        Parent root = fxmlLoader.load();
+        
+        // Obtener el controlador de forma genérica
+        Object controller = fxmlLoader.getController();
 
-        } catch (IOException ex) {
-            Logger.getLogger(OptionsAdminController.class.getName()).log(Level.SEVERE, "Error navegando a " + fxmlPath, ex);
+        // Solo si el controlador es de tipo MainBookStoreController, configuramos el header
+        if (controller instanceof MainBookStoreController) {
+            MainBookStoreController main = (MainBookStoreController) controller;
+            main.headerController.setMode(UserSession.getInstance().getUser(), null);
         }
+        
+        // El resto del código para mostrar la ventana permanece igual
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.show();
+
+    } catch (IOException ex) {
+        Logger.getLogger(OptionsAdminController.class.getName()).log(Level.SEVERE, "Error navegando a " + fxmlPath, ex);
     }
+}
 }

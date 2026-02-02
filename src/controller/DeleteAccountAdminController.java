@@ -21,24 +21,23 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.ClassDAO;
 import model.DBImplementation;
+import model.Profile;
 import model.User;
+import model.UserSession;
 
 /**
- * Controlador de la ventana de eliminar usuarios siendo admin
- * Es una ventana que solo tiene acceso administrador
- * Cueenta con un ComboBox para seleccionar usuario a eliminar
+ * Controlador de la ventana de eliminar usuarios siendo admin.
+ * Valida la operación mediante la contraseña del administrador en sesión.
  * @author unai azkorra
- * @version 1.0
+ * @version 1.1
  */
-public class DeleteAccountAdminController implements Initializable{
+public class DeleteAccountAdminController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(DeleteAccountAdminController.class.getName());
-
-    private final ClassDAO dao = new DBImplementation(); 
+    private final ClassDAO dao = new DBImplementation();
 
     @FXML
-    private ComboBox<User> ComboBoxUser; 
-    
+    private ComboBox<User> ComboBoxUser;
     @FXML
     private TextField TextFieldPassword;
     @FXML
@@ -46,124 +45,67 @@ public class DeleteAccountAdminController implements Initializable{
     @FXML
     private Button Button_Cancel;
 
-    /**
-     * Inicializa los componentes de la ventana y configura el comboBox para tener cargados los usuarios
-     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        LOGGER.info("Inicializando ventana Delete Account Admin...");
-
-        // 1. CARGAR USUARIOS
         cargarUsuarios();
-
-        // 2. CONFIGURACIÓN INICIAL
-        Button_Delete.setDisable(true);
-
-        if (ComboBoxUser != null) {
-            ComboBoxUser.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> validarBoton());
-        }
-        
-        TextFieldPassword.textProperty().addListener((obs, oldVal, newVal) -> validarBoton());
-
     }
 
-    /**
-     * metodo para cargar los usuarios en el comboBox
-     */
     private void cargarUsuarios() {
         try {
-            List<User> listaUsuarios = dao.getAllUsers();
-            System.out.println(listaUsuarios.toString());
-            
-            // --- CORRECCIÓN: Usamos 'ComboBoxUser' ---
-            // Aseguramos que la lista no sea nula para evitar errores
-            if (listaUsuarios != null) {
-                ComboBoxUser.setItems(FXCollections.observableArrayList(listaUsuarios));
-            }
-            
+            List<User> users = dao.getAllUsers();
+            ComboBoxUser.setItems(FXCollections.observableArrayList(users));
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error al cargar los usuarios", ex);
-            showAlert("Error", "No se pudieron cargar los usuarios: " + ex.getMessage(), Alert.AlertType.ERROR);
+            LOGGER.log(Level.SEVERE, "Error al cargar usuarios", ex);
         }
     }
 
-    /**
-     * metodo para validar que los campos esten bien al momento de inicializar
-     */
-    private void validarBoton() {
-        boolean usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem() != null;
-        boolean contrasenaEscrita = !TextFieldPassword.getText().trim().isEmpty();
-        Button_Delete.setDisable(!(usuarioSeleccionado && contrasenaEscrita));
-    }
-
-    /**
-     * metodo para eliminar el usuario seleccionado
-     * @param event se dispara al confirmar la eliminacion del usuario
-     */
     @FXML
     private void delete(ActionEvent event) {
-        LOGGER.info("Intentando borrar usuario desde Admin...");
+        User selectedUser = ComboBoxUser.getSelectionModel().getSelectedItem();
+        String inputPassword = TextFieldPassword.getText();
+        
+        // Obtenemos el perfil del administrador logueado desde la sesión
+        Profile adminProfile = UserSession.getInstance().getUser();
 
-        User usuarioSeleccionado = ComboBoxUser.getSelectionModel().getSelectedItem();
-        String passwordEscrita = TextFieldPassword.getText();
-
-        if (usuarioSeleccionado == null) return;
-
-        // Validación de contraseña
-        if (!usuarioSeleccionado.getPassword().equals(passwordEscrita)) {
-            showAlert("Error de Contraseña", "La contraseña introducida no coincide con la del usuario.", Alert.AlertType.WARNING);
+        if (selectedUser == null) {
+            showAlert("Selección vacía", "Por favor, selecciona un usuario para eliminar.", Alert.AlertType.WARNING);
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                "¿Estás seguro de que deseas ELIMINAR al usuario: " + usuarioSeleccionado.getName() + "?", 
-                ButtonType.YES, ButtonType.NO);
-        confirm.showAndWait();
+        // CAMBIO DE LÓGICA: Se compara con la contraseña del ADMIN en sesión
+        if (adminProfile != null && adminProfile.getPassword().equals(inputPassword)) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de que deseas eliminar al usuario " + selectedUser.getUsername() + "?", ButtonType.YES, ButtonType.NO);
+            confirm.showAndWait();
 
-        if (confirm.getResult() == ButtonType.YES) {
-            try {
-                // LLamada al método correcto dropOutUser que implementaste en DBImplementation
-                dao.dropOutUser(usuarioSeleccionado);
-                
-                showAlert("Éxito", "Usuario eliminado correctamente.", Alert.AlertType.INFORMATION);
-
-                cargarUsuarios(); // Recargar lista
-                TextFieldPassword.clear();
-
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, "Error al borrar en BD", ex);
-                showAlert("Error", "No se pudo borrar el usuario.", Alert.AlertType.ERROR);
+            if (confirm.getResult() == ButtonType.YES) {
+                try {
+                    dao.dropOutUser(selectedUser);
+                    showAlert("Éxito", "Usuario eliminado correctamente.", Alert.AlertType.INFORMATION);
+                    cargarUsuarios();
+                    TextFieldPassword.clear();
+                } catch (Exception ex) {
+                    LOGGER.log(Level.SEVERE, "Error al borrar en BD", ex);
+                    showAlert("Error", "No se pudo borrar el usuario.", Alert.AlertType.ERROR);
+                }
             }
+        } else {
+            showAlert("Error de autenticación", "La contraseña del administrador es incorrecta.", Alert.AlertType.ERROR);
         }
     }
 
-    /**
-     * se usa para cancelar la operacion y regresas a la ventana de operaciones que puede hacer el adminsitrador
-     * @param event 
-     */
     @FXML
     private void cancel(ActionEvent event) {
         try {
-
             Parent root = FXMLLoader.load(getClass().getResource("/view/OptionsAdmin.fxml"));
-
             Stage currentStage = (Stage) Button_Cancel.getScene().getWindow();
-
             Scene scene = new Scene(root);
             currentStage.setScene(scene);
             currentStage.show();
-
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Error al volver al menú de administración", ex);
         }
     }
 
-    /**
-     * se usa para avisar de psoibles errores al usuario de la aplicacion
-     * @param title
-     * @param message
-     * @param type 
-     */
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -171,6 +113,4 @@ public class DeleteAccountAdminController implements Initializable{
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-    
 }

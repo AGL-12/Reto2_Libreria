@@ -16,7 +16,7 @@ import javax.persistence.*;
 @Table(name = "user")
 @PrimaryKeyJoinColumn(name = "user_code") // La FK que une con Profile es también la PK de User
 public class User extends Profile {
-
+    @Column(name="gender")
     private String gender;
 
     @Column(name = "card_number")

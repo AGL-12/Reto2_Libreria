@@ -123,15 +123,6 @@ public class BookCRUDWindowController implements Initializable {
                 habilitarCampos(false);
                 txtISBN.setDisable(false); // Se habilita para buscar primero
                 break;
-            case "delete":
-                btnConfirm.setText("Eliminar Libro");
-                limpiarCampos();
-                habilitarCampos(false);
-                txtISBN.setDisable(false);
-                txtISBN.setPromptText("Escribe ISBN y pulsa Enter");
-                // En delete, el botón confirmar se deshabilita hasta encontrar el libro
-                btnConfirm.setDisable(true);
-                break;
         }
     }
 
