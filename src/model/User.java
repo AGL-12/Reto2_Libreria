@@ -16,10 +16,10 @@ import javax.persistence.*;
 @Table(name = "user")
 @PrimaryKeyJoinColumn(name = "user_code") // La FK que une con Profile es también la PK de User
 public class User extends Profile {
-
+    @Column(name="gender")
     private String gender;
 
-    @Column(name = "card_number")
+    @Column(name = "card_number",columnDefinition = "CHAR(16)")
     private String cardNumber;
 
     // --- CAMBIO 1: CascadeType.ALL en Pedidos ---

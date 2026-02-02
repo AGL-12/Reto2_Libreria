@@ -13,9 +13,9 @@ import javafx.stage.Stage;
 import model.UserSession;
 
 /**
- * Controlador de la ventana de opciones para administrador
- * es una ventana que se puede acceder desde adminsitrador
- * es una ventana intermedia
+ * Controlador de la ventana de opciones para administrador es una ventana que
+ * se puede acceder desde adminsitrador es una ventana intermedia
+ *
  * @author unai azkorra
  * @version 1.0
  */
@@ -29,71 +29,84 @@ public class OptionsAdminController {
     private Button btnModificarUsuario;
     @FXML
     private Button btnLibro;
-    
+
     /**
-     * pasa al  metodo de navigacion la ruta para abrir la ventana de eliminar usuario
-     * @param event 
+     * pasa al metodo de navigacion la ruta para abrir la ventana de eliminar
+     * usuario
+     *
+     * @param event
      */
     @FXML
     private void deleteUserWindow(ActionEvent event) {
         navigateTo("/view/DeleteAccountAdmin.fxml");
     }
 
-     /**
-     * pasa al  metodo de navigacion la ruta para abrir la ventana de eliminar comentario
-     * @param event 
+    /**
+     * pasa al metodo de navigacion la ruta para abrir la ventana de eliminar
+     * comentario
+     *
+     * @param event
      */
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
         navigateTo("/view/DeleteComentWindow.fxml");
     }
-    
+
     /**
-     * pasa al  metodo de navigacion la ruta para abrir la ventana de modificar usuario
-     * @param event 
+     * pasa al metodo de navigacion la ruta para abrir la ventana de modificar
+     * usuario
+     *
+     * @param event
      */
     @FXML
     private void modificarUsuarioWindow(ActionEvent event) {
         navigateTo("/view/ModifyWindow.fxml");
     }
 
-     /**
-     * pasa al  metodo de navigacion la ruta para abrir la ventana de libro
-     * @param event 
+    /**
+     * pasa al metodo de navigacion la ruta para abrir la ventana de libro
+     *
+     * @param event
      */
     @FXML
     private void opcionesLibroWindow(ActionEvent event) {
         navigateTo("/view/BookOptionWindow.fxml");
     }
+
     /**
-     * pasa al  metodo de navigacion la ruta para abrir la ventana principal de la aplicacion
-     * @param event 
+     * pasa al metodo de navigacion la ruta para abrir la ventana principal de
+     * la aplicacion
+     *
+     * @param event
      */
     @FXML
     private void btnVolver(ActionEvent event) {
         navigateTo("/view/MainBookStore.fxml");
     }
-    
+
     /**
      * metodo para abrir la ventana correspondiente
+     *
      * @param event
-     * @param fxmlPath 
+     * @param fxmlPath
      */
     private void navigateTo(String fxmlPath) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
 
-            if ("/view/MainBookStore.fxml".equals(fxmlPath)) {
-                MainBookStoreController main = fxmlLoader.getController();
+            // Obtener el controlador de forma genérica
+            Object controller = fxmlLoader.getController();
+
+            // Solo si el controlador es de tipo MainBookStoreController, configuramos el header
+            if (controller instanceof MainBookStoreController) {
+                MainBookStoreController main = (MainBookStoreController) controller;
                 main.headerController.setMode(UserSession.getInstance().getUser(), null);
             }
 
-            // Obtenemos el Stage directamente del elemento que disparó el evento (Botón o Hyperlink)
+            // El resto del código para mostrar la ventana permanece igual
             Stage stage = (Stage) btnDeleteUser.getScene().getWindow();
-
             stage.setScene(new Scene(root));
-            stage.centerOnScreen();
             stage.show();
 
         } catch (IOException ex) {

@@ -103,8 +103,25 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     public void testLogIn() {
         clickOn("#btnLogIn");
         clickOn("#Button_SignUp");
+        clickOn("#textFieldEmail");
+        write("test@test.test");
+        clickOn("#textFieldUsername");
+        write("test");
+        clickOn("#textFieldName");
+        write("testname");
+        clickOn("#textFieldSurname");
+        write("testsurname");
+        clickOn("#textFieldTelephone");
+        write("101010101");
+        clickOn("#textFieldCardN");
+        write("0101010101010101");
+        clickOn("#textFieldPassword");
+        write("1234");
+        clickOn("#textFieldCPassword");
+        write("1234");
+        clickOn("#rButtonO");
         clickOn("#buttonSignUp");
         type(KeyCode.ENTER);
     }
-    
+
 }

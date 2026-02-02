@@ -42,9 +42,9 @@ public class MainBookStoreController {
     private final ClassDAO dao = new DBImplementation();
     // El temporizador para el delay
     private PauseTransition pause;
-    
+
     private ContextMenu globalMenu;
-    
+
     @FXML
     public void initialize() {
         allBooks = dao.getAllBooks();
@@ -87,20 +87,9 @@ public class MainBookStoreController {
 
         String busqueda = text.toLowerCase();
 
-        // FILTRO PROFESIONAL CON STREAMS
-        List<Book> filtrados = allBooks.stream()
-                .filter(b -> {
-                    // Condiciones de búsqueda (Título OR Autor OR ISBN)
-                    boolean coincideTitulo = b.getTitle().toLowerCase().contains(busqueda);
-                    // Ojo con los nulos en autor
-                    boolean coincideAutor = b.getAuthor() != null && b.getAuthor().toString().toLowerCase().contains(busqueda);
-                    boolean coincideISBN = String.valueOf(b.getISBN()).contains(busqueda);
+        List<Book> filteredBooks = filterBook(busqueda);
 
-                    return coincideTitulo || coincideAutor || coincideISBN;
-                })
-                .collect(Collectors.toList());
-
-        showBooks(filtrados);
+        showBooks(filteredBooks);
     }
 
     private void showBooks(List<Book> allBooks) {
@@ -121,5 +110,21 @@ public class MainBookStoreController {
         } catch (IOException ex) {
             Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private List<Book> filterBook(String busqueda) {
+        List<Book> resultados = new ArrayList<>();
+
+        for (Book b : allBooks) {
+            boolean coincideTitulo = b.getTitle().toLowerCase().contains(busqueda);
+            boolean coincideAutor = b.getAuthor() != null
+                    && b.getAuthor().toString().toLowerCase().contains(busqueda);
+            boolean coincideISBN = String.valueOf(b.getISBN()).contains(busqueda);
+            if (coincideTitulo || coincideAutor || coincideISBN) {
+                resultados.add(b);
+            }
+        }
+
+        return resultados;
     }
 }
