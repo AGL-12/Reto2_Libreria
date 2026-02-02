@@ -19,7 +19,7 @@ public class User extends Profile {
     @Column(name="gender")
     private String gender;
 
-    @Column(name = "card_number")
+    @Column(name = "card_number",columnDefinition = "CHAR(16)")
     private String cardNumber;
 
     // --- CAMBIO 1: CascadeType.ALL en Pedidos ---

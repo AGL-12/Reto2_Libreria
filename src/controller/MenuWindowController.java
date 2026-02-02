@@ -86,9 +86,13 @@ public class MenuWindowController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            if ("MainBookStore".contains(fxmlPath) || "ShoppingHistory".contains(fxmlPath)) {
-                MainBookStoreController main = loader.getController();
-                main.headerController.setMode(UserSession.getInstance().getUser(), headermode);
+            // Obtener el controlador de forma genérica
+            Object controller = loader.getController();
+
+            // Solo si el controlador es de tipo MainBookStoreController, configuramos el header
+            if (controller instanceof MainBookStoreController) {
+                MainBookStoreController main = (MainBookStoreController) controller;
+                main.headerController.setMode(UserSession.getInstance().getUser(), null);
             }
             Stage stage = (Stage) label_Username.getScene().getWindow();
 

@@ -101,9 +101,14 @@ public class SignUpWindowController implements Initializable {
                 gender = "Other";
             }
         }
-        // 2. Validaciones simples (sin BD)
-        if (!pass.equals(passC)) {
-            throw new passwordequalspassword("Las contraseñas no coinciden");
+        try {
+            // 2. Validaciones simples (sin BD)
+            if (!pass.equals(passC)) {
+                throw new passwordequalspassword("Las contraseñas no coinciden");
+            }
+        } catch (passwordequalspassword e) {
+            showAlert(e.getMessage());
+            return;
         }
 
         if (username.isEmpty() || pass.isEmpty() || email.isEmpty()) {

@@ -18,7 +18,7 @@ public class passwordequalspassword extends Exception {
 
     public passwordequalspassword(String text) {
         super(text);
-        showPopup(text);
+        //showPopup(text);
     }
 
     /**
