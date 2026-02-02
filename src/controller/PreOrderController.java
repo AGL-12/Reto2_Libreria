@@ -22,9 +22,10 @@ import javafx.scene.layout.VBox;
 import model.Book;
 
 /**
- * FXML Controller class
- *
- * @author ander
+ * Controlador para los elementos individuales (filas) dentro del carrito de la compra.
+ * Representa un libro específico en el pedido, permitiendo ajustar su cantidad o eliminarlo.
+ * * @author ander
+ * @version 1.0
  */
 public class PreOrderController {
 
@@ -44,6 +45,13 @@ public class PreOrderController {
     @FXML
     private Button btnDelete;
 
+    
+    /**
+     * Configura los datos del libro en la fila del carrito y establece los límites
+     * del selector de cantidad basándose en el stock disponible.
+     * * @param libro El libro a mostrar.
+     * @param cartController Referencia al controlador principal del carrito para permitir actualizaciones de precio.
+     */
     public void setData(Book libro, ShoppingCartController cartController) {
         this.libro = libro;
         this.shoppingCartController = cartController;
@@ -69,6 +77,15 @@ public class PreOrderController {
         }
     }
 
+    
+    /**
+     * Ajusta el tamaño de la portada del libro y aplica un recorte centrado (Center Crop)
+     * para mantener la estética de la interfaz.
+     * * @param imageView El contenedor donde se mostrará la imagen.
+     * @param image La imagen original del libro.
+     * @param targetWidth Ancho objetivo.
+     * @param targetHeight Alto objetivo.
+     */
     private void recortarImagen(ImageView imageView, Image image, double targetWidth, double targetHeight) {
         // Establecemos el tamaño final que tendrá el ImageView
         imageView.setFitWidth(targetWidth);
@@ -107,11 +124,21 @@ public class PreOrderController {
         return this.libro;
     }
 
+    
+    /**
+     * Obtiene la cantidad de ejemplares seleccionada actualmente por el usuario mediante el Spinner.
+     * * @return El valor entero seleccionado en el selector de cantidad.
+     */
     public int getCantidadSeleccionada() {
         // Devolvemos el número que el usuario ha elegido en el selector
         return spinnerCantidad.getValue();
     }
 
+    
+    /**
+     * Gestiona la acción de eliminar este libro específico del carrito de la compra.
+     * * @param event El evento de pulsación del botón de borrado.
+     */
     @FXML
     private void handleDelete(ActionEvent event) {
         if (shoppingCartController != null) {

@@ -19,9 +19,12 @@ import model.DBImplementation;
 import model.Order;
 
 /**
- * FXML Controller class
+ * Controlador de la vista de Detalles de Pedido. Se encarga de mostrar de forma
+ * detallada los artículos contenidos en un pedido realizado anteriormente por
+ * el usuario (historial).
  *
- * @author ander
+ * * @author ander
+ * @version 1.0
  */
 public class OrderDetailController implements Initializable {
 
@@ -40,29 +43,23 @@ public class OrderDetailController implements Initializable {
     private final ClassDAO dao = new DBImplementation();
 
     /**
-     * Initializes the controller class.
+     * Inicializa el controlador. Se ejecuta al cargar la vista FXML.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("Abre la ventana");
     }
 
+    /**
+     * Recibe los datos de un pedido y los vincula a la tabla de la interfaz.
+     * Muestra el título del libro, la cantidad comprada y el precio total de esa línea.
+     * * @param order El objeto Order que contiene la información del pedido a detallar.
+     */
     void setOrderData(Order order) {
-        // 1. Título de la ventana
         lblTitulo.setText("Pedido Nº " + order.getIdOrder());
-
-        // 2. Vinculación AUTOMÁTICA (Magia de JavaFX)
-        // Busca "getNombreLibro()" en Contain
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("nombreLibro"));
-
-        // Busca "getQuantity()" en Contain
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-
-        // Busca "getTotalEuros()" en Contain
         colPrecioTotal.setCellValueFactory(new PropertyValueFactory<>("totalEuros"));
-
-        // 3. Cargar datos
-        // Asumimos que la lista ya viene cargada del historial
         if (order.getListPreBuy() != null) {
             tableItems.getItems().setAll(order.getListPreBuy());
 

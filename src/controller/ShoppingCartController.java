@@ -29,9 +29,11 @@ import model.User;
 import model.UserSession;
 
 /**
- * FXML Controller class
- *
- * @author ander
+ * Controlador de la vista del Carrito de la Compra.
+ * Gestiona la visualización de los libros añadidos al pedido actual (en estado de preventa),
+ * el cálculo dinámico de precios totales y la finalización de la compra.
+ * * @author ander
+ * @version 1.0
  */
 public class ShoppingCartController implements Initializable, EventHandler<ActionEvent> {
 
@@ -55,6 +57,13 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
 
     private final ClassDAO dao = new DBImplementation();
 
+    
+    /**
+     * Inicializa la ventana cargando el pedido actual del usuario desde la base de datos.
+     * Si el carrito contiene elementos, procede a generar la vista.
+     * * @param url La ubicación relativa del archivo FXML.
+     * @param rb Los recursos utilizados para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         Profile userLogged = UserSession.getInstance().getUser();
@@ -73,6 +82,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    /**
+     * Limpia el contenedor visual y genera dinámicamente las filas de libros (PreOrder)
+     * basándose en la lista de productos del pedido actual.
+     */
     private void cargarVistaLibros() {
         Profile userLogged = UserSession.getInstance().getUser();
         // 1. LIMPIEZA OBLIGATORIA: Borramos lo visual y lo lógico para empezar de cero
@@ -112,6 +125,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    /**
+     * Recorre todos los elementos visuales del carrito para calcular el precio total
+     * multiplicando el precio unitario de cada libro por la cantidad seleccionada en su Spinner.
+     * Actualiza la etiqueta de texto del total en la interfaz.
+     */
     public void actualizarPrecioTotal() {
         double total = 0;
 
@@ -133,12 +151,20 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         lblTotal.setText("Total: " + String.format("%.2f", total) + " €");
     }
 
+    
+
     @Override
     public void handle(ActionEvent event
     ) {
         actualizarPrecioTotal();
     }
 
+    
+     /**
+     * Gestiona la lógica de finalización de compra. Sincroniza las cantidades elegidas
+     * por el usuario con el objeto de la base de datos y marca el pedido como pagado.
+     * * @param event El evento de pulsación del botón comprar.
+     */
     @FXML
     private void handleComprar(ActionEvent event
     ) {
@@ -175,6 +201,8 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    
+    
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String contenido) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -183,6 +211,12 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         alert.showAndWait();
     }
 
+    
+    /**
+     * Elimina un libro específico del carrito de la compra tanto de la base de datos
+     * como de la vista actual.
+     * * @param libroAEliminar El objeto Book que se desea retirar del pedido.
+     */
     public void eliminarLibroDelCarrito(Book libroAEliminar) {
         Profile userLogged = UserSession.getInstance().getUser();
         try {
