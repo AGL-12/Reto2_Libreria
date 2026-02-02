@@ -15,9 +15,9 @@ import javafx.stage.Stage;
 import model.UserSession;
 
 /**
- * Controlador de la ventana de opciones del usuario
- * Es una ventana que solo tiene acceso el usuario
- * es una ventana intermedia
+ * Controlador de la ventana de opciones del usuario Es una ventana que solo
+ * tiene acceso el usuario es una ventana intermedia
+ *
  * @author unai azkorra
  * @version 1.0
  */
@@ -37,7 +37,7 @@ public class MenuWindowController {
     private Label label_Username;
 
     /**
-     * abre la ventana para que el usuario modifique sus propios 
+     * abre la ventana para que el usuario modifique sus propios
      */
     @FXML
     private void handleModifyAction(ActionEvent event) {
@@ -46,7 +46,8 @@ public class MenuWindowController {
 
     /**
      * abre el historial de compras del usuario
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void handleHistoryAction(ActionEvent event) {
@@ -55,7 +56,8 @@ public class MenuWindowController {
 
     /**
      * Abre la ventana para eliminar la cuenta del usuario
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void handleDeleteAction(ActionEvent event) {
@@ -64,7 +66,8 @@ public class MenuWindowController {
 
     /**
      * abre la ventana principal
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void handleBackAction(ActionEvent event) {
@@ -73,22 +76,26 @@ public class MenuWindowController {
 
     /**
      * Recive la ruta para abrir la siguente ventana de la ejecucion.
+     *
      * @param fxmlPath
      * @param title
-     * @param headermode 
+     * @param headermode
      */
     private void openWindow(String fxmlPath, String title, String headermode) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            
-            MainBookStoreController main = loader.getController();
-            main.headerController.setMode(UserSession.getInstance().getUser(), headermode);
+
+            if ("MainBookStore".contains(fxmlPath) || "ShoppingHistory".contains(fxmlPath)) {
+                MainBookStoreController main = loader.getController();
+                main.headerController.setMode(UserSession.getInstance().getUser(), headermode);
+            }
             Stage stage = (Stage) label_Username.getScene().getWindow();
 
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setTitle(title);
+            stage.centerOnScreen();
             stage.show();
 
         } catch (IOException ex) {

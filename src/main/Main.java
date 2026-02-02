@@ -153,7 +153,7 @@ public class Main extends Application {
             Map<Long, Book> librosMap = new HashMap<>(); // Para recuperar libros luego por ISBN
 
             Object[][] datosLibros = {
-                {9780307474728L, "Cien años de soledad", 5, 471, 8, "La saga de la familia Buendía...", 18.5f, "Cátedra", "cien_anos.jpg"},
+                {9780307474728L, "Cien años de soledad", 5, 471, 0, "La saga de la familia Buendía...", 18.5f, "Cátedra", "cien_anos.jpg"},
                 {9780439139595L, "Harry Potter y el Cáliz de Fuego", 2, 636, 10, "Harry se enfrenta a desafíos...", 22.5f, "Salamandra", "hp4.jpg"},
                 {9780451524935L, "1984", 4, 328, 20, "El Gran Hermano te vigila...", 12.0f, "Debolsillo", "1984.jpg"},
                 {9788416440047L, "NOCHES BLANCAS", 8, 128, 30, "Un joven solitario e introvertido...", 17.1f, "Nórdica Libros", "noches_blancas.jpg"},

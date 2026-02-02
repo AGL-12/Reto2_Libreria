@@ -137,4 +137,5 @@ public class DeleteAccountController implements Initializable {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
 }

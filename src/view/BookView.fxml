@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -18,134 +19,134 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 
-<VBox fx:id="rootPane" stylesheets="@../css/style.css" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookViewController">
-   <children>
-      <fx:include fx:id="header" source="Header.fxml" />
-<MenuBar>
-  <menus>
-    <Menu mnemonicParsing="true" text="_Archivo"> <items>
-        <MenuItem text="Cerrar Sesión" onAction="#handleLogOut" accelerator="Ctrl+L"/>
-        <SeparatorMenuItem />
-        <MenuItem text="Salir" onAction="#handleExit" accelerator="Ctrl+Q"/>
-      </items>
-    </Menu>
+<VBox fx:id="rootPane" prefHeight="600.0" prefWidth="900.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookViewController">
+    <children>
+        <fx:include fx:id="header" source="Header.fxml" />
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="true" text="_Archivo"> 
+                    <items>
+                        <MenuItem accelerator="Ctrl+L" onAction="#handleLogOut" text="Cerrar Sesión" />
+                        <SeparatorMenuItem />
+                        <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                    </items>
+                </Menu>
 
-    <Menu mnemonicParsing="true" text="A_cciones">
-      <items>
-        <MenuItem fx:id="menuItemReport" text="Manual De Usuario" onAction="#handleReportAction" accelerator="Ctrl+P"/>
-        <MenuItem text="Informe Técnico de Stock" onAction="#handleInformeTecnico" accelerator="Ctrl+I"/>
-      </items>
-    </Menu>
+                <Menu mnemonicParsing="true" text="A_cciones">
+                    <items>
+                        <MenuItem fx:id="menuItemReport" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                        <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                    </items>
+                </Menu>
 
-    <Menu mnemonicParsing="true" text="A_yuda">
-      <items>
-        <SeparatorMenuItem />
-        <MenuItem text="Acerca de..." onAction="#handleAboutAction"/>
-      </items>
-    </Menu>
-  </menus>
-</MenuBar>
+                <Menu mnemonicParsing="true" text="A_yuda">
+                    <items>
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#handleAboutAction" text="Acerca de..." />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
 
-      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
-         <content>
-            <VBox spacing="20.0" styleClass="book-sheet">
-               <padding>
-                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-               </padding>
-               <children>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="20.0" styleClass="book-sheet">
+                    <padding>
+                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                    </padding>
+                    <children>
                   
-                  <GridPane hgap="20.0">
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="NEVER" minWidth="220.0" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                     </rowConstraints>
-                     <children>
-                        <VBox alignment="TOP_CENTER" spacing="10.0">
-                           <children>
-                              <ImageView fx:id="coverBook" styleClass="image-view-cover" fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/mood-heart.png" />
-                                 </image>
-                              </ImageView>
-                              <Button fx:id="btnAddToCart" onAction="#handleAddToCart" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-base: #4CAF50;" text="Añadir al carrito" textFill="WHITE" />
-                           </children>
-                        </VBox>
-                        <VBox spacing="10.0" styleClass="panel-info" GridPane.columnIndex="1">
-                           <children>
-                              <Label fx:id="titleBook" text="El Título del Libro">
-                                 <font>
-                                    <Font name="System Bold" size="24.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="authorName" text="Autor: Nombre Autor" />
-                              <Label fx:id="priceBook" text="Precio: 19.99 €" textFill="#2e7d32">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Separator prefWidth="200.0" />
-                              <Label text="Sinopsis:" underline="true" />
-                              <Label fx:id="sypnosis" text="Aquí va la sinopsis larga que hará que el contenido crezca..." wrapText="true" />
-                              <Label fx:id="stockBook" text="Stock: 5 unidades" />
-                           </children>
-                        </VBox>
-                     </children>
-                  </GridPane>
+                        <GridPane hgap="20.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="NEVER" minWidth="220.0" />
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                            <children>
+                                <VBox alignment="TOP_CENTER" spacing="10.0">
+                                    <children>
+                                        <ImageView fx:id="coverBook" fitHeight="250.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="image-view-cover">
+                                            <image>
+                                                <Image url="@../images/Book&amp;Bugs_Logo.png" />
+                                            </image>
+                                        </ImageView>
+                                        <Button fx:id="btnAddToCart" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleAddToCart" style="-fx-base: #4CAF50;" text="Añadir al carrito" textFill="WHITE" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="10.0" styleClass="panel-info" GridPane.columnIndex="1">
+                                    <children>
+                                        <Label fx:id="titleBook" text="El Título del Libro">
+                                            <font>
+                                                <Font name="System Bold" size="24.0" />
+                                            </font>
+                                        </Label>
+                                        <Label fx:id="authorName" text="Autor: Nombre Autor" />
+                                        <Label fx:id="priceBook" text="Precio: 19.99 €" textFill="#2e7d32">
+                                            <font>
+                                                <Font size="18.0" />
+                                            </font>
+                                        </Label>
+                                        <Separator prefWidth="200.0" />
+                                        <Label text="Sinopsis:" underline="true" />
+                                        <Label fx:id="sypnosis" text="Aquí va la sinopsis larga que hará que el contenido crezca..." wrapText="true" />
+                                        <Label fx:id="stockBook" text="Stock: 5 unidades" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </GridPane>
 
-                  <Separator prefWidth="200.0" />
+                        <Separator prefWidth="200.0" />
 
-                  <HBox alignment="CENTER_LEFT" spacing="10.0">
-                     <children>
-                        <Label text="Comentarios">
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
-                        </Label>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="btnAddComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Escribir opinión" />
-                     </children>
-                  </HBox>
-                  <VBox fx:id="cajaEscribir" managed="false" prefHeight="200.0" prefWidth="540.0" visible="false">
-                     <children>
-                        <HBox fx:id="buttonBox" alignment="CENTER_LEFT" spacing="10.0">
-                           <children>
-                              <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#handleCancelar" text="Cancelar" />
-                              <Button fx:id="btnPublicar" mnemonicParsing="false" onAction="#handlePublicar" text="Publicar" />
-                           </children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Label text="Comentarios">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button fx:id="btnAddComment" mnemonicParsing="false" onAction="#handleNewComment" text="+ Escribir opinión" />
+                            </children>
                         </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="15.0">
-                           <children>
-                              <Label fx:id="lblUsuario" text="Usuario">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="lblFecha" text="DD/MM/YYYY" textFill="#757575" />
-                              <fx:include fx:id="estrellas" source="StarRate.fxml" />
-                           </children>
-                           <padding>
-                              <Insets left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </HBox>
-                        <TextArea fx:id="txtNuevoComentario" wrapText="true" VBox.vgrow="ALWAYS">
-                           <VBox.margin>
-                              <Insets top="7.0" />
-                           </VBox.margin>
-                        </TextArea>
-                     </children>
-                  </VBox>
+                        <VBox fx:id="cajaEscribir" managed="false" prefHeight="200.0" prefWidth="540.0" visible="false">
+                            <children>
+                                <HBox fx:id="buttonBox" alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#handleCancelar" text="Cancelar" />
+                                        <Button fx:id="btnPublicar" mnemonicParsing="false" onAction="#handlePublicar" text="Publicar" />
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                    <children>
+                                        <Label fx:id="lblUsuario" text="Usuario">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <Label fx:id="lblFecha" text="DD/MM/YYYY" textFill="#757575" />
+                                        <fx:include fx:id="estrellas" source="StarRate.fxml" />
+                                    </children>
+                                    <padding>
+                                        <Insets left="10.0" right="10.0" top="10.0" />
+                                    </padding>
+                                </HBox>
+                                <TextArea fx:id="txtNuevoComentario" wrapText="true" VBox.vgrow="ALWAYS">
+                                    <VBox.margin>
+                                        <Insets top="7.0" />
+                                    </VBox.margin>
+                                </TextArea>
+                            </children>
+                        </VBox>
 
-                  <VBox fx:id="commentsContainer" spacing="15.0">
-                     </VBox>
+                        <VBox fx:id="commentsContainer" spacing="15.0">
+                        </VBox>
 
-               </children>
-            </VBox>
-         </content>
-      </ScrollPane>
-   </children>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
 </VBox>

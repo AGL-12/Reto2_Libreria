@@ -5,8 +5,6 @@
  */
 package controller;
 
-import static com.mchange.v2.c3p0.impl.C3P0Defaults.user;
-import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +37,6 @@ import net.sf.jasperreports.view.JasperViewer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
 // --------------------------------------
 
 //Imports para informe
@@ -56,9 +53,6 @@ import java.nio.file.StandardCopyOption;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.input.ContextMenuEvent;
-import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 
 /**
@@ -90,7 +84,7 @@ public class BookViewController {
     public HeaderController headerController;
 
     @FXML
-    private javafx.scene.control.MenuItem menuItemReport;
+    private MenuItem menuItemReport;
     @FXML
     private VBox rootPane;
 
