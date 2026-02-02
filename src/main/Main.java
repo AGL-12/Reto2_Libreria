@@ -99,7 +99,7 @@ public class Main extends Application {
             admin.setName("Jefe");
             admin.setSurname("Supremo");
             admin.setTelephone("600111222");
-            admin.setCurrentAccount("ES00123456789012"); // Campo específico de Admin
+            admin.setCurrentAccount("ES0012345678901212340928"); // Campo específico de Admin
             session.save(admin);
 
             // --- USER ---
@@ -111,7 +111,7 @@ public class Main extends Application {
             user1.setSurname("Cliente");
             user1.setTelephone("600333444");
             user1.setGender("Man");                // Campo específico de User
-            user1.setCardNumber("1111-2222-3333"); // Campo específico de User
+            user1.setCardNumber("1111222233334444"); // Campo específico de User
             session.save(user1);
 
             User user2 = new User();
@@ -122,7 +122,7 @@ public class Main extends Application {
             user2.setSurname("Lectora");
             user2.setTelephone("700999888");
             user2.setGender("Woman");
-            user2.setCardNumber("4444-5555-6666");
+            user2.setCardNumber("4444555566667777");
             session.save(user2);
 
             Map<Integer, Author> autores = new HashMap<>();
