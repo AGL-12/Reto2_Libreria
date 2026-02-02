@@ -12,6 +12,7 @@ public class Contain implements Serializable {
     private ContainId id;
 
     // 2. Atributos propios
+    @Column(name="quantity")
     private int quantity;
 
     @Transient

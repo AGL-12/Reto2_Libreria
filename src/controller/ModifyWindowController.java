@@ -22,6 +22,12 @@ import model.Profile;
 import model.User;
 import model.UserSession;
 
+/**
+ * Controlador de la ventana de modificar los datos de los usuarios
+ * es una ventana que se puede acceder desde usuario y administrador pero con diferente interface
+ * @author unai azkorra
+ * @version 1.0
+ */
 public class ModifyWindowController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(ModifyWindowController.class.getName());
@@ -37,6 +43,12 @@ public class ModifyWindowController implements Initializable {
     @FXML private PasswordField TextField_CNewPass;
     @FXML private ComboBox<User> comboUsers;
 
+    /**
+     * metodo que se usa para inicializar la interfaz con los datos necesarios
+     * se cargan los usuarios en el comboBox en la parte de Administrador
+     * @param location
+     * @param resources 
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Profile loggedProfile = UserSession.getInstance().getUser();
@@ -64,6 +76,10 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * metodo para rellenar automaticamente los datos de usuario
+     * @param p usuario seleccionado o loggeado
+     */
     private void fillUserData(Profile p) {
         this.profileToModify = p;
         LabelUsername.setText(p.getUsername());
@@ -73,6 +89,10 @@ public class ModifyWindowController implements Initializable {
         TextField_Telephone.setText(p.getTelephone());
     }
 
+    /**
+     * metodo para guardar todos los cambios realizados en el perfil selecionado
+     * @param event 
+     */
     @FXML
     private void save(ActionEvent event) {
         if (profileToModify == null) return;
@@ -105,21 +125,29 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * metodo para salir de la ventana de modificar 
+     * que abre un metodo para abrir la ventana previa a la que se encontraba el usuario/adminsitrador
+     * @param event 
+     */
     @FXML
     private void cancel(ActionEvent event) {
         handleNavigation(event);
     }
 
+    /**
+     * metodo para abrir la ventana previa despues de haber presionado el boton de cancelar
+     * @param event 
+     */
     private void handleNavigation(ActionEvent event) {
         try {
             Profile loggedProfile = UserSession.getInstance().getUser();
-            // Determinamos la vista según el rol para volver a la ventana correcta
+            //depende si es admin o usuario va a una ventana diferente
             String fxmlPath = (loggedProfile instanceof Admin) ? "/view/OptionsAdmin.fxml" : "/view/MenuWindow.fxml";
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            // Obtenemos el Stage actual desde el evento para evitar el NullPointerException
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             
             Scene scene = new Scene(root);

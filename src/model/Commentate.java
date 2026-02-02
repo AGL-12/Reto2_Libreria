@@ -17,6 +17,7 @@ public class Commentate implements Serializable {
 
     @Column(name = "date_creation")
     private Timestamp dateCreation;
+    @Column(name="valuation")
     private float valuation;
     
     @ManyToOne

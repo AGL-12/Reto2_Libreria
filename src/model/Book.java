@@ -11,17 +11,23 @@ public class Book implements Serializable {
     @Id
     @Column(name = "isbn")
     private long ISBN; // Asumo que el ISBN lo pones tú manualmente, si no, añade @GeneratedValue
+    @Column(name = "cover")
     private String cover;
+    @Column(name="title")
     private String title;
 
     @ManyToOne
     @JoinColumn(name = "id_author")
     private Author author;
+    @Column(name="sheets")
     private int sheets;
+    @Column(name="stock")
     private int stock;
-    @Column(length = 1000) // Para textos largos
+    @Column(length = 1000, name="synopsis") // Para textos largos
     private String sypnosis;
+    @Column(name="price")
     private float price;
+    @Column(name="editorial")
     private String editorial;
     // Lista inversa: Un libro tiene muchos comentarios.
     // fetch = FetchType.LAZY es el defecto (se cargan solo cuando los pides)
