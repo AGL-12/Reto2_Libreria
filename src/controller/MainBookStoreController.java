@@ -242,22 +242,6 @@ public class MainBookStoreController {
         System.exit(0);
     }
 
-    @FXML
-    private void handleLogOut(ActionEvent event) {
-        // 1. Limpiar sesión
-        UserSession.getInstance().cleanUserSession();
-
-        // 2. Navegar al Login (necesitas tu lógica de navegación aquí)
-        // Ejemplo rápido:
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
-            Parent root = loader.load();
-            mainRoot.getScene().setRoot(root); // Usamos cualquier nodo para pillar la escena
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
     @FXML
     private void handleInformeTecnico(ActionEvent event) {

@@ -1,5 +1,8 @@
 package controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -7,13 +10,20 @@ import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
 import javafx.stage.Stage;
 import main.Main;
+import model.Book;
 import model.ClassDAO;
+import model.Contain;
 import model.DBImplementation;
 import model.Order;
+import model.Profile;
+import model.User; // Importa tu modelo User
 import model.UserSession;
 import org.junit.After;
-import static org.junit.Assert.assertTrue;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxToolkit;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
@@ -21,18 +31,56 @@ import org.testfx.util.WaitForAsyncUtils;
 
 public class ShoppingHistoryControllerTest extends ApplicationTest {
 
-    ClassDAO dao = new DBImplementation();
+    private static ClassDAO dao = new DBImplementation();
+    private static final String TEST_USER = "UsuarioUnico";
+    private static final String TEST_PASS = "1234";
+    private Book testBook;
+    private Order testOrder;
 
-    @Before
-    public void setUp() throws Exception {
-        UserSession.getInstance().setUser(null);
+    @BeforeClass
+    public static void setupSpec() {
+        // 1. Limpieza preventiva
+        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
+        if (existente != null) {
+            dao.dropOutUser(existente);
+        }
+
+        // 2. CREACIÓN DIRECTA EN BASE DE DATOS
+        // Creamos el objeto directamente usando tu modelo para que ya exista al iniciar los tests
+        User nuevoUsuario = new User();
+        nuevoUsuario.setUsername(TEST_USER);
+        nuevoUsuario.setPassword(TEST_PASS);
+        nuevoUsuario.setEmail("test@unico.com");
+        nuevoUsuario.setName("Nombre");
+        nuevoUsuario.setSurname("Apellido");
+        nuevoUsuario.setTelephone("123456789");
+        // Asegúrate de que estos setters coincidan con los de tu clase User/Profile
+
+        dao.signUp(nuevoUsuario);
+    }
+
+    @AfterClass
+    public static void tearDownSpec() {
+        // Eliminación final tras todos los tests
+        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
+        if (existente != null) {
+            dao.dropOutUser(existente);
+        }
     }
 
     @After
     public void tearDown() throws Exception {
-        release(new KeyCode[]{});
-        release(new MouseButton[]{});
+        // Esto cierra la ventana de la aplicación después de cada test
         FxToolkit.hideStage();
+        release(new KeyCode[]{}); // Libera teclas por si acaso
+        release(new MouseButton[]{}); // Libera el ratón
+    }
+
+    @Before
+    public void setup() throws Exception {
+        // Esto vuelve a lanzar la aplicación antes de cada test
+        FxToolkit.registerPrimaryStage();
+        FxToolkit.setupApplication(Main.class);
     }
 
     @Override
@@ -41,69 +89,58 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testSignUp() {
-        clickOn("#btnLogIn");
-        clickOn("#Button_SignUp");
-        clickOn("#textFieldEmail").write("ejemplo@correo.com");
-        clickOn("#textFieldUsername").write("Ejemplo");
-        clickOn("#textFieldName").write("Ejemplo");
-        clickOn("#textFieldSurname").write("Prueba");
-        clickOn("#textFieldTelephone").write("123456789");
-        clickOn("#textFieldCardN").write("1234567890123456");
-        clickOn("#textFieldPassword").write("1234");
-        clickOn("#textFieldCPassword").write("1234");
-        clickOn("#rButtonM");
-        clickOn("#buttonSignUp");
-        // Nota: Asegúrate de que tras el registro el sistema te devuelva al login o main
+    public void verificarHistorial() {
+        testLogIn();
+        testNavegarAHistorial();
+        verifyThat("#tableOrders", isVisible());
+        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
+        assertTrue("El historial debe estar vacío", tabla.getItems().isEmpty());
+        testLogOut();
+        testLogIn();
+        String tituloLibro = "1984"; // Asegúrate de que este libro existe en tu BD
+        scroll(VerticalDirection.DOWN);
+        clickOn(tituloLibro);
+        WaitForAsyncUtils.waitForFxEvents();
+        clickOn("#btnAddToCart");
+        clickOn("Aceptar"); 
+        WaitForAsyncUtils.waitForFxEvents();
+        clickOn("#btnBuy");
+        clickOn("#btnComprar");
+        clickOn("Aceptar");
+        testNavegarAHistorial();
+        tabla = lookup("#tableOrders").queryAs(TableView.class);
+        assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());
     }
 
     private void testLogIn() {
+        // Al empezar, el usuario ya existe gracias al @BeforeClass
         clickOn("#btnLogIn");
-        clickOn("#TextField_Username").write("Ejemplo");
-        clickOn("#PasswordField_Password").write("1234");
+        clickOn("#TextField_Username").write(TEST_USER);
+        clickOn("#PasswordField_Password").write(TEST_PASS);
         clickOn("#Button_LogIn");
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     private void testNavegarAHistorial() {
-        testLogIn();
-        // Esperamos a que el Header procese el modo de usuario logueado
-        WaitForAsyncUtils.waitForFxEvents();
-        clickOn("#btnOption"); // Botón del Header para ir al menú
-        clickOn("#btnAllPurchase"); // ID real en MenuWindow para ir al historial
-    }
-
-    @Test
-    public void tablaVacia() {
-        // Primero registramos para asegurar que el usuario existe y no tiene compras
-        testSignUp();
-        testNavegarAHistorial();
-
-        verifyThat("#tableOrders", isVisible());
-        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
-        assertTrue("La tabla debería estar vacía para un usuario recién creado", tabla.getItems().isEmpty());
-    }
-
-    @Test
-    public void testCompraYVerificacionEnHistorial() {
-        testLogIn();
-
-        // 1. Añadir un libro (Ajusta el selector si .vbox-libro no es el ID de estilo)
-        clickOn("#tileBooks"); // Contenedor de libros en MainBookStore
-        // Suponiendo que haces clic en el primer libro que aparece
-        clickOn("#btnBuy"); // En el Header para ir a comprar
-
-        // 2. Finalizar compra en ShoppingCart.fxml
-        verifyThat("#btnBuy", isVisible()); // Validar botón de comprar
-        clickOn("#btnBuy"); // Acción de compra en el carrito
-
-        // 3. Navegar al Historial
         clickOn("#btnOption");
-        clickOn("#btnAllPurchase");
-
-        // 4. Verificación
-        verifyThat("#tableOrders", isVisible());
-        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
-        assertTrue("El historial debería contener el pedido recién realizado",
-                tabla.getItems().size() > 0);
+        clickOn("#btnHistory");
     }
+
+    private void testLogOut() {
+        // 1. Si estamos en la ventana de Historial, pulsamos Volver para ir al Menú
+        if (lookup("#btnVolver").tryQuery().isPresent()) {
+            clickOn("#btnVolver");
+            WaitForAsyncUtils.waitForFxEvents();
+        }
+
+        // 2. En el Menú (MenuWindow), abrimos el panel de opciones
+        // Según tus tests previos, el ID es btnOption
+        clickOn("#btnBack");
+
+        // 3. Pulsamos el botón de cerrar sesión
+        // Verifica en MenuWindow.fxml si el ID es btnLogOut o btnSalir
+        clickOn("#btnLogOut");
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
 }

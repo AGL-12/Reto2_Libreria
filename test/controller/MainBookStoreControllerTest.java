@@ -13,7 +13,9 @@ import model.UserSession;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
@@ -22,6 +24,7 @@ import static org.testfx.matcher.base.NodeMatchers.isVisible;
  *
  * @author Alexander
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MainBookStoreControllerTest extends ApplicationTest {
 
     ClassDAO dao = new DBImplementation();
@@ -47,7 +50,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testHeaderEstado() {
+    public void test01_HeaderEstado() {
         verifyThat("#btnLogIn", isVisible());
 
         Label name = lookup("#lblUserName").query();
@@ -59,7 +62,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testCargaLibros() {
+    public void test02_CargaLibros() {
         int total = dao.getAllBooks().size();
         // 1. Verificamos que el contenedor de libros es visible
         verifyThat("#tileBooks", isVisible());
@@ -70,7 +73,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testHeaderSearch() {
+    public void test03_HeaderSearch() {
         TilePane tileBooks = lookup("#tileBooks").query();
         int totalLibros = tileBooks.getChildren().size();
 
@@ -98,15 +101,16 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
         System.out.println("Test Buscador: OK.");
     }
+
     @Test
-    public void testClickBook() {
+    public void test04_ClickBook() {
         clickOn("1984");
         sleep(1500);
         clickOn("#btnBackMain");
     }
 
     @Test
-    public void testLogIn() {
+    public void test05_LogIn() {
         clickOn("#btnLogIn");
         clickOn("#Button_SignUp");
         clickOn("#textFieldEmail").write("test@test.test");
@@ -121,7 +125,10 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         clickOn("#buttonSignUp");
         sleep(1000);
         type(KeyCode.ENTER);
-        //header estado
+    }
+
+    @Test
+    public void test05_HeaderLogged() {
         sleep(2000);
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
@@ -133,6 +140,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         verifyThat("#txtSearch", isVisible());
 
         System.out.println("Test Header: OK. Estado Logged correcto (LogOut visible).");
+
     }
 
 }

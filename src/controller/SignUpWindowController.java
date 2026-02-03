@@ -107,10 +107,10 @@ public class SignUpWindowController implements Initializable {
                 throw new MyFormException("Las contraseñas no coinciden");
             }
             if (!telephone.matches("\\d{9}")) {
-                 throw new MyFormException("El telefono tiene que tener 9 digitos");
+                throw new MyFormException("El telefono tiene que tener 9 digitos");
             }
-             if (!cardN.matches("\\d{16}")) {
-                 throw new MyFormException("La tarjeta de cuenta tiene que tener 16 digitos");
+            if (!cardN.matches("\\d{16}")) {
+                throw new MyFormException("La tarjeta de cuenta tiene que tener 16 digitos");
             }
         } catch (MyFormException e) {
             showAlert(e.getMessage());
@@ -178,6 +178,9 @@ public class SignUpWindowController implements Initializable {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
+
+            MainBookStoreController main = fxmlLoader.getController();
+            main.headerController.setMode(userNew, null);
 
             //Usamos UserSesion Singlenton
             UserSession.getInstance().setUser(userNew);
