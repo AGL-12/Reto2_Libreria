@@ -15,9 +15,13 @@ import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 import model.Book;
 import model.ClassDAO;
 import model.Contain;
@@ -27,9 +31,10 @@ import model.Profile;
 import model.UserSession;
 
 /**
- * Controlador de la vista del Carrito de la Compra.
- * Gestiona la visualización de los libros añadidos al pedido actual (en estado de preventa),
- * el cálculo dinámico de precios totales y la finalización de la compra.
+ * Controlador de la vista del Carrito de la Compra. Gestiona la visualización
+ * de los libros añadidos al pedido actual (en estado de preventa), el cálculo
+ * dinámico de precios totales y la finalización de la compra.
+ *
  * * @author ander
  * @version 1.0
  */
@@ -43,6 +48,8 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private VBox vBoxResumen;
     @FXML
     private Button btnComprar;
+    @FXML
+    private MenuBar menuBar;
 
     // Si usas el Header incluido
     public HeaderController headerController;
@@ -54,10 +61,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
 
     private final ClassDAO dao = new DBImplementation();
 
-    
     /**
-     * Inicializa la ventana cargando el pedido actual del usuario desde la base de datos.
-     * Si el carrito contiene elementos, procede a generar la vista.
+     * Inicializa la ventana cargando el pedido actual del usuario desde la base
+     * de datos. Si el carrito contiene elementos, procede a generar la vista.
+     *
      * * @param url La ubicación relativa del archivo FXML.
      * @param rb Los recursos utilizados para localizar el objeto raíz.
      */
@@ -80,8 +87,8 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     /**
-     * Limpia el contenedor visual y genera dinámicamente las filas de libros (PreOrder)
-     * basándose en la lista de productos del pedido actual.
+     * Limpia el contenedor visual y genera dinámicamente las filas de libros
+     * (PreOrder) basándose en la lista de productos del pedido actual.
      */
     private void cargarVistaLibros() {
         Profile userLogged = UserSession.getInstance().getUser();
@@ -123,9 +130,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     /**
-     * Recorre todos los elementos visuales del carrito para calcular el precio total
-     * multiplicando el precio unitario de cada libro por la cantidad seleccionada en su Spinner.
-     * Actualiza la etiqueta de texto del total en la interfaz.
+     * Recorre todos los elementos visuales del carrito para calcular el precio
+     * total multiplicando el precio unitario de cada libro por la cantidad
+     * seleccionada en su Spinner. Actualiza la etiqueta de texto del total en
+     * la interfaz.
      */
     public void actualizarPrecioTotal() {
         double total = 0;
@@ -148,17 +156,16 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         lblTotal.setText("Total: " + String.format("%.2f", total) + " €");
     }
 
-    
-
     @Override
     public void handle(ActionEvent event) {
         actualizarPrecioTotal();
     }
 
-    
-     /**
-     * Gestiona la lógica de finalización de compra. Sincroniza las cantidades elegidas
-     * por el usuario con el objeto de la base de datos y marca el pedido como pagado.
+    /**
+     * Gestiona la lógica de finalización de compra. Sincroniza las cantidades
+     * elegidas por el usuario con el objeto de la base de datos y marca el
+     * pedido como pagado.
+     *
      * * @param event El evento de pulsación del botón comprar.
      */
     @FXML
@@ -197,8 +204,6 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
-    
-    
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String contenido) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -207,10 +212,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         alert.showAndWait();
     }
 
-    
     /**
-     * Elimina un libro específico del carrito de la compra tanto de la base de datos
-     * como de la vista actual.
+     * Elimina un libro específico del carrito de la compra tanto de la base de
+     * datos como de la vista actual.
+     *
      * * @param libroAEliminar El objeto Book que se desea retirar del pedido.
      */
     public void eliminarLibroDelCarrito(Book libroAEliminar) {
@@ -239,6 +244,93 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
         cargarVistaLibros();
         actualizarPrecioTotal();
+    }
+    
+    /**
+     * Navega a la vista principal de libros (BookView).
+     */
+    @FXML
+    private void handleBackToBooks(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
+            Parent root = loader.load();
+            
+            // Cambiamos la escena usando el Stage actual
+            Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error al cargar la vista de libros: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Navega a la vista del historial de compras.
+     */
+    @FXML
+    private void handleViewHistory(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error al cargar el historial: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    // --- MÉTODOS DE GESTIÓN (Ya existentes en tu código, asegúrate de que el FXML los llame) ---
+
+    @FXML
+    public void handleExit(ActionEvent event) {
+        // Cierra la aplicación
+        javafx.application.Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    public void handleLogOut(ActionEvent event) {
+        // Limpia la sesión y vuelve al Login
+        UserSession.getInstance().cleanUserSession();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        // Genera el informe JasperReports
+        // (Mantén el código de conexión JDBC que ya tienes implementado)
+    }
+
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        // Abre el PDF del manual de usuario
+    }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        // Muestra información de la app
+        showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
+    }
+    
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        // Aquí invocas tu lógica de JasperReports (JasperPrint, JasperViewer, etc.)
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Informe", "Generando informe técnico...");
+    }
+
+    private void showAlert(String bookStore_App_v10Desarrollado_por_MikelPr, Alert.AlertType alertType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
