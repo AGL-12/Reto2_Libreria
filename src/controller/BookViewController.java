@@ -217,34 +217,50 @@ public class BookViewController {
      *
      * * @param book El objeto libro con la información a mostrar.
      */
-    void setData(Book book) {
+void setData(Book book) {
         this.currentBook = book;
-        Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
 
-        // Definimos el tamaño de la imagen
-        cutOutImage(coverBook, originalImage, 140, 210);
+        // 1. Cargar la imagen (con protección por si falla el archivo)
+        try {
+            if (book.getCover() != null && !book.getCover().isEmpty()) {
+                Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
+                cutOutImage(coverBook, originalImage, 140, 210);
+            }
+        } catch (Exception e) {
+            System.out.println("Aviso: No se pudo cargar la imagen del libro " + book.getTitle());
+        }
 
+        // 2. Rellenar textos
         titleBook.setText(book.getTitle());
         authorName.setText(book.getAuthor().toString());
         priceBook.setText("precio: " + book.getPrice());
         sypnosis.setText(book.getSypnosis());
         stockBook.setText("Stock: " + book.getStock());
 
+        // 3. Cargar comentarios
         refreshList();
 
+        // 4. LÓGICA DE VISIBILIDAD DEL BOTÓN "COMPRAR"
         Profile user = UserSession.getInstance().getUser();
 
         if (user instanceof Admin) {
-            // El Admin NO compra
+            // CASO A: Es Administrador -> NUNCA puede comprar
             btnAddToCart.setVisible(false);
             btnAddToCart.setManaged(false);
+            
         } else {
-            // El Usuario SÍ compra
-            btnAddToCart.setVisible(true);
-            btnAddToCart.setManaged(true);
+            // CASO B: Es Usuario Normal (o invitado) -> Depende del Stock
+            if (book.getStock() > 0) {
+                // Hay stock -> Botón VISIBLE
+                btnAddToCart.setVisible(true);
+                btnAddToCart.setManaged(true);
+            } else {
+                // No hay stock (0) -> Botón OCULTO (Desaparece)
+                btnAddToCart.setVisible(false);
+                btnAddToCart.setManaged(false);
+            }
         }
     }
-
     /**
      * Maneja la acción de pulsar el botón "+ Escribir opinión".
      * <p>
