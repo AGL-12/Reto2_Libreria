@@ -13,7 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import model.ClassDAO;
 import model.DBImplementation;
@@ -27,7 +27,7 @@ import model.UserSession;
 public class LogInWindowController {
 
     @FXML
-    private AnchorPane loginRoot;
+    private GridPane loginRoot;
 
     @FXML
     private TextField TextField_Username;

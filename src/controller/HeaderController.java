@@ -238,7 +238,7 @@ public class HeaderController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
-            
+
             UserSession.getInstance().setUser(null);
 
             MainBookStoreController main = fxmlLoader.getController();
@@ -281,11 +281,14 @@ public class HeaderController {
         }
         if (filter == null) {
             btnBackMain.setManaged(false);
-        }else {
+        } else {
             stackSearch.setVisible(false);
         }
         if ("buying".equals(filter)) {
             btnBuy.setManaged(false);
+        }
+        if ("book view".equals(filter)) {
+            btnAllPurchase.setManaged(true);
         }
     }
 

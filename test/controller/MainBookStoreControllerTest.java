@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
-import static org.testfx.matcher.base.NodeMatchers.isVisible;
+import static org.testfx.matcher.base.NodeMatchers.*;
 
 /**
  *
@@ -52,6 +52,11 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     @Test
     public void test01_HeaderEstado() {
         verifyThat("#btnLogIn", isVisible());
+        verifyThat("#btnOption", isInvisible());
+        verifyThat("#btnLogOut", isInvisible());
+        verifyThat("#btnSearch", isInvisible());
+        verifyThat("#btnBackMain", isInvisible());
+        verifyThat("#btnAllPurchase", isInvisible());
 
         Label name = lookup("#lblUserName").query();
         Assert.assertEquals("Bienvenido", name.getText());
@@ -86,6 +91,8 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         // ESPERAR AL THREAD (PauseTransition de 0.5s)
         sleep(1000);
 
+        verifyThat("#btnSearch", isVisible());
+
         int librosFiltrados = tileBooks.getChildren().size();
         System.out.println("Libros tras buscar 'Harry': " + librosFiltrados);
 
@@ -94,6 +101,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         // Caso: Borrar búsqueda
         clickOn("#btnSearch");
         sleep(1000); // Esperar a que se restauren
+        verifyThat("#btnSearch", isInvisible());
 
         Assert.assertEquals("Al borrar, deben volver todos los libros",
                 totalLibros,
@@ -129,10 +137,13 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
     @Test
     public void test06_HeaderLogged() {
-        sleep(10000);
+        sleep(1000);
+        verifyThat("#btnLogIn", isInvisible());
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
-        verifyThat("#btnBuy", isVisible());
+        verifyThat("#btnSearch", isInvisible());
+        verifyThat("#btnBackMain", isInvisible());
+        verifyThat("#btnAllPurchase", isVisible());
 
         Label name = lookup("#lblUserName").query();
         Assert.assertEquals("testname", name.getText());
