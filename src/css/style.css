@@ -366,3 +366,35 @@
     -fx-background-color: #333333; 
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2); 
 }
+#mainRoot{
+    -fx-background-color: white;      
+}
+/* Estilo base para el contenedor del libro */
+.book-item {
+    -fx-background-color: white;      
+    -fx-background-radius: 8;          
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4); 
+    -fx-padding: 10;                   
+    -fx-cursor: hand;                 
+    -fx-transition: all 0.3s ease;     
+}
+
+/* Efecto HOVER*/
+.book-item:hover {
+    -fx-background-color: #f9f9f9;     
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 8); 
+    -fx-translate-y: -2;              
+}
+
+/* Opcional: Estilo para el título */
+.book-item .label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-text-fill: #333333;
+}
+
+/* Opcional: Título en negrita */
+#title {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}

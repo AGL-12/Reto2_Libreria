@@ -1,26 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" prefHeight="700.0" prefWidth="800.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainBookStoreController">
+<BorderPane fx:id="mainRoot" prefHeight="700.0" prefWidth="800.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainBookStoreController">
     <top>
-        <fx:include fx:id="header" source="Header.fxml" />
+        <VBox>
+            <children>
+                <fx:include fx:id="header" source="Header.fxml" />
+                <MenuBar>
+                    <menus>
+                        <Menu mnemonicParsing="true" text="_Archivo"> 
+                            <items>
+                                <MenuItem accelerator="Ctrl+L" onAction="#handleLogOut" text="Cerrar Sesión" />
+                                <SeparatorMenuItem />
+                                <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                            </items>
+                        </Menu>
+
+                        <Menu mnemonicParsing="true" text="A_cciones">
+                            <items>
+                                <MenuItem fx:id="menuItemReport" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                                <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                            </items>
+                        </Menu>
+
+                        <Menu mnemonicParsing="true" text="A_yuda">
+                            <items>
+                                <SeparatorMenuItem />
+                                <MenuItem onAction="#handleAboutAction" text="Acerca de..." />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </children>
+        </VBox>
     </top>
     <center>
         <VBox alignment="CENTER" BorderPane.alignment="CENTER">
             <children>
                 <ScrollPane fitToWidth="true" pannable="true" VBox.vgrow="ALWAYS">
-               <content>
-                  <TilePane fx:id="tileBooks" alignment="TOP_CENTER" hgap="20.0" prefColumns="3" tileAlignment="TOP_LEFT" vgap="20.0">
-                     <padding>
-                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                     </padding>
-                  </TilePane>
-               </content>
+                    <content>
+                        <TilePane fx:id="tileBooks" alignment="TOP_CENTER" hgap="20.0" prefColumns="3" tileAlignment="TOP_LEFT" vgap="20.0">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                        </TilePane>
+                    </content>
                 </ScrollPane>
             </children>
         </VBox>

@@ -30,7 +30,6 @@ import model.User;
 import model.UserSession;
 import model.Admin;
 
-
 // --- IMPORTS NUEVOS PARA EL INFORME ---
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.view.JasperViewer;
@@ -46,14 +45,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-
+import javafx.event.EventHandler;
 
 //Imports para click derecho
-
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-
 
 /**
  * FXML Controller class
@@ -108,36 +105,16 @@ public class BookViewController {
 
     @FXML
     private StarRateController estrellasController;
-    
+
     private ContextMenu globalMenu;
 
     private Profile currentUser = UserSession.getInstance().getUser();
 
     public void initialize() {
-        initContextMenu();
-        initGlobalContextMenu();
-    }
-
-    /**
-     * Configura el menú de clic derecho (Context Menu). Requerido para el 100%
-     * en controles avanzados.
-     */
-    private void initContextMenu() {
         if (currentUser instanceof Admin) {
             btnAddComment.setVisible(false);
         }
-        /*
-        ContextMenu contextMenu = new ContextMenu();
-
-        MenuItem itemEditar = new MenuItem("Modificar Comentario");
-        itemEditar.setOnAction(this::handleModify);
-
-        MenuItem itemBorrar = new MenuItem("Eliminar Comentario");
-        itemBorrar.setOnAction(this::handleDelete);
-
-        contextMenu.getItems().addAll(itemEditar, itemBorrar);
-        listViewComments.setContextMenu(contextMenu);
-         */
+        initGlobalContextMenu();
     }
 
     /**
@@ -287,7 +264,7 @@ public class BookViewController {
 
         try {
             Profile currentUser = UserSession.getInstance().getUser();
-// Ahora cogemos el valor real:
+            // Ahora cogemos el valor real:
             float puntuacion = 0;
             if (estrellasController != null) {
                 puntuacion = (float) estrellasController.getValueUser(); // O .getRating(), según tu StarRateController
@@ -435,8 +412,7 @@ public class BookViewController {
             e.printStackTrace();
         }
     }
-    
-    
+
     // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
@@ -445,7 +421,7 @@ public class BookViewController {
             // 1. CONEXIÓN A BASE DE DATOS
             // Ajusta el usuario y contraseña a los tuyos de MySQL
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
-            String user = "root"; 
+            String user = "root";
             String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
 
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -454,7 +430,7 @@ public class BookViewController {
             // 2. CARGAR EL ARCHIVO .JRXML
             // Busca en el paquete 'reports' que creamos anteriormente
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            
+
             if (reportStream == null) {
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
                 return;
@@ -462,7 +438,7 @@ public class BookViewController {
 
             // 3. COMPILAR Y LLENAR EL INFORME
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-            
+
             // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
 
@@ -473,7 +449,12 @@ public class BookViewController {
             e.printStackTrace();
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
@@ -512,8 +493,8 @@ public class BookViewController {
     private void handleAboutAction(ActionEvent event) {
         showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
     }
-    
-/**
+
+    /**
      * Configura el menú global de clic derecho para toda la ventana.
      */
     private void initGlobalContextMenu() {
@@ -523,45 +504,75 @@ public class BookViewController {
 
         // --- Opción 1: Añadir al Carrito ---
         MenuItem itemAddCart = new MenuItem("Añadir al Carrito");
-        itemAddCart.setOnAction(event -> handleAddToCart(null));
+        itemAddCart.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleAddToCart(null);
+            }
+        });
 
         // Si es Admin, deshabilitamos esta opción
         if (UserSession.getInstance().getUser() instanceof Admin) {
-            itemAddCart.setDisable(true); 
+            itemAddCart.setDisable(true);
         }
 
         // =========================================================
         // --- NUEVO: OPCIÓN INFORME TÉCNICO (JASPER) ---
         // =========================================================
         MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
-        itemInforme.setOnAction(event -> handleInformeTecnico(event));
+        itemInforme.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleInformeTecnico(event);
+            }
+        });
         // =========================================================
 
         // --- Resto de Opciones ---
         MenuItem itemLogOut = new MenuItem("Cerrar Sesión");
-        itemLogOut.setOnAction(event -> handleLogOut(event));
+        itemLogOut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleLogOut(event);
+            }
+        });
 
         MenuItem itemExit = new MenuItem("Salir");
-        itemExit.setOnAction(event -> handleExit(event));
+        itemExit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleExit(event);
+            }
+        });
 
         SeparatorMenuItem separator = new SeparatorMenuItem();
 
         MenuItem itemManual = new MenuItem("Manual de Usuario");
-        itemManual.setOnAction(event -> handleHelpAction(event));
+        itemManual.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleHelpAction(event);
+            }
+        });
 
         MenuItem itemAbout = new MenuItem("Acerca de...");
-        itemAbout.setOnAction(event -> handleAboutAction(event));
+        itemAbout.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleAboutAction(event);
+            }
+        });
 
         // 2. AÑADIR TODO AL MENÚ EN ORDEN
         globalMenu.getItems().addAll(
-                itemAddCart,      // 1. Comprar
-                itemInforme,      // 2. Informe Técnico (NUEVO)
+                itemAddCart, // 1. Comprar
+                itemInforme, // 2. Informe Técnico (NUEVO)
                 new SeparatorMenuItem(), // Línea separadora
-                itemLogOut,       // 3. Cerrar Sesión
-                itemExit,         // 4. Salir
-                separator,        // Línea separadora
-                itemManual,       // 5. Ayuda
-                itemAbout         // 6. About
+                itemLogOut, // 3. Cerrar Sesión
+                itemExit, // 4. Salir
+                separator, // Línea separadora
+                itemManual, // 5. Ayuda
+                itemAbout // 6. About
         );
 
         // 3. Asignar eventos al panel principal (rootPane)
@@ -569,7 +580,7 @@ public class BookViewController {
             rootPane.setOnContextMenuRequested(event -> {
                 // Mostrar el menú donde se hizo clic
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
-                event.consume(); 
+                event.consume();
             });
 
             // Ocultar el menú si se hace clic izquierdo fuera

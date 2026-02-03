@@ -7,7 +7,7 @@ package controller;
 
 import javafx.scene.control.ToggleGroup;
 
-import exception.passwordequalspassword;
+import exception.MyFormException;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
@@ -104,15 +104,15 @@ public class SignUpWindowController implements Initializable {
         try {
             // 2. Validaciones simples (sin BD)
             if (!pass.equals(passC)) {
-                throw new passwordequalspassword("Las contraseñas no coinciden");
+                throw new MyFormException("Las contraseñas no coinciden");
             }
             if (!telephone.matches("\\d{9}")) {
-                 throw new passwordequalspassword("El telefono tiene que tener 9 digitos");
+                 throw new MyFormException("El telefono tiene que tener 9 digitos");
             }
              if (!cardN.matches("\\d{16}")) {
-                 throw new passwordequalspassword("La tarjeta de cuenta tiene que tener 16 digitos");
+                 throw new MyFormException("La tarjeta de cuenta tiene que tener 16 digitos");
             }
-        } catch (passwordequalspassword e) {
+        } catch (MyFormException e) {
             showAlert(e.getMessage());
             return;
         }
@@ -176,7 +176,7 @@ public class SignUpWindowController implements Initializable {
         // Nota: No hace falta hacer LogIn otra vez. Hibernate ya actualizó 
         // el objeto 'perfilRegistrado' con su ID. Ya está listo.
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
 
             //Usamos UserSesion Singlenton

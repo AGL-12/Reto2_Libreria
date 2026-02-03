@@ -14,9 +14,9 @@ import javafx.scene.control.Alert.AlertType;
  * 
  * Author: acer
  */
-public class passwordequalspassword extends Exception {
+public class MyFormException extends Exception {
 
-    public passwordequalspassword(String text) {
+    public MyFormException(String text) {
         super(text);
         //showPopup(text);
     }

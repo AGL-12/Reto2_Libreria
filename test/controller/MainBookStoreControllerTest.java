@@ -55,7 +55,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
         verifyThat("#txtSearch", isVisible());
 
-        System.out.println("Test Header: OK. Estado inicial correcto (LogOut visible).");
+        System.out.println("Test Header: OK. Estado inicial correcto (LogIn visible).");
     }
 
     @Test
@@ -98,30 +98,41 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
         System.out.println("Test Buscador: OK.");
     }
+    @Test
+    public void testClickBook() {
+        clickOn("1984");
+        sleep(1500);
+        clickOn("#btnBackMain");
+    }
 
     @Test
     public void testLogIn() {
         clickOn("#btnLogIn");
         clickOn("#Button_SignUp");
-        clickOn("#textFieldEmail");
-        write("test@test.test");
-        clickOn("#textFieldUsername");
-        write("test");
-        clickOn("#textFieldName");
-        write("testname");
-        clickOn("#textFieldSurname");
-        write("testsurname");
-        clickOn("#textFieldTelephone");
-        write("101010101");
-        clickOn("#textFieldCardN");
-        write("0101010101010101");
-        clickOn("#textFieldPassword");
-        write("1234");
-        clickOn("#textFieldCPassword");
-        write("1234");
+        clickOn("#textFieldEmail").write("test@test.test");
+        clickOn("#textFieldUsername").write("test");
+        clickOn("#textFieldName").write("testname");
+        clickOn("#textFieldSurname").write("testsurname");
+        clickOn("#textFieldTelephone").write("101010101");
+        clickOn("#textFieldCardN").write("0101010101010101");
+        clickOn("#textFieldPassword").write("1234");
+        clickOn("#textFieldCPassword").write("1234");
         clickOn("#rButtonO");
         clickOn("#buttonSignUp");
+        sleep(1000);
         type(KeyCode.ENTER);
+        //header estado
+        sleep(2000);
+        verifyThat("#btnOption", isVisible());
+        verifyThat("#btnLogOut", isVisible());
+        verifyThat("#btnBuy", isVisible());
+
+        Label name = lookup("#lblUserName").query();
+        Assert.assertEquals("testname", name.getText());
+
+        verifyThat("#txtSearch", isVisible());
+
+        System.out.println("Test Header: OK. Estado Logged correcto (LogOut visible).");
     }
 
 }
