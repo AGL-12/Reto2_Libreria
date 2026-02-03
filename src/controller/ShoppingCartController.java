@@ -1,7 +1,11 @@
 package controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -29,6 +33,11 @@ import model.DBImplementation;
 import model.Order;
 import model.Profile;
 import model.UserSession;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * Controlador de la vista del Carrito de la Compra. Gestiona la visualización
@@ -325,8 +334,41 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
-        // Aquí invocas tu lógica de JasperReports (JasperPrint, JasperViewer, etc.)
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Informe", "Generando informe técnico...");
+        Connection con = null;
+        try {
+            // 1. CONEXIÓN A BASE DE DATOS
+            // Ajusta el usuario y contraseña a los tuyos de MySQL
+            String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
+            String user = "root"; 
+            String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(url, user, pass);
+
+            // 2. CARGAR EL ARCHIVO .JRXML
+            // Busca en el paquete 'reports' que creamos anteriormente
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            
+            if (reportStream == null) {
+                showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. COMPILAR Y LLENAR EL INFORME
+            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+            
+            // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
+
+            // 4. MOSTRAR VISOR
+            JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) {}
+        }
     }
 
     private void showAlert(String bookStore_App_v10Desarrollado_por_MikelPr, Alert.AlertType alertType) {

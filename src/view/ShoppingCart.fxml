@@ -23,7 +23,6 @@
                     <menus>
                         <Menu text="Tienda">
                             <items>
-                                <MenuItem onAction="#handleBackToBooks" text="Ver Catálogo" />
                                 <MenuItem onAction="#handleViewHistory" text="Mi Historial" />
                                 <SeparatorMenuItem />
                                 <MenuItem onAction="#handleLogOut" text="Cerrar Sesión" />

@@ -366,3 +366,28 @@
     -fx-background-color: #333333; 
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2); 
 }
+
+
+/* Estilos para la vista de Historial de Compras */
+
+.history-container {
+    -fx-padding: 20;
+    -fx-background-color: white;
+}
+
+.history-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5084C1; /* Color azul coherente con tu app */
+    -fx-padding: 0 0 10 0;
+}
+
+.history-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #789DE5;
+    -fx-border-width: 1;
+}
+
+.history-button-container {
+    -fx-padding: 10 0 0 0;
+}

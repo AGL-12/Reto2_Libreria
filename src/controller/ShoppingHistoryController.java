@@ -18,6 +18,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -36,7 +37,6 @@ import model.UserSession;
  */
 public class ShoppingHistoryController implements Initializable {
 
-    @FXML
     private TableView<Order> tableOrders;
     @FXML
     private TableColumn<Order, Integer> colId;
@@ -50,6 +50,10 @@ public class ShoppingHistoryController implements Initializable {
 
     @FXML
     private Button btnVolver;
+    @FXML
+    private MenuBar menuBar;
+    @FXML
+    private TableView<?> tblHistory;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -71,7 +75,6 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
-    @FXML
     private void clickFila(MouseEvent event) {
         // AQUÍ ESTÁ EL TRUCO:
         // Preguntamos al evento: "¿El contador de clics es igual a 2?"
@@ -108,7 +111,6 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
-    @FXML
     private void volver(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
@@ -120,5 +122,53 @@ public class ShoppingHistoryController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // En src/controller/ShoppingHistoryController.java
+    @FXML
+    private void handleBackToBooks(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/view/BookView.fxml"));
+            // Usamos tblHistory para obtener la ventana actual
+            Stage stage = (Stage) tblHistory.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        UserSession.getInstance().cleanUserSession();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/view/LogInWindow.fxml"));
+            Stage stage = (Stage) tblHistory.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleExit(ActionEvent event) {
+        javafx.application.Platform.exit();
+        System.exit(0);
+    }
+
+// Implementar estos métodos si están en el MenuBar del FXML
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        /* Lógica de informe */ }
+
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        /* Lógica de ayuda */ }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        /* Lógica de información */ }
+
+    @FXML
+    private void handleViewHistory(ActionEvent event) {
     }
 }
