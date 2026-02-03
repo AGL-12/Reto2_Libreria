@@ -32,8 +32,6 @@ public class HeaderController {
     @FXML
     private Button btnBuy;
     @FXML
-    private Button btnAllPurchase;
-    @FXML
     private Button btnBackMain;
     @FXML
     private TextField txtSearch;
@@ -96,7 +94,6 @@ public class HeaderController {
         }
     }
 
-    @FXML
     private void seeAllPurchase(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
@@ -267,16 +264,13 @@ public class HeaderController {
         if (user == null) {
             btnOption.setManaged(false);
             btnLogOut.setManaged(false);
-            btnAllPurchase.setManaged(false);
             btnBuy.setManaged(false);
         } else if (user instanceof User) {
             btnLogIn.setManaged(false);
             lblUserName.setText(user.getName());
-            btnAllPurchase.setManaged(false);
         } else if (user instanceof Admin) {
             btnLogIn.setManaged(false);
             lblUserName.setText(user.getName());
-            btnAllPurchase.setManaged(false);
             btnBuy.setManaged(false);
         }
         if (filter == null) {
@@ -288,7 +282,6 @@ public class HeaderController {
             btnBuy.setManaged(false);
         }
         if ("book view".equals(filter)) {
-            btnAllPurchase.setManaged(true);
         }
     }
 

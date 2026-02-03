@@ -27,8 +27,6 @@
             <menus>
                 <Menu mnemonicParsing="true" text="_Archivo"> 
                     <items>
-                        <MenuItem accelerator="Ctrl+L" onAction="#handleLogOut" text="Cerrar Sesión" />
-                        <SeparatorMenuItem />
                         <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
                     </items>
                 </Menu>

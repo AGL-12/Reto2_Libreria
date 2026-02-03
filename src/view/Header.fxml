@@ -37,7 +37,6 @@
       <Button fx:id="btnOption" mnemonicParsing="false" onAction="#option" text="Opciones" HBox.hgrow="ALWAYS" />
       <Button fx:id="btnLogOut" mnemonicParsing="false" onAction="#logOut" text="Cerrar Sesión" HBox.hgrow="ALWAYS" />
       <Button fx:id="btnBuy" mnemonicParsing="false" onAction="#goToBuy" text="Comprar" />
-      <Button fx:id="btnAllPurchase" mnemonicParsing="false" onAction="#seeAllPurchase" text="Historial de Compras" />
       <Button fx:id="btnBackMain" mnemonicParsing="false" onAction="#backToMain" text="Volver" />
    </children>
    <opaqueInsets>
