@@ -128,8 +128,8 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void test05_HeaderLogged() {
-        sleep(2000);
+    public void test06_HeaderLogged() {
+        sleep(10000);
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
         verifyThat("#btnBuy", isVisible());

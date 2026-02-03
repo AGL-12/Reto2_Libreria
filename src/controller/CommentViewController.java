@@ -20,7 +20,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import model.Admin;
 import model.ClassDAO;
@@ -30,9 +29,13 @@ import model.Profile;
 import model.UserSession;
 
 /**
- * FXML Controller class
+ * Controlador para la vista individual de un comentario (CommentView.fxml).
+ * Esta clase gestiona la visualización de cada comentario en la lista,
+ * permitiendo ver la información del autor, la fecha y el contenido. También
+ * controla la lógica para editar o eliminar el comentario si el usuario actual
+ * es el propietario o un administrador.
  *
- * @author mikel
+ * * @author mikel
  */
 public class CommentViewController implements Initializable {
 
@@ -56,14 +59,19 @@ public class CommentViewController implements Initializable {
     private boolean isEditing = false;
 
     /**
-     * Initializes the controller class.
+     * Inicializa la clase controladora. Se ejecuta automáticamente al cargar el
+     * FXML. Configura el estado inicial de los componentes (deshabilita la
+     * edición y oculta botones de gestión).
+     *
+     * * @param url La ubicación relativa del archivo FXML.
+     * @param rb Los recursos específicos (idioma, etc.), puede ser null.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
         ContextMenu cm = new ContextMenu();
         MenuItem miBorrar = new MenuItem("Borrar Comentario");
-        miBorrar.setOnAction(this::handleDelete); // Reusamos tu método borrar
+        miBorrar.setOnAction(this::handleDelete);
         cm.getItems().add(miBorrar);
 
         if (txtComment != null) {
@@ -81,19 +89,20 @@ public class CommentViewController implements Initializable {
 
     }
 
-    /* public void setDatos(String usuario, String fecha, String texto, float puntuacion) {
-        this.lblUsuario.setText(usuario);
-        this.lblFecha.setText(fecha);
-        this.txtComment.setText(texto);
-
-        if (estrellasController != null) {
-            estrellasController.setValueStars(puntuacion);
-        }
-    }*/
+    /**
+     * Método principal para cargar los datos del comentario en la vista.
+     * <p>
+     * Recibe un objeto {@link Commentate}, rellena los campos de texto y
+     * estrellas, y decide qué botones mostrar según si el usuario logueado es
+     * el autor del comentario o un administrador.
+     * </p>
+     *
+     * * @param comment El objeto comentario con toda la información a mostrar.
+     */
     public void setData(Commentate comment) {
         this.currentComment = comment;
 
-        // 1. Rellenar la información visual (con seguridad anti-null)
+        // Rellenamos información visual
         if (lblUsuario != null && comment.getUser() != null) {
             lblUsuario.setText(comment.getUser().getName());
         }
@@ -104,7 +113,6 @@ public class CommentViewController implements Initializable {
 
         if (txtComment != null) {
             txtComment.setText(comment.getCommentary());
-            // Forzamos estilo por si acaso
             txtComment.getStyleClass().remove("comment-edit-mode");
         } else {
             System.err.println("¡ERROR CRÍTICO! txtComment es NULL en el controlador.");
@@ -114,28 +122,26 @@ public class CommentViewController implements Initializable {
             starRateController.setValueStars(comment.getValuation());
         }
 
-        // 2. LÓGICA DE SEGURIDAD: ¿Muestro los botones?
+        // Declaramos el current user
         Profile currentUser = UserSession.getInstance().getUser();
 
-        // Variables booleanas para aclarar la lógica
+        // Variables booleanas para saber si es owner o admin
         boolean isOwner = false;
         boolean isAdmin = false;
 
         if (currentUser != null) {
-            // ¿Es el dueño?
             if (comment.getUser() != null && currentUser.getUserCode() == comment.getUser().getUserCode()) {
                 isOwner = true;
             }
-            // ¿Es admin?
             if (currentUser instanceof Admin) {
                 isAdmin = true;
             }
         }
 
-        // REGLAS DE VISIBILIDAD
+        // Reglas de visibilidad
         if (buttonBox != null) {
             if (isOwner) {
-                // CASO 1: SOY EL DUEÑO -> Veo todo
+                // Si es el dueño ve todo
                 buttonBox.setVisible(true);
                 buttonBox.setManaged(true);
 
@@ -146,7 +152,7 @@ public class CommentViewController implements Initializable {
                 btnDelete.setManaged(true);
 
             } else if (isAdmin) {
-                // CASO 2: SOY ADMIN (Pero no dueño) -> Solo borrar
+                // Si es admin solo ve borrar
                 buttonBox.setVisible(true);
                 buttonBox.setManaged(true);
 
@@ -159,52 +165,58 @@ public class CommentViewController implements Initializable {
                 btnDelete.setManaged(true);
 
             } else {
-                // CASO 3: NI DUEÑO NI ADMIN -> No veo nada
+                // si no es ni dueño ni admin no ve nada
                 buttonBox.setVisible(false);
                 buttonBox.setManaged(false);
             }
         }
     }
 
+    /**
+     * Habilita manualmente el modo de edición desde fuera del controlador. Útil
+     * si queremos activar la edición programáticamente.
+     */
     public void activeEditable() {
-        // 1. Mostrar los botones
+        // Mostramos los botones
         buttonBox.setVisible(true);
         buttonBox.setManaged(true);
 
-        // 2. Habilitar edición
+        // Habilitamos edición
         txtComment.setEditable(true);
         txtComment.requestFocus();
     }
 
-    /*void setData(Commentate coment) {
-        lblUsuario.setText(coment.getUser().getName());
-        lblFecha.setText(coment.getDateCreation().toString());
-        txtComment.setText(coment.getCommentary());
-        estrellasController.setValueStars(coment.getValuation());
-    }*/
+    /**
+     * Maneja el evento del botón "Editar" (o "Guardar"). Si no se está
+     * editando, activa el modo edición (habilita texto y estrellas). Si ya se
+     * está editando, guarda los cambios en la base de datos y actualiza la
+     * vista.
+     *
+     * * @param event El evento de acción generado por el botón.
+     */
     @FXML
     private void handleEdit(ActionEvent event) {
         if (!isEditing) {
-            // --- MODO: EMPEZAR A EDITAR ---
+            // Modo para empezar a editar
             isEditing = true;
 
-            // 1. Habilitar escritura
+            // Habilitamos la escritura para que se pueda editar
             txtComment.setEditable(true);
-            txtComment.requestFocus(); // Poner el cursor ahí
+            txtComment.requestFocus();
             if (!txtComment.getStyleClass().contains("comment-edit-mode")) {
                 txtComment.getStyleClass().add("comment-edit-mode");
             }
-            // 2. Habilitar Estrellas (NUEVO)
+            // Habilitamos edición de estrellas
             if (starRateController != null) {
                 starRateController.setEditable(true);
             }
 
-            // 2. Cambiar botones
+            // Cambiamos los botones
             btnEdit.setText("💾 Guardar");
             btnDelete.setText("❌ Cancelar");
 
         } else {
-            // --- MODO: GUARDAR CAMBIOS ---
+            // Guardamos cambios
             String nuevoTexto = txtComment.getText();
 
             if (nuevoTexto.trim().isEmpty()) {
@@ -215,15 +227,13 @@ public class CommentViewController implements Initializable {
                 @Override
                 public void run() {
                     try {
-                        // Actualizar DB y Objeto
+                        // Actualizar base de datos y el objeto
                         currentComment.setCommentary(nuevoTexto);
                         dao.updateComment(currentComment);
 
-                        // Volver a estado normal
+                        // Vuelve al estado normal
                         Platform.runLater(() -> finalizarEdicion());
 
-                        // Mensaje opcional (puedes quitarlo si te molesta)
-                        // showAlert("Comentario guardado", Alert.AlertType.INFORMATION); 
                     } catch (Exception e) {
                         Platform.runLater(() -> showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR));
                     }
@@ -232,16 +242,23 @@ public class CommentViewController implements Initializable {
         }
     }
 
+    /**
+     * Maneja el evento del botón "Borrar" (o "Cancelar"). Si se está en modo
+     * edición, funciona como botón "Cancelar" y revierte los cambios. Si está
+     * en modo normal, pide confirmación para eliminar el comentario de la BD.
+     *
+     * * @param event El evento de acción generado por el botón.
+     */
     @FXML
     private void handleDelete(ActionEvent event) {
         if (isEditing) {
-            // --- MODO: CANCELAR EDICIÓN ---
+            // Modo para cancelar la edición
             // Restauramos el texto original
             txtComment.setText(currentComment.getCommentary());
             finalizarEdicion();
 
         } else {
-            // --- MODO: BORRAR COMENTARIO ---
+            // Modo para borrar comentario
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Borrar");
             alert.setHeaderText("¿Seguro que quieres borrarlo?");
@@ -265,7 +282,10 @@ public class CommentViewController implements Initializable {
         }
     }
 
-    // Método auxiliar para volver al estado normal
+    /**
+     * Método auxiliar para restaurar la vista al estado de "Solo Lectura".
+     * Deshabilita la edición de texto y restaura los botones originales.
+     */
     private void finalizarEdicion() {
         isEditing = false;
         txtComment.setEditable(false);
@@ -274,6 +294,12 @@ public class CommentViewController implements Initializable {
         btnDelete.setText("Borrar"); // O pon tu icono "🗑️"
     }
 
+    /**
+     * Muestra una alerta simple al usuario.
+     *
+     * * @param message El mensaje a mostrar.
+     * @param type El tipo de alerta (ERROR, WARNING, INFORMATION).
+     */
     private void showAlert(String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setContentText(message);
