@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import model.ClassDAO;
@@ -35,6 +36,8 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
     @After
     public void tearDown() {
+        release(new KeyCode[]{});
+        release(new MouseButton[]{});
     }
 
     @Override
@@ -108,7 +111,6 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     @Test
     public void test04_ClickBook() {
         clickOn("1984");
-        sleep(1500);
         clickOn("#btnBackMain");
     }
 
@@ -132,7 +134,6 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
     @Test
     public void test06_HeaderLogged() {
-        sleep(1000);
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
 
@@ -143,10 +144,15 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
         System.out.println("Test Header: OK. Estado Logged correcto (LogOut visible).");
     }
+
     @Test
-    public void test07_LogOut() {
-        sleep(1000);
-        clickOn("#btnLogOut");
+    public void test07_Delete() {
+        clickOn("#btnOption");
+        clickOn("#btnDeleteAccount");
+        clickOn("#TextFieldPassword").write("1234");
+        clickOn("#Button_Delete");
+        type(KeyCode.ENTER);
+        clickOn("volver");
         verifyThat("#btnLogIn", isVisible());
 
         Label name = lookup("#lblUserName").query();
@@ -157,4 +163,25 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         System.out.println("Test Header: OK. Estado inicial correcto (LogIn visible).");
     }
 
+    @Test
+    public void test08_MenusAndActions() {
+        clickOn("#menuAyuda");
+        clickOn("#iAcercaDe");
+        type(KeyCode.ENTER);
+        clickOn("#menuAcciones");
+        clickOn("#iManual");
+        clickOn("#menuAcciones");
+        clickOn("#iJasper");
+    }
+
+    @Test
+    public void test09_ContextMenu() {
+        rightClickOn("#mainRoot");
+        clickOn("Limpiar Busqueda");
+        rightClickOn("#mainRoot");
+        clickOn("Acerca de Nosotros");
+        type(KeyCode.ENTER);
+        clickOn("#menuArchivo");
+        clickOn("#iSalir");
+    }
 }

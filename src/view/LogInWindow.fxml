@@ -10,22 +10,22 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
-<GridPane fx:id="loginRoot" prefHeight="390.0" prefWidth="355.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LogInWindowController">
+<GridPane fx:id="loginRoot" alignment="CENTER" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LogInWindowController">
    <columnConstraints>
-      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" percentWidth="60.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" />
+      <RowConstraints maxHeight="1.7976931348623157E308" />
    </rowConstraints>
    <children>
       <Button mnemonicParsing="false" onAction="#backToMain" prefHeight="25.0" prefWidth="60.0" text="volver" GridPane.columnIndex="2" />

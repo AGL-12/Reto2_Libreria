@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -47,6 +48,9 @@ public class BookItemController {
 
     @FXML
     private void openBookView(MouseEvent event) {
+        if (event.getButton() == MouseButton.SECONDARY) {
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
             Parent root = fxmlLoader.load();
@@ -110,7 +114,7 @@ public class BookItemController {
         imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
 
-   private void setComponents() {
+    private void setComponents() {
         // Tooltips y Textos
         Tooltip cov = new Tooltip(book.getTitle());
         Tooltip.install(stackImg, cov);
@@ -119,7 +123,7 @@ public class BookItemController {
         title.setTooltip(new Tooltip(book.getTitle()));
 
         contador.setText("(" + book.getComments().size() + ")");
-        
+
         if (book.getAuthor() != null) {
             String textoAutor = book.getAuthor().toString();
             author.setText(textoAutor);
@@ -130,16 +134,15 @@ public class BookItemController {
         }
 
         // --- CORRECCIÓN DE IMÁGENES (Anti-Caídas) ---
-        
         // 1. Determinar nombre de la imagen (evitar nulos)
         String imageName = book.getCover();
         if (imageName == null || imageName.isEmpty()) {
             imageName = "default.png"; // Nombre por defecto si viene null de la BD
         }
-        
+
         // 2. Intentar cargar la imagen del libro
         java.io.InputStream imageStream = getClass().getResourceAsStream("/images/" + imageName);
-        
+
         // 3. Si no existe, cargar una imagen de respaldo QUE SEPAS QUE EXISTE (ej. el logo)
         if (imageStream == null) {
             System.out.println("⚠️ Imagen no encontrada: " + imageName + ". Usando respaldo.");
@@ -163,17 +166,16 @@ public class BookItemController {
         }
 
         // --- FIN CORRECCIÓN ---
-
         if (book.getStock() <= 0) {
             // --- NO HAY STOCK ---
-            cover.setOpacity(0.5);      
+            cover.setOpacity(0.5);
         } else {
             // --- HAY STOCK ---
-            soldOut.setVisible(false);  
+            soldOut.setVisible(false);
         }
-        
-        starsController.setEditable(false); 
-        starsController.setValueStars(book.getAvgValuation()); 
+
+        starsController.setEditable(false);
+        starsController.setValueStars(book.getAvgValuation());
     }
 
 }
