@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -72,7 +73,8 @@ public class BookOptionWindowController {
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
-            stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
+            stage.setTitle("Book&Bugs"); 
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.show();
 
             // Cerrar la ventana actual

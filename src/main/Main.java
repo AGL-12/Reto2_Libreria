@@ -22,6 +22,7 @@ import model.UserSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import utilities.HibernateUtil;
+import javafx.scene.image.Image;
 
 public class Main extends Application {
 
@@ -38,7 +39,11 @@ public class Main extends Application {
         MainBookStoreController main = fxmlloader.getController();
         main.headerController.setMode(UserSession.getInstance().getUser(), null);
         Scene scene = new Scene(root);
-        stage.setTitle("Libreria che");
+        stage.setTitle("Book&Bugs");
+        
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"))); 
+        // 
+       // stage.setTitle("Libreria che");
         stage.setScene(scene);
         stage.show();
     }

@@ -22,6 +22,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import model.Order;
@@ -102,7 +103,8 @@ public class ShoppingHistoryController implements Initializable {
 
             // Mostrar la ventana
             Stage stage = new Stage();
-            stage.setTitle("Detalle Pedido " + order.getIdOrder());
+            stage.setTitle("Book&Bugs - Detalle del pedido"); 
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
             stage.show();
 

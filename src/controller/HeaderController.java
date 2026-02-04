@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -161,10 +162,10 @@ public class HeaderController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LoginWindow.fxml"));
             Parent root = fxmlLoader.load();
 
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
 
             Stage oldStage = (Stage) rootHeader.getScene().getWindow();
             Stage newStage = new Stage();
+
 
             // Estilo sin bordes
             newStage.setScene(new Scene(root));
@@ -174,6 +175,8 @@ public class HeaderController {
 
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             newStage.centerOnScreen();
+            newStage.setTitle("Book&Bugs - Login");
+            newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
 
             /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
              * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
