@@ -25,7 +25,6 @@
             <Menu mnemonicParsing="false" text="Sesión">
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleLogOut" text="Cerrar Sesión" />
-                <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Salir" />
               </items>
             </Menu>
             <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">

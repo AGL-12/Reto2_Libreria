@@ -61,6 +61,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 public class ShoppingHistoryController implements Initializable {
 
+
     private final LogInfo logger = LogInfo.getInstance();
 
     @FXML

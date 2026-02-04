@@ -380,6 +380,7 @@
     -fx-transition: all 0.3s ease;     
 }
 
+<<<<<<< HEAD
 /* Efecto HOVER*/
 .book-item:hover {
     -fx-background-color: #f9f9f9;     
@@ -403,21 +404,37 @@
 .history-container {
     -fx-padding: 20;
     -fx-background-color: white;
+=======
+#mainVBox {
+    -fx-background-color: #f4f4f4;
+>>>>>>> 824487ded36254403b4230e31fecbe7740aff23a
 }
 
-.history-title {
-    -fx-font-size: 24px;
+#headerHBox {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 0 20 0 20;
+}
+
+#headerLabel {
+    -fx-text-fill: white;
+}
+
+#infoLabel {
+    -fx-text-fill: #555555;
+}
+
+#btnVolver {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-text-fill: #5084C1; /* Color azul coherente con tu app */
-    -fx-padding: 0 0 10 0;
+    -fx-cursor: hand;
 }
 
-.history-table {
-    -fx-background-color: transparent;
-    -fx-border-color: #789DE5;
-    -fx-border-width: 1;
+#btnVolver:hover {
+    -fx-background-color: #c0392b;
 }
 
+<<<<<<< HEAD
 .history-button-container {
     -fx-padding: 10 0 0 0;
 }
@@ -595,3 +612,5 @@
     -fx-underline: true;
     -fx-text-fill: #7a9cc2;
 }
+=======
+>>>>>>> 824487ded36254403b4230e31fecbe7740aff23a
