@@ -12,7 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty; 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,8 +36,9 @@ import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
 /**
- * Controlador de la ventana de eliminar comentarios.
- * Acceso restringido a administradores para moderar comentarios por usuario.
+ * Controlador de la ventana de eliminar comentarios. Acceso restringido a
+ * administradores para moderar comentarios por usuario.
+ *
  * @author unai azkorra
  * @version 1.0
  */
@@ -45,18 +46,24 @@ public class DeleteComentWindowController implements Initializable {
 
     private DBImplementation db = new DBImplementation();
 
-    @FXML private VBox rootPane; 
-    @FXML private TableView<Commentate> tableComments;
-    @FXML private TableColumn<Commentate, String> colBook;    
-    @FXML private TableColumn<Commentate, String> colDate;    
-    @FXML private TableColumn<Commentate, String> colComment; 
-    @FXML private ComboBox<User> comboUsers;
+    @FXML
+    private VBox rootPane;
+    @FXML
+    private TableView<Commentate> tableComments;
+    @FXML
+    private TableColumn<Commentate, String> colBook;
+    @FXML
+    private TableColumn<Commentate, String> colDate;
+    @FXML
+    private TableColumn<Commentate, String> colComment;
+    @FXML
+    private ComboBox<User> comboUsers;
 
     private ContextMenu globalMenu;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initGlobalContextMenu(); 
+        initGlobalContextMenu();
 
         colBook.setCellValueFactory(cellData -> {
             if (cellData.getValue().getBook() != null) {
@@ -66,8 +73,8 @@ public class DeleteComentWindowController implements Initializable {
             }
         });
 
-        colDate.setCellValueFactory(cellData ->  new SimpleStringProperty(cellData.getValue().getFormattedDate()));
-        colComment.setCellValueFactory(cellData ->  new SimpleStringProperty(cellData.getValue().getCommentary()));
+        colDate.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFormattedDate()));
+        colComment.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCommentary()));
 
         try {
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
@@ -169,7 +176,12 @@ public class DeleteComentWindowController implements Initializable {
         } catch (Exception e) {
             LogInfo.getInstance().logSevere("Error al generar el informe técnico Jasper", e);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) { }
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
@@ -195,13 +207,23 @@ public class DeleteComentWindowController implements Initializable {
     @FXML
     private void handleBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/view/OptionsAdmin.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            // Obtenemos el stage de forma segura usando el rootPane (VBox) definido en el FXML
+            // Evitamos el ClassCastException porque MenuItem no hereda de Node
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+
+            // Cargar la ventana de opciones de administrador
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
-            LogInfo.getInstance().logInfo("Regresando al menú de opciones de administración.");
+
+            // Usamos el método logInfo de tu clase LogInfo
+            LogInfo.getInstance().logInfo("Navegación atrás desde gestión de comentarios realizada.");
         } catch (IOException ex) {
-            LogInfo.getInstance().logSevere("Error al navegar de vuelta a OptionsAdmin", ex);
+            // Usamos el método logSevere para registrar el error
+            LogInfo.getInstance().logSevere("Error al volver a OptionsAdmin: " + ex.getMessage(), ex);
         }
     }
 }

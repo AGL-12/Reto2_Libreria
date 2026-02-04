@@ -74,11 +74,11 @@ public class OptionsAdminController {
         itemExit.setOnAction(this::handleExit);
 
         globalMenu.getItems().addAll(
-            itemLibros, itemComentarios, itemModUser, itemDelUser, 
-            new SeparatorMenuItem(), 
-            itemInforme, itemManual, 
-            new SeparatorMenuItem(), 
-            itemExit
+                itemLibros, itemComentarios, itemModUser, itemDelUser,
+                new SeparatorMenuItem(),
+                itemInforme, itemManual,
+                new SeparatorMenuItem(),
+                itemExit
         );
 
         if (rootPane != null) {
@@ -122,7 +122,7 @@ public class OptionsAdminController {
             Parent root = loader.load();
 
             MainBookStoreController controller = loader.getController();
-            
+
             if (controller.headerController != null) {
                 controller.headerController.setMode(UserSession.getInstance().getUser(), null);
             }
@@ -181,18 +181,27 @@ public class OptionsAdminController {
             LogInfo.getInstance().logSevere("Error al generar informe técnico", e);
             showAlert("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
+    // Dentro de OptionsAdminController.java
     private void navigateTo(String fxmlPath) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
-            
-            Stage stage = (Stage) btnLibro.getScene().getWindow();
+
+            // CORRECCIÓN SEGURA: Usar el rootPane en lugar de un botón específico
+            // para evitar ClassCastException si la llamada viene de un MenuItem
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
+
             LogInfo.getInstance().logInfo("Navegación administrativa a: " + fxmlPath);
         } catch (IOException ex) {
             LogInfo.getInstance().logSevere("Error abriendo " + fxmlPath, ex);
