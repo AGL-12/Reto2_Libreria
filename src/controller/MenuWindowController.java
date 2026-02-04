@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import model.UserSession;
 
@@ -34,6 +36,20 @@ public class MenuWindowController {
     private Button btnBack;
     @FXML
     private Label label_Username;
+    @FXML
+    private Menu menuArchivo;
+    @FXML
+    private MenuItem iSalir;
+    @FXML
+    private Menu menuAcciones;
+    @FXML
+    private MenuItem iManual;
+    @FXML
+    private MenuItem iJasper;
+    @FXML
+    private Menu menuAyuda;
+    @FXML
+    private MenuItem iAcercaDe;
 
     /**
      * abre la ventana para que el usuario modifique sus propios
@@ -61,6 +77,12 @@ public class MenuWindowController {
     @FXML
     private void handleDeleteAction(ActionEvent event) {
         openWindow("/view/DeleteAccount.fxml", "Borrar Cuenta", null);
+    }
+
+    @FXML
+    private void handleExit(ActionEvent event) {
+        javafx.application.Platform.exit();
+        System.exit(0);
     }
 
     /**
@@ -104,5 +126,17 @@ public class MenuWindowController {
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, "Error al abrir la ventana: " + fxmlPath, ex);
         }
+    }
+
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+    }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
     }
 }

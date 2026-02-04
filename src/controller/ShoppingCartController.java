@@ -1,8 +1,12 @@
 package controller;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,19 +16,22 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.event.EventHandler; // Necesario para clases anónimas
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.ContextMenuEvent; // Necesario para clic derecho
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Book;
 import model.ClassDAO;
@@ -38,6 +45,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import util.LogInfo;
 
 /**
  * Controlador de la vista del Carrito de la Compra. Gestiona la visualización
@@ -49,6 +57,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 public class ShoppingCartController implements Initializable, EventHandler<ActionEvent> {
 
+    private final LogInfo logger = LogInfo.getInstance();
     @FXML
     private VBox vBoxContenedorLibros;
     @FXML
@@ -79,13 +88,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        logger.logInfo("Cargando carrito de la compra.");
         Profile userLogged = UserSession.getInstance().getUser();
 
         if (userLogged != null) {
-            // 1. Cargar el objeto pedido completo desde la BD
             cartOder = dao.cartOrder(userLogged.getId());
-
-            // 2. Si existe pedido y tiene líneas, cargamos la vista
             if (cartOder != null && cartOder.getListPreBuy() != null && !cartOder.getListPreBuy().isEmpty()) {
                 cargarVistaLibros();
             } else {
@@ -93,6 +100,36 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 btnComprar.setDisable(true);
             }
         }
+
+        // --- CONFIGURACIÓN CLIC DERECHO (Sin Lambdas) ---
+        final ContextMenu cartMenu = new ContextMenu();
+        MenuItem itemComprar = new MenuItem("Finalizar Compra");
+        MenuItem itemLimpiar = new MenuItem("Limpiar Vista");
+
+        itemComprar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleComprar(event);
+            }
+        });
+
+        itemLimpiar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                vBoxContenedorLibros.getChildren().clear();
+                lblTotal.setText("Total: 0.00 €");
+                btnComprar.setDisable(true);
+            }
+        });
+
+        cartMenu.getItems().addAll(itemComprar, itemLimpiar);
+
+        vBoxContenedorLibros.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+            @Override
+            public void handle(ContextMenuEvent event) {
+                cartMenu.show(vBoxContenedorLibros, event.getScreenX(), event.getScreenY());
+            }
+        });
     }
 
     /**
@@ -254,7 +291,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         cargarVistaLibros();
         actualizarPrecioTotal();
     }
-    
+
     /**
      * Navega a la vista principal de libros (BookView).
      */
@@ -263,7 +300,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
             Parent root = loader.load();
-            
+
             // Cambiamos la escena usando el Stage actual
             Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -282,7 +319,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -293,7 +330,6 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     // --- MÉTODOS DE GESTIÓN (Ya existentes en tu código, asegúrate de que el FXML los llame) ---
-
     @FXML
     public void handleExit(ActionEvent event) {
         // Cierra la aplicación
@@ -316,22 +352,36 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     @FXML
-    private void handleReportAction(ActionEvent event) {
-        // Genera el informe JasperReports
-        // (Mantén el código de conexión JDBC que ya tienes implementado)
-    }
-
-    @FXML
     private void handleHelpAction(ActionEvent event) {
-        // Abre el PDF del manual de usuario
+        try {
+            // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
+            String resourcePath = "/documents/Manual_Usuario.pdf";
+
+            // 2. Cargar archivo
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. Crear temporal y abrir
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
-    @FXML
-    private void handleAboutAction(ActionEvent event) {
-        // Muestra información de la app
-        showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
-    }
-    
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -339,7 +389,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             // 1. CONEXIÓN A BASE DE DATOS
             // Ajusta el usuario y contraseña a los tuyos de MySQL
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
-            String user = "root"; 
+            String user = "root";
             String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
 
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -348,7 +398,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             // 2. CARGAR EL ARCHIVO .JRXML
             // Busca en el paquete 'reports' que creamos anteriormente
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            
+
             if (reportStream == null) {
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
                 return;
@@ -356,7 +406,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
 
             // 3. COMPILAR Y LLENAR EL INFORME
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-            
+
             // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
 
@@ -367,12 +417,20 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             e.printStackTrace();
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
-    private void showAlert(String bookStore_App_v10Desarrollado_por_MikelPr, Alert.AlertType alertType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void showAlert(String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 }
