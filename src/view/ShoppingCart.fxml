@@ -21,23 +21,21 @@
                 
                 <MenuBar fx:id="menuBar">
                     <menus>
-                        <Menu text="Tienda">
+                        <Menu text="Navegacion">
                             <items>
                                 <MenuItem onAction="#handleViewHistory" text="Mi Historial" />
                                 <SeparatorMenuItem />
                                 <MenuItem onAction="#handleLogOut" text="Cerrar Sesión" />
-                                <MenuItem onAction="#handleExit" text="Salir" />
                             </items>
                         </Menu>
                         <Menu text="Herramientas">
                             <items>
-                                <MenuItem onAction="#handleReportAction" text="Informe Técnico" />
+                                <MenuItem onAction="#handleInformeTecnico" text="Informe Técnico" />
                             </items>
                         </Menu>
                         <Menu text="Ayuda">
                             <items>
                                 <MenuItem onAction="#handleHelpAction" text="Manual de Usuario" />
-                                <MenuItem onAction="#handleAboutAction" text="Acerca de..." />
                             </items>
                         </Menu>
                     </menus>

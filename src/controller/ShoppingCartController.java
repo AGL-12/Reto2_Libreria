@@ -1,8 +1,12 @@
 package controller;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -315,22 +319,38 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
-    @FXML
-    private void handleReportAction(ActionEvent event) {
-        // Genera el informe JasperReports
-        // (Mantén el código de conexión JDBC que ya tienes implementado)
-    }
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
-        // Abre el PDF del manual de usuario
+        try {
+            // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
+            String resourcePath = "/documents/Manual_Usuario.pdf";
+
+            // 2. Cargar archivo
+            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
+
+            if (pdfStream == null) {
+                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
+                return;
+            }
+
+            // 3. Crear temporal y abrir
+            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+            tempFile.deleteOnExit();
+            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
-    @FXML
-    private void handleAboutAction(ActionEvent event) {
-        // Muestra información de la app
-        showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
-    }
     
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
