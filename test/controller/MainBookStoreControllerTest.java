@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.List;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -8,9 +9,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
+import main.Main;
 import model.ClassDAO;
 import model.DBImplementation;
+import model.Profile;
+import model.User;
 import model.UserSession;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,6 +26,7 @@ import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.*;
+import util.HibernateUtil;
 
 /**
  *
@@ -29,6 +36,12 @@ import static org.testfx.matcher.base.NodeMatchers.*;
 public class MainBookStoreControllerTest extends ApplicationTest {
 
     ClassDAO dao = new DBImplementation();
+
+    // --- CREDENCIALES ---
+    private static final String TEST_USER_LOGIN = "userTest";
+    private static final String TEST_USER_PASS = "1234";
+    private static final String ADMIN_LOGIN = "admin";
+    private static final String ADMIN_PASS = "1234";
 
     @Before
     public void setUp() {
@@ -42,14 +55,7 @@ public class MainBookStoreControllerTest extends ApplicationTest {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
-        Parent root = loader.load();
-        MainBookStoreController main = loader.getController();
-        main.headerController.setMode(UserSession.getInstance().getUser(), null);
-
-        stage.setScene(new Scene(root));
-        stage.show();
-        stage.toFront();
+        new Main().start(stage);
     }
 
     @Test
@@ -136,13 +142,9 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     public void test06_HeaderLogged() {
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
-
         Label name = lookup("#lblUserName").query();
         Assert.assertEquals("testname", name.getText());
-
         verifyThat("#txtSearch", isVisible());
-
-        System.out.println("Test Header: OK. Estado Logged correcto (LogOut visible).");
     }
 
     @Test
@@ -183,5 +185,77 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         clickOn("#menuArchivo");
         clickOn("#iSalir");
+    }
+
+    private void crearUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Profile existing = (Profile) session.createQuery("FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER_LOGIN).uniqueResult();
+
+            if (existing == null) {
+                User testUser = new User();
+                testUser.setUsername(TEST_USER_LOGIN);
+                testUser.setPassword(TEST_USER_PASS);
+                testUser.setEmail("test@junit.com");
+                testUser.setName("Tester");
+                testUser.setSurname("Selenium");
+                testUser.setTelephone("600000000");
+                testUser.setCardNumber("1234567890123456");
+                testUser.setGender("Other");
+                session.save(testUser);
+                tx.commit();
+                System.out.println(">> Usuario temporal creado: " + TEST_USER_LOGIN);
+            }
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    private void eliminarUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            session.createQuery("DELETE FROM Commentate WHERE user.username = :u")
+                    .setParameter("u", TEST_USER_LOGIN)
+                    .executeUpdate();
+
+            List<Integer> orderIds = session.createQuery("SELECT idOrder FROM Order WHERE idUsuer.username = :u")
+                    .setParameter("u", TEST_USER_LOGIN).list();
+
+            if (orderIds != null && !orderIds.isEmpty()) {
+                session.createQuery("DELETE FROM Contain WHERE order.idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+
+                session.createQuery("DELETE FROM Order WHERE idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+            }
+
+            int deleted = session.createQuery("DELETE FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER_LOGIN)
+                    .executeUpdate();
+
+            tx.commit();
+            if (deleted > 0) {
+                System.out.println(">> Usuario temporal y todos sus datos eliminados.");
+            }
+
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            System.out.println("Aviso: Limpieza de datos incompleta: " + e.getMessage());
+        } finally {
+            session.close();
+        }
     }
 }

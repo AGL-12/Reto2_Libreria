@@ -3,8 +3,6 @@ package main;
 import controller.MainBookStoreController;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +21,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;
 import util.LogInfo;
+import javafx.scene.image.Image;
 
 public class Main extends Application {
 
@@ -40,6 +39,11 @@ public class Main extends Application {
         main.headerController.setMode(UserSession.getInstance().getUser(), null);
         Scene scene = new Scene(root);
         stage.setTitle("Libreria Book&Bugs");
+        stage.setTitle("Book&Bugs");
+        
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"))); 
+        // 
+       // stage.setTitle("Libreria che");
         stage.setScene(scene);
         stage.show();
     }

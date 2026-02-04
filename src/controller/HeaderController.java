@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -135,6 +136,8 @@ public class HeaderController {
 
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             newStage.centerOnScreen();
+            newStage.setTitle("Book&Bugs - Login");
+            newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
 
             newStage.show();
             oldStage.close();
@@ -180,7 +183,7 @@ public class HeaderController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
 
-            UserSession.getInstance().setUser(null);
+            UserSession.getInstance().cleanUserSession();
 
             MainBookStoreController main = fxmlLoader.getController();
             main.headerController.setMode(UserSession.getInstance().getUser(), null);

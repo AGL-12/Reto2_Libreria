@@ -426,7 +426,8 @@ public class BookCRUDWindowController implements Initializable {
             // 2. Crear nueva ventana
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
-            stage.setTitle("Gestión de Libros");
+            stage.setTitle("Book&Bugs"); 
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.show();
 
             // 3. Cerrar la ventana actual

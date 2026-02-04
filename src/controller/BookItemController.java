@@ -59,16 +59,23 @@ public class BookItemController {
             cont.setData(book);
             cont.headerController.setMode(UserSession.getInstance().getUser(), "book view");
 
-            Stage stage = (Stage) rootBookItem.getScene().getWindow();
+            // Referencia a la ventana vieja (para cerrarla luego)
             Stage oldStage = (Stage) rootBookItem.getScene().getWindow();
+            
+            // Crear la ventana NUEVA
             Stage newStage = new Stage();
-            newStage.setScene(new Scene(root));
-            // 1. Calculamos cuánto mide la ventana nueva
-            newStage.sizeToScene();
+            
 
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
+            newStage.setTitle("Book&Bugs - " + book.getTitle()); 
+            newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
+
+            newStage.setScene(new Scene(root));
+            
+            // Ajustes de tamaño y posición
+            newStage.sizeToScene();
             newStage.centerOnScreen();
 
+            // Mostrar la nueva y cerrar la vieja
             newStage.show();
             oldStage.close();
         } catch (IOException ex) {

@@ -24,6 +24,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import model.ClassDAO;
 import model.DBImplementation;
@@ -66,6 +67,8 @@ public class SignUpWindowController implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
+            stage.setTitle("Book&Bugs - Iniciar Sesión"); 
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
             stage.show();
             Stage currentStage = (Stage) buttonLogIn.getScene().getWindow();
@@ -186,6 +189,8 @@ public class SignUpWindowController implements Initializable {
             UserSession.getInstance().setUser(userNew);
 
             Stage stage = new Stage();
+            stage.setTitle("Book&Bugs");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
             stage.show();
 

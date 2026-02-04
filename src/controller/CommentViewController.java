@@ -91,11 +91,9 @@ public class CommentViewController implements Initializable {
 
     /**
      * Método principal para cargar los datos del comentario en la vista.
-     * <p>
      * Recibe un objeto {@link Commentate}, rellena los campos de texto y
      * estrellas, y decide qué botones mostrar según si el usuario logueado es
      * el autor del comentario o un administrador.
-     * </p>
      *
      * * @param comment El objeto comentario con toda la información a mostrar.
      */

@@ -197,11 +197,9 @@ public class BookViewController {
 
     /**
      * Carga los datos de un libro específico en la vista.
-     * <p>
      * Rellena todos los campos visuales (título, precio, sinopsis), procesa la
      * imagen de portada y determina si el botón "Añadir al Carrito" debe
      * mostrarse (oculto para Admins).
-     * </p>
      *
      * * @param book El objeto libro con la información a mostrar.
      */
@@ -218,26 +216,26 @@ void setData(Book book) {
             System.out.println("Aviso: No se pudo cargar la imagen del libro " + book.getTitle());
         }
 
-        // 2. Rellenar textos
+        // Rellenar textos
         titleBook.setText(book.getTitle());
         authorName.setText(book.getAuthor().toString());
         priceBook.setText("precio: " + book.getPrice());
         sypnosis.setText(book.getSypnosis());
         stockBook.setText("Stock: " + book.getStock());
 
-        // 3. Cargar comentarios
+        // Cargar comentarios
         refreshList();
 
-        // 4. LÓGICA DE VISIBILIDAD DEL BOTÓN "COMPRAR"
+        // Logica boton comprar
         Profile user = UserSession.getInstance().getUser();
 
         if (user instanceof Admin) {
-            // CASO A: Es Administrador -> NUNCA puede comprar
+            // Es Administrador -> NUNCA puede comprar
             btnAddToCart.setVisible(false);
             btnAddToCart.setManaged(false);
             
         } else {
-            // CASO B: Es Usuario Normal (o invitado) -> Depende del Stock
+            // Es Usuario Normal (o invitado) -> Depende del Stock
             if (book.getStock() > 0) {
                 // Hay stock -> Botón VISIBLE
                 btnAddToCart.setVisible(true);
@@ -275,7 +273,7 @@ void setData(Book book) {
                 }
             }
         } catch (Exception e) {
-            // Si falla la conexión, seguimos
+            // Falla la conexion
         }
 
         // Muestra la caja mostrando el nombre
@@ -318,11 +316,9 @@ void setData(Book book) {
 
     /**
      * Guarda el nuevo comentario en la base de datos.
-     * <p>
      * Recoge el texto y la valoración (estrellas), valida que no esté vacío,
      * guarda el objeto {@link Commentate} mediante el DAO y actualiza la lista
      * visual.
-     * </p>
      *
      * * @param event Evento del botón Publicar.
      */
@@ -347,7 +343,7 @@ void setData(Book book) {
             Commentate newComment = new Commentate((User) currentUser, currentBook, texto, puntuacion);
             dao.addComment(newComment);
 
-            // 2. Crear tarjeta visual CommentView.fxml
+            // Crear tarjeta visual
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
             Parent tarjeta = loader.load();
             CommentViewController controller = loader.getController();
@@ -358,7 +354,7 @@ void setData(Book book) {
 
             // Cerrar y limpiar
             handleCancelar(null);
-            btnAddComment.setDisable(true); // Bloqueado  porque ya ha comentado
+            btnAddComment.setDisable(true); 
 
             showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
 
@@ -431,7 +427,7 @@ void setData(Book book) {
         double scaledWidth = originalWidth * scale;
         double scaledHeight = originalHeight * scale;
 
-        // Calculamos el Viewport (la ventana de recorte sobre la imagen original)
+        // Calculamos el la ventana de recorte sobre la imagen original
         double viewportWidth = targetWidth / scale;
         double viewportHeight = targetHeight / scale;
 
@@ -460,8 +456,7 @@ void setData(Book book) {
             return;
         }
 
-        // 2. Validar que el usuario puede comprar
-        // (Aunque ya ocultamos el botón al Admin, doble seguridad no sobra)
+        // Validar que el usuario puede comprar
         if (!UserSession.getInstance().isLoggedIn()) {
             showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
             return;
@@ -483,7 +478,6 @@ void setData(Book book) {
         System.exit(0);
     }
 
-    // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
     /**
      * Genera un informe técnico de stock utilizando JasperReports. Conecta
      * directamente a la base de datos y lanza el visor de informes.
@@ -600,7 +594,6 @@ void setData(Book book) {
                 handleInformeTecnico(event);
             }
         });
-        // =========================================================
 
         // El resto de opciones "sencillas"
         MenuItem itemExit = new MenuItem("Salir");
@@ -629,13 +622,13 @@ void setData(Book book) {
 
         // Añadimos el menú
         globalMenu.getItems().addAll(
-                itemAddCart, // Comprar
-                itemInforme, // Informe Técnico 
-                new SeparatorMenuItem(), // Línea separadora
-                itemExit, // Salir
-                new SeparatorMenuItem(), // Línea separadora
-                itemManual, // Ayuda
-                itemAbout // About
+                itemAddCart, 
+                itemInforme, 
+                new SeparatorMenuItem(), 
+                itemExit, 
+                new SeparatorMenuItem(),
+                itemManual, 
+                itemAbout 
         );
 
         // Asignamos los eventos al panel

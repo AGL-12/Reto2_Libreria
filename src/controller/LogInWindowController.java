@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import model.ClassDAO;
@@ -55,7 +56,8 @@ public class LogInWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/SignUpWindow.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
-            stage.setTitle("SignUp");
+            stage.setTitle("Book&Bugs - Registro");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
             stage.show();
 
@@ -124,6 +126,8 @@ public class LogInWindowController {
             mainUser.headerController.setMode(UserSession.getInstance().getUser(), null);
 
             Stage stage = new Stage();
+            stage.setTitle("Book&Bugs");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
 
             stage.sizeToScene();
