@@ -254,7 +254,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         cargarVistaLibros();
         actualizarPrecioTotal();
     }
-    
+
     /**
      * Navega a la vista principal de libros (BookView).
      */
@@ -263,7 +263,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookView.fxml"));
             Parent root = loader.load();
-            
+
             // Cambiamos la escena usando el Stage actual
             Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -282,7 +282,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
             Parent root = loader.load();
-            
+
             Stage stage = (Stage) vBoxContenedorLibros.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -293,7 +293,6 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     }
 
     // --- MÉTODOS DE GESTIÓN (Ya existentes en tu código, asegúrate de que el FXML los llame) ---
-
     @FXML
     public void handleExit(ActionEvent event) {
         // Cierra la aplicación
@@ -331,7 +330,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         // Muestra información de la app
         showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
     }
-    
+
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -339,7 +338,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             // 1. CONEXIÓN A BASE DE DATOS
             // Ajusta el usuario y contraseña a los tuyos de MySQL
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
-            String user = "root"; 
+            String user = "root";
             String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
 
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -348,7 +347,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             // 2. CARGAR EL ARCHIVO .JRXML
             // Busca en el paquete 'reports' que creamos anteriormente
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            
+
             if (reportStream == null) {
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
                 return;
@@ -356,7 +355,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
 
             // 3. COMPILAR Y LLENAR EL INFORME
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-            
+
             // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
 
@@ -367,12 +366,20 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             e.printStackTrace();
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
-    private void showAlert(String bookStore_App_v10Desarrollado_por_MikelPr, Alert.AlertType alertType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void showAlert(String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 }

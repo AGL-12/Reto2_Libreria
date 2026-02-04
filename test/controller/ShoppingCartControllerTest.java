@@ -1,24 +1,25 @@
 package controller;
 
 import javafx.geometry.VerticalDirection;
-import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import main.Main;
 import model.ClassDAO;
 import model.DBImplementation;
-import model.Order;
 import model.Profile;
 import model.User;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import org.testfx.matcher.control.LabeledMatchers;
 import org.testfx.util.WaitForAsyncUtils;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ShoppingCartControllerTest extends ApplicationTest {
 
     private static ClassDAO dao = new DBImplementation();
@@ -62,57 +63,55 @@ public class ShoppingCartControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void comprar() {
+    public void test1_comprar() {
         testLogIn();
         String tituloLibro = "1984";
         scroll(VerticalDirection.DOWN);
         clickOn(tituloLibro);
-        WaitForAsyncUtils.waitForFxEvents();
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
-        WaitForAsyncUtils.waitForFxEvents();
         clickOn("#btnBuy");
         clickOn("#btnComprar");
         clickOn("Aceptar");
+
     }
 
     @Test
-    public void aumentarCantidad() {
-        testLogIn();
-        String tituloLibro = "1984";
-        scroll(VerticalDirection.DOWN);
-        clickOn(tituloLibro);
+    public void test2_aumentarCantidad() {
+        clickOn("1984");
         double precioLibro = 12.0;
-        WaitForAsyncUtils.waitForFxEvents();
         clickOn("#btnAddToCart");
-        clickOn("Aceptar");
+        type(KeyCode.ENTER);
+        sleep(2000);
         clickOn("#btnBuy");
-        WaitForAsyncUtils.waitForFxEvents();
-        clickOn(".spinner");
+        clickOn("#spinnerCantidad");
         clickOn(".increment-arrow-button");
         clickOn(".increment-arrow-button");
         double totalCalculado = precioLibro * 3;
         String textoEsperado = "Total: " + String.format("%.2f", totalCalculado) + " €";
         verifyThat("#lblTotal", LabeledMatchers.hasText(textoEsperado));
         clickOn("#btnComprar");
-        clickOn("Aceptar");
+        sleep(2000);
+        type(KeyCode.ENTER);
+
     }
 
     @Test
-    public void quitar() {
-        testLogIn();
-        String tituloLibro = "1984";
-        scroll(VerticalDirection.DOWN);
-        clickOn(tituloLibro);
-        WaitForAsyncUtils.waitForFxEvents();
+    public void test3_mantenerCarrito() {
+
+    }
+
+    @Test
+    public void test4_quitar() {
+        sleep(1000);
+        clickOn("#btnBackMain");
+        clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
         clickOn("#btnBuy");
-        WaitForAsyncUtils.waitForFxEvents();
-        verifyThat("#btnDelete", isVisible()); 
+        verifyThat("#btnDelete", isVisible());
         clickOn("#btnDelete");
-        WaitForAsyncUtils.waitForFxEvents();
-        String totalVacio = "Total: 0,00 €";
+        String totalVacio = "Total: 0.00 €";
         verifyThat("#lblTotal", LabeledMatchers.hasText(totalVacio));
     }
 
@@ -122,12 +121,15 @@ public class ShoppingCartControllerTest extends ApplicationTest {
         clickOn("#TextField_Username").write(TEST_USER);
         clickOn("#PasswordField_Password").write(TEST_PASS);
         clickOn("#Button_LogIn");
-        WaitForAsyncUtils.waitForFxEvents();
     }
 
     private void testNavegarAHistorial() {
         clickOn("#btnOption");
         clickOn("#btnHistory");
+    }
+
+    private void testLogOut() {
+        clickOn("#btnLogOut");
     }
 
 }
