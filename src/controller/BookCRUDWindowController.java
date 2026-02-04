@@ -44,6 +44,9 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
+/**
+ * Controlador de la ventana de gestión (CRUD) de libros.
+ */
 public class BookCRUDWindowController implements Initializable {
 
     @FXML private GridPane rootPane;
@@ -90,10 +93,28 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     @FXML
+    private void handleClearAction(ActionEvent event) {
+        LogInfo.getInstance().logInfo("Limpieza de campos solicitada en CRUD Libros.");
+        limpiarCampos();
+    }
+
+    @FXML
+    private void handleCreateAction(ActionEvent event) {
+        LogInfo.getInstance().logInfo("Modo 'Crear' activado en CRUD Libros.");
+        setModo("create");
+    }
+
+    @FXML
+    private void handleModifyAction(ActionEvent event) {
+        LogInfo.getInstance().logInfo("Modo 'Modificar' activado en CRUD Libros.");
+        setModo("modify");
+    }
+
+    @FXML
     private void confirmAction(ActionEvent event) {
         try {
             if (txtISBN.getText().isEmpty() || txtTitle.getText().isEmpty()) {
-                LogInfo.getInstance().logWarning("Intento de guardado de libro con campos obligatorios vacíos.");
+                LogInfo.getInstance().logWarning("Intento de guardado de libro incompleto (falta ISBN o Título).");
                 mostrarAlerta("Error", "ISBN y Título son obligatorios.", Alert.AlertType.WARNING);
                 return;
             }
@@ -116,7 +137,7 @@ public class BookCRUDWindowController implements Initializable {
             }
             limpiarCampos();
         } catch (Exception e) {
-            LogInfo.getInstance().logSevere("Error en la operación de confirmación del libro", e);
+            LogInfo.getInstance().logSevere("Error al confirmar la operación de libro en BD", e);
             mostrarAlerta("Error", "Datos inválidos o error en la base de datos.", Alert.AlertType.ERROR);
         }
     }
@@ -128,8 +149,22 @@ public class BookCRUDWindowController implements Initializable {
             Stage stage = (Stage) btnReturn.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
+            LogInfo.getInstance().logInfo("Regresando al menú de administración.");
         } catch (IOException ex) {
-            LogInfo.getInstance().logSevere("Error al volver al menú de opciones admin", ex);
+            LogInfo.getInstance().logSevere("Error al intentar volver a OptionsAdmin", ex);
+        }
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "abcd*1234")) {
+            InputStream is = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            JasperPrint jp = JasperFillManager.fillReport(JasperCompileManager.compileReport(is), null, con);
+            JasperViewer.viewReport(jp, false);
+            LogInfo.getInstance().logInfo("Informe técnico generado desde CRUD Libros.");
+        } catch (Exception e) { 
+            LogInfo.getInstance().logSevere("Error al generar el informe técnico Jasper", e);
+            mostrarAlerta("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR); 
         }
     }
 
@@ -141,23 +176,11 @@ public class BookCRUDWindowController implements Initializable {
                 rellenarDatos(libro);
                 habilitarCampos(true);
                 txtISBN.setDisable(true);
+                LogInfo.getInstance().logInfo("Búsqueda exitosa de libro ISBN: " + txtISBN.getText());
             }
         } catch (Exception e) { 
-            LogInfo.getInstance().logWarning("ISBN no encontrado en búsqueda: " + txtISBN.getText());
+            LogInfo.getInstance().logWarning("ISBN no encontrado en el sistema: " + txtISBN.getText());
             mostrarAlerta("Error", "ISBN no encontrado.", Alert.AlertType.WARNING); 
-        }
-    }
-
-    @FXML 
-    private void handleInformeTecnico(ActionEvent event) {
-        try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "abcd*1234")) {
-            InputStream is = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            JasperPrint jp = JasperFillManager.fillReport(JasperCompileManager.compileReport(is), null, con);
-            JasperViewer.viewReport(jp, false);
-            LogInfo.getInstance().logInfo("Informe técnico generado desde CRUD de Libros.");
-        } catch (Exception e) { 
-            LogInfo.getInstance().logSevere("Error al generar informe técnico en CRUD", e);
-            mostrarAlerta("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR); 
         }
     }
 
@@ -165,10 +188,10 @@ public class BookCRUDWindowController implements Initializable {
         try {
             String n = UUID.randomUUID().toString() + s.getName().substring(s.getName().lastIndexOf('.'));
             java.nio.file.Files.copy(s.toPath(), java.nio.file.Paths.get(RUTA_IMAGENES, n), StandardCopyOption.REPLACE_EXISTING);
-            LogInfo.getInstance().logInfo("Nueva imagen de portada guardada: " + n);
+            LogInfo.getInstance().logInfo("Imagen de portada guardada físicamente como: " + n);
             return n;
         } catch (Exception e) { 
-            LogInfo.getInstance().logSevere("Error al guardar imagen en disco", e);
+            LogInfo.getInstance().logSevere("Error al intentar guardar la imagen en el servidor local", e);
             return "default.png"; 
         }
     }
@@ -207,7 +230,7 @@ public class BookCRUDWindowController implements Initializable {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
         MenuItem itemLimpiar = new MenuItem("Limpiar Campos");
-        itemLimpiar.setOnAction(e -> limpiarCampos());
+        itemLimpiar.setOnAction(e -> handleClearAction(null));
         MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
         itemInforme.setOnAction(this::handleInformeTecnico);
         MenuItem itemManual = new MenuItem("Manual de Usuario");
@@ -228,19 +251,35 @@ public class BookCRUDWindowController implements Initializable {
         }
     }
 
-    @FXML private void handleExit(ActionEvent event) { Platform.exit(); System.exit(0); }
-    @FXML private void handleReportAction(ActionEvent event) { abrirDoc("/documents/Manual_Usuario.pdf"); }
+    @FXML private void handleExit(ActionEvent event) { 
+        LogInfo.getInstance().logInfo("Cierre de aplicación desde CRUD Libros.");
+        Platform.exit(); 
+        System.exit(0); 
+    }
+    
+    @FXML private void handleAboutAction(ActionEvent event) { 
+        mostrarAlerta("Acerca de", "BookStore App v1.0", Alert.AlertType.INFORMATION); 
+    }
+    
+    @FXML private void handleReportAction(ActionEvent event) { 
+        abrirDoc("/documents/Manual_Usuario.pdf"); 
+    }
+
     private void abrirDoc(String path) {
         try (InputStream is = getClass().getResourceAsStream(path)) {
             File temp = File.createTempFile("Manual", ".pdf");
             java.nio.file.Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             Desktop.getDesktop().open(temp);
-            LogInfo.getInstance().logInfo("Manual de usuario abierto.");
-        } catch (Exception e) { LogInfo.getInstance().logSevere("Error al abrir manual de usuario", e); }
+            LogInfo.getInstance().logInfo("Manual de usuario visualizado.");
+        } catch (Exception e) { 
+            LogInfo.getInstance().logSevere("Fallo al abrir el documento de ayuda", e);
+        }
     }
+
     private void mostrarAlerta(String t, String c, Alert.AlertType tp) {
         Alert a = new Alert(tp); a.setTitle(t); a.setHeaderText(null); a.setContentText(c); a.showAndWait();
     }
+
     @FXML private void dragOver(DragEvent e) { if (e.getDragboard().hasFiles()) e.acceptTransferModes(TransferMode.COPY); e.consume(); }
     @FXML private void dropImage(DragEvent e) { 
         Dragboard db = e.getDragboard(); 
