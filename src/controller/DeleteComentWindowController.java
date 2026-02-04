@@ -1,10 +1,19 @@
 package controller;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty; 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,11 +25,17 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Commentate;
 import model.DBImplementation;
 import model.User;
 import model.UserSession;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * Controlador de la ventana de eliminar comentarios
@@ -34,20 +49,19 @@ public class DeleteComentWindowController implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(DeleteComentWindowController.class.getName());
     private DBImplementation db = new DBImplementation();
 
+    @FXML private VBox rootPane; // Necesario para el menú contextual
     @FXML private TableView<Commentate> tableComments;
     @FXML private TableColumn<Commentate, String> colBook;    
     @FXML private TableColumn<Commentate, String> colDate;    
     @FXML private TableColumn<Commentate, String> colComment; 
     @FXML private ComboBox<User> comboUsers;
 
-    /**
-     * metodo que se usa para inicializar los parametros y establecer los valores iniciales
-     * @param location
-     * @param resources 
-     */
-    
+    private ContextMenu globalMenu;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        initGlobalContextMenu(); // Inicializar menú contextual
+
         colBook.setCellValueFactory(cellData -> {
             if (cellData.getValue().getBook() != null) {
                 return new SimpleStringProperty(cellData.getValue().getBook().getTitle());
@@ -73,10 +87,6 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
-    /**
-     *recibe por parametro el username para buscar los comentarios 
-     * @param username 
-     */
     private void cargarComentarios(String username) {
         try {
             ObservableList<Commentate> lista = FXCollections.observableArrayList(db.getCommentsByUser(username));
@@ -86,12 +96,86 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
-    /**
-     * Metodo que se ejecuta al presionar eliminar el libro. 
-     * En caso de no haber elegido un comentario saltara un error avisando al usuario que debe 
-     * seleccionar un comentario.
-     * @param event 
-     */
+    // --- NUEVOS MÉTODOS PARA MENÚS ---
+
+    private void initGlobalContextMenu() {
+        globalMenu = new ContextMenu();
+        globalMenu.setAutoHide(true);
+
+        MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
+        itemInforme.setOnAction(this::handleInformeTecnico);
+
+        MenuItem itemManual = new MenuItem("Manual de Usuario");
+        itemManual.setOnAction(this::handleReportAction);
+
+        MenuItem itemExit = new MenuItem("Salir");
+        itemExit.setOnAction(this::handleExit);
+
+        globalMenu.getItems().addAll(itemInforme, itemManual, new SeparatorMenuItem(), itemExit);
+
+        if (rootPane != null) {
+            rootPane.setOnContextMenuRequested(event -> {
+                globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
+                event.consume();
+            });
+        }
+        rootPane.setOnMousePressed(event -> {
+                if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
+                    globalMenu.hide();
+                }
+            });
+    }
+
+    @FXML
+    private void handleExit(ActionEvent event) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Acerca de");
+        alert.setHeaderText(null);
+        alert.setContentText("BookStore App v1.0\nGestión administrativa de comentarios.");
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        try {
+            InputStream is = getClass().getResourceAsStream("/documents/Manual_Usuario.pdf");
+            if (is != null) {
+                File temp = File.createTempFile("Manual", ".pdf");
+                temp.deleteOnExit();
+                Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Desktop.getDesktop().open(temp);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error al abrir manual", e);
+        }
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false", "root", "abcd*1234");
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            if (reportStream != null) {
+                JasperReport jr = JasperCompileManager.compileReport(reportStream);
+                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
+                JasperViewer.viewReport(jp, false);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error en informe", e);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) { }
+        }
+    }
+
+    // --- LÓGICA ORIGINAL ---
+
     @FXML
     private void handleDeleteComment(ActionEvent event) {
         Commentate selected = tableComments.getSelectionModel().getSelectedItem();
@@ -108,10 +192,6 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
-    /**
-     * el metodo entra en accion al pulsar volver y aber el menu de operacion del administrador
-     * @param event 
-     */
     @FXML
     private void handleBack(ActionEvent event) {
         try {

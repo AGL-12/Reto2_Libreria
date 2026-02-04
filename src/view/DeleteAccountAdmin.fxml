@@ -7,82 +7,84 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<GridPane prefHeight="342.0" prefWidth="268.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteAccountAdminController">
-   <columnConstraints>
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-   </columnConstraints>
-   <rowConstraints>
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-   </rowConstraints>
+<GridPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteAccountAdminController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
    <children>
-      <Label prefHeight="30.0" prefWidth="240.0" text="DELETE ACCOUNT ADMIN" GridPane.rowIndex="1">
-         <font>
-            <Font size="20.0" />
-         </font>
-      </Label>
-      <Label prefHeight="17.0" prefWidth="81.0" text="Select a user" GridPane.rowIndex="2" />
-      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="3">
-         <children>
-            <ImageView fitHeight="25.0" fitWidth="23.0" opacity="0.79">
-               <image>
-                  <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
-               </image>
-            </ImageView>
-            <Label prefHeight="17.0" prefWidth="56.0" text="Username" />
-            <ComboBox fx:id="ComboBoxUser" prefHeight="25.0" prefWidth="117.0" />
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="4">
-         <children>
-            <ImageView fitHeight="25.0" fitWidth="23.0">
-               <image>
-                  <Image url="@../images/verified_user_32dp_789DE5_FILL0_wght400_GRAD0_opsz40.png" />
-               </image>
-            </ImageView>
-            <Label text="Password" />
-            <TextField fx:id="TextFieldPassword" prefHeight="25.0" prefWidth="117.0" />
-         </children>
-      </HBox>
-      <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.rowIndex="5" />
-      <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.rowIndex="6" />
-      <MenuBar>
-         <menus>
-            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
-               <items>
-                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
-               </items>
-            </Menu>
-            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
-               <items>
-                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
-                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
-               </items>
-            </Menu>
-            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
-               <items>
-                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
-               </items>
-            </Menu>
-         </menus>
-         <GridPane.margin>
-            <Insets bottom="25.0" />
-         </GridPane.margin>
+      <MenuBar GridPane.valignment="TOP">
+        <menus>
+          <Menu mnemonicParsing="true" text="Archivo">
+            <items>
+              <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="true" text="Acciones">
+            <items>
+              <MenuItem accelerator="Ctrl+L" onAction="#handleClearAction" text="Limpiar Campos" />
+              <SeparatorMenuItem />
+              <MenuItem accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+              <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico" />
+              <SeparatorMenuItem />
+              <MenuItem onAction="#cancel" text="Volver Atrás" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="true" text="Ayuda">
+            <items>
+              <MenuItem onAction="#handleAboutAction" text="Acerca de" />
+            </items>
+          </Menu>
+        </menus>
       </MenuBar>
+
+      <VBox alignment="CENTER" spacing="20.0" GridPane.rowIndex="1">
+         <children>
+            <Label text="Eliminar Usuario (Admin)">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            
+            <VBox maxWidth="400.0" spacing="10.0">
+               <children>
+                  <Label text="Seleccionar Usuario:" />
+                  <ComboBox fx:id="ComboBoxUser" maxWidth="1.7976931348623157E308" promptText="Seleccione un usuario..." />
+               </children>
+            </VBox>
+            
+            <VBox maxWidth="400.0" spacing="10.0">
+               <children>
+                  <Label text="Confirmar con su contraseña de Administrador:" />
+                  <PasswordField fx:id="TextFieldPassword" promptText="Contraseña Admin" />
+               </children>
+            </VBox>
+            
+            <HBox alignment="CENTER" spacing="30.0">
+               <children>
+                  <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" prefWidth="100.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Eliminar" />
+                  <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefWidth="100.0" text="Cancelar" />
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
    </children>
 </GridPane>
