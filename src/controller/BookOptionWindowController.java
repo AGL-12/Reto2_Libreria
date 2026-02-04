@@ -1,26 +1,39 @@
 package controller;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import model.UserSession;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * Controlador de la ventana de gestión del modo del Crud de libros.
  * Permite elegir entre crear y modificar libros en la proxima ventana.
- * Es una ventana intermedia
  * @author unai azkorra
- * @version 1.0
  */
 public class BookOptionWindowController {
 
-    // CAMBIO 1: Nombres de variables coincidentes con fx:id del FXML
     @FXML
     private Button btnReturn;
     @FXML
@@ -29,84 +42,136 @@ public class BookOptionWindowController {
     private Button btnModify;
 
     /**
-     * metodo que se lanza al presionar el boton de añadir libro
+     * Metodo que se lanza al presionar el boton de añadir libro.
      * @param event 
      */
     @FXML
     private void createBook(ActionEvent event) {
-        abrirCRUD("create", event);
+        abrirCRUD("create");
     }
 
     /**
-     * metodo que se lanza al presionar el botn de modificar libro
+     * Metodo que se lanza al presionar el boton de modificar libro.
      * @param event 
      */
     @FXML
     private void modifyBook(ActionEvent event) {
-        abrirCRUD("modify", event);
+        abrirCRUD("modify");
     }
 
     /**
-     * Acción para el botón "Eliminar Libro". Abre la ventana CRUD en modo
-     * "delete".
+     * Metodos para el menú superior (Acciones).
      */
     @FXML
-    private void deleteBook(ActionEvent event) {
-        abrirCRUD("delete", event);
+    private void handleCreateAction(ActionEvent event) {
+        abrirCRUD("create");
+    }
+
+    @FXML
+    private void handleModifyAction(ActionEvent event) {
+        abrirCRUD("modify");
     }
 
     /**
-     * metodo que se usa para abrir la ventana de CrudBook 
-     * @param modo actualiza la interfaz dependiendo el modo
+     * Metodo para retroceder en el flujo de ventanas.
      * @param event 
      */
-    private void abrirCRUD(String modo, ActionEvent event) {
+    @FXML
+    private void Return(ActionEvent event) {
+        navigateTo("/view/OptionsAdmin.fxml");
+    }
+
+    /**
+     * Metodos de soporte para el menú (Archivo y Ayuda).
+     */
+    @FXML
+    private void handleExit(ActionEvent event) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        mostrarAlerta("Acerca de Nosotros", "BookStore App v1.0\nGestión de administración.", Alert.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void handleReportAction(ActionEvent event) {
+        abrirPDF("/documents/Manual_Usuario.pdf");
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false", "root", "abcd*1234");
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            if (reportStream != null) {
+                JasperReport jr = JasperCompileManager.compileReport(reportStream);
+                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
+                JasperViewer.viewReport(jp, false);
+            }
+        } catch (Exception e) {
+            mostrarAlerta("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) {}
+        }
+    }
+
+    /**
+     * Lógica compartida para abrir la ventana CRUD.
+     */
+    private void abrirCRUD(String modo) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookCRUDWindow.fxml"));
             Parent root = fxmlLoader.load();
-
             BookCRUDWindowController controllerWindow = fxmlLoader.getController();
 
-            // PASAmos el modo
             controllerWindow.setModo(modo);           
 
-            Stage stage = new Stage();
+            Stage stage = (Stage) btnAdd.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Gestión de Libros - " + modo.toUpperCase());
             stage.show();
-
-            // Cerrar la ventana actual
-            Stage currentStage = (Stage) btnAdd.getScene().getWindow();
-            // Cerrar ventana actual de forma segura
-            currentStage.close();
 
         } catch (IOException ex) {
             Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, "Error al abrir BookCRUDWindow", ex);
         }
     }
 
-    // --- CORRECCIÓN AQUÍ ---
-    /**
-     * metodo para retroceder en el flujo de ventanas
-     * @param event 
-     */
-    @FXML
-    private void Return(ActionEvent event) {
+    private void navigateTo(String fxmlPath) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
-            
-            
-            Stage stage = new Stage();
+            Stage stage = (Stage) btnReturn.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-
-            Stage currentStage = (Stage) btnReturn.getScene().getWindow();
-            currentStage.close();
-
         } catch (IOException ex) {
             Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    private void abrirPDF(String path) {
+        try {
+            InputStream pdfStream = getClass().getResourceAsStream(path);
+            if (pdfStream != null) {
+                File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
+                tempFile.deleteOnExit();
+                Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(tempFile);
+                }
+            }
+        } catch (IOException e) {
+            Logger.getLogger(BookOptionWindowController.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+    private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
 }

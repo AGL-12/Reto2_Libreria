@@ -2,6 +2,9 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -9,7 +12,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
-
 
 <GridPane prefHeight="318.0" prefWidth="284.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteAccountController">
    <columnConstraints>
@@ -20,32 +22,53 @@
    </columnConstraints>
    <rowConstraints>
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
-        <Label text="DELETE ACCOUNT" GridPane.columnSpan="4" GridPane.halignment="CENTER">
+        <Label text="DELETE ACCOUNT" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="1">
             <font>
                 <Font size="20.0" />
             </font>
         </Label>
-        <ImageView fitHeight="25.0" fitWidth="23.0" opacity="0.79" GridPane.rowIndex="1">
+        <ImageView fitHeight="25.0" fitWidth="23.0" opacity="0.79" GridPane.rowIndex="2">
             <image>
                 <Image url="@../images/mail_34dp_5084C1_FILL0_wght400_GRAD0_opsz40.png" />
             </image>
         </ImageView>
-        <Label prefHeight="17.0" prefWidth="56.0" text="Username" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <Label fx:id="LabelUsername" prefHeight="17.0" prefWidth="79.0" text="Label" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-        <ImageView fitHeight="25.0" fitWidth="23.0" GridPane.rowIndex="2">
+        <Label prefHeight="17.0" prefWidth="56.0" text="Username" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label fx:id="LabelUsername" prefHeight="17.0" prefWidth="79.0" text="Label" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="2" />
+        <ImageView fitHeight="25.0" fitWidth="23.0" GridPane.rowIndex="3">
             <image>
                 <Image url="@../images/verified_user_32dp_789DE5_FILL0_wght400_GRAD0_opsz40.png" />
             </image>
         </ImageView>
-        <Label text="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <TextField fx:id="TextFieldPassword" prefHeight="25.0" prefWidth="97.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-        <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#handleDelete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-        <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+        <Label text="Password" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <TextField fx:id="TextFieldPassword" prefHeight="25.0" prefWidth="97.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+        <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#handleDelete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+        <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+      <MenuBar GridPane.columnSpan="4" GridPane.valignment="TOP">
+         <menus>
+            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
+               <items>
+                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
+               <items>
+                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
+               <items>
+                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
    </children>
 </GridPane>

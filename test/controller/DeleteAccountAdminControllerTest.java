@@ -8,114 +8,135 @@ import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import model.DBImplementation;
 import model.User;
-import model.Admin;
-import model.UserSession;
 import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
-import static org.testfx.matcher.base.NodeMatchers.isEnabled;
-import javafx.scene.input.KeyCode;
-import java.util.Set;
 import javafx.scene.Node;
 import javafx.collections.ObservableList;
+import java.util.Set;
+import org.junit.Assert;
 
 /**
- * Test de integración para el borrado de usuarios por el Administrador.
+ * Test de flujo completo para DeleteAccountAdminController.
+ * Selección VISUAL (Clicks) y sin Lambdas.
  */
 public class DeleteAccountAdminControllerTest extends ApplicationTest {
 
     private final DBImplementation db = new DBImplementation();
     private final String LOGIN_TEST = "user_test_delete";
-    private final String ADMIN_PASS = "1234";
+    private final String ADMIN_USER = "admin"; 
+    private final String ADMIN_PASS = "1234"; 
 
     @Override
     public void start(Stage stage) throws Exception {
-        // 1. COMPROBAR Y CREAR USUARIO A ELIMINAR
-        // Buscamos en la lista si existe el usuario de prueba
+        // 1. PREPARACIÓN: Asegurar que el usuario a borrar existe en la BD
         boolean existe = false;
-        for (User u : db.getAllUsers()) {
-            if (u.getUsername().equals(LOGIN_TEST)) {
-                existe = true;
-                break;
+        try {
+            for (User u : db.getAllUsers()) {
+                if (u.getUsername().equals(LOGIN_TEST)) {
+                    existe = true;
+                    break;
+                }
             }
+            if (!existe) {
+                User u = new User();
+                u.setUsername(LOGIN_TEST);
+                u.setPassword("test1234");
+                u.setName("Borrar");
+                u.setSurname("Test");
+                u.setEmail("test@delete.com");
+                u.setTelephone("690014712");
+                db.signUp(u);
+            }
+        } catch (Exception e) {
+            System.out.println("Aviso en start: " + e.getMessage());
         }
 
-        if (!existe) {
-            User u = new User();
-            u.setUsername(LOGIN_TEST); 
-            u.setPassword("test1234"); 
-            u.setName("Borrar");
-            u.setSurname("Test");
-            u.setEmail("test@delete.com");
-            u.setTelephone("690014712");
-            db.signUp(u);
-        }
-
-        // 2. CONFIGURAR ADMIN EN SESIÓN
-        // Como ahora pides la contraseña del ADMIN, necesitamos que haya uno en la sesión
-        Admin admin = new Admin();
-        admin.setUsername("adminTest");
-        admin.setPassword(ADMIN_PASS);
-        UserSession.getInstance().setUser(admin);
-
-        // 3. LANZAR VENTANA
-        Parent root = FXMLLoader.load(getClass().getResource("/view/DeleteAccountAdmin.fxml"));
+        // Iniciamos en la ventana principal
+        Parent root = FXMLLoader.load(getClass().getResource("/view/MainBookStore.fxml"));
         stage.setScene(new Scene(root));
         stage.show();
     }
 
     @Test
-    public void testBorrarUsuarioAdmin() {
-        // 1. Buscar y seleccionar el usuario específico en el ComboBox
-        ComboBox<User> combo = lookup("#ComboBoxUser").queryAs(ComboBox.class);
-        ObservableList<User> items = combo.getItems();
-        User usuarioEncontrado = null;
+    public void testFlujoCompletoBorrarUsuario() {
+        // --- PASO 1: LOGIN ---
+        clickOn("#btnLogIn");
+        WaitForAsyncUtils.waitForFxEvents();
 
-        for (User u : items) {
+        clickOn("#TextField_Username").write(ADMIN_USER);
+        clickOn("#PasswordField_Password").write(ADMIN_PASS);
+        clickOn("#Button_LogIn");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 2: IR A OPCIONES DE ADMIN ---
+        clickOn("#btnOption"); 
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 3: IR A BORRAR USUARIO ---
+        clickOn("#btnDeleteUser"); 
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 4: SELECCIÓN VISUAL DEL USUARIO (HACIENDO CLICK) ---
+        // Primero verificamos que el usuario esté cargado en el combo (para evitar clicks ciegos)
+        ComboBox<User> combo = lookup("#ComboBoxUser").queryAs(ComboBox.class);
+        boolean usuarioEnLista = false;
+        for (User u : combo.getItems()) {
             if (u.getUsername().equals(LOGIN_TEST)) {
-                usuarioEncontrado = u;
+                usuarioEnLista = true;
                 break;
             }
         }
-
-        final User finalUser = usuarioEncontrado;
-        interact(new Runnable() {
-            @Override
-            public void run() {
-                combo.getSelectionModel().select(finalUser);
-            }
-        });
         
+        if (!usuarioEnLista) {
+            Assert.fail("El usuario '" + LOGIN_TEST + "' no aparece en la lista del ComboBox.");
+        }
+
+        // 1. Hacemos CLICK en el ComboBox para desplegarlo
+        clickOn("#ComboBoxUser");
         WaitForAsyncUtils.waitForFxEvents();
 
+        // 2. Hacemos CLICK en el texto del usuario dentro de la lista desplegada
+        // Como User.toString() devuelve el username, buscamos por ese texto
+        clickOn(LOGIN_TEST);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 5: VALIDACIÓN Y BORRADO ---
+        // Escribimos la contraseña del ADMINISTRADOR
         clickOn("#TextFieldPassword").write(ADMIN_PASS);
-        
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 3. Verificar que el botón 'Borrar' esté habilitado y pulsar
-        verifyThat("#Button_Delete", isEnabled());
+        // Hacemos clic en borrar
         clickOn("#Button_Delete");
-
-        // 4. Gestión de la alerta de confirmación
         WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 6: CONFIRMACIÓN (Alerta "¿Estás seguro?") ---
         Set<Node> botonesConfirmacion = lookup(".dialog-pane .button").queryAll();
         for (Node nodo : botonesConfirmacion) {
-            Button boton = (Button) nodo;
-            String texto = boton.getText().toLowerCase();
-            if (texto.equals("sí") || texto.equals("yes") || texto.equals("aceptar")) {
-                clickOn(boton);
-                break;
+            if (nodo instanceof Button) {
+                Button boton = (Button) nodo;
+                String texto = boton.getText().toLowerCase();
+                if (texto.contains("s") || texto.contains("yes") || texto.contains("aceptar")) {
+                    clickOn(boton);
+                    break;
+                }
             }
         }
         WaitForAsyncUtils.waitForFxEvents();
+
+        // --- PASO 7: MENSAJE DE ÉXITO ---
         verifyThat("Usuario eliminado correctamente.", isVisible());
         
+        // Cerrar la alerta de éxito
         Set<Node> botonesExito = lookup(".dialog-pane .button").queryAll();
         for (Node nodo : botonesExito) {
-            clickOn(nodo); 
+            clickOn(nodo);
             break;
         }
+        
+        clickOn("#ComboBoxUser");
+        sleep(2000);
     }
 }

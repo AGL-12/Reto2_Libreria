@@ -2,6 +2,9 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -9,7 +12,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
-
 
 <GridPane prefHeight="357.0" prefWidth="518.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuWindowController">
    <columnConstraints>
@@ -22,10 +24,11 @@
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
-      <HBox alignment="CENTER">
+      <HBox alignment="CENTER" GridPane.rowIndex="1">
          <children>
               <ImageView>
                   <image>
@@ -35,25 +38,45 @@
               <Label fx:id="label_Username" text="Useraname" />
          </children>
       </HBox>
-        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackAction" style="-fx-border-color: #000000; -fx-font-weight: bold;" text="Return" GridPane.columnIndex="2">
+        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackAction" style="-fx-border-color: #000000; -fx-font-weight: bold;" text="Return" GridPane.columnIndex="2" GridPane.rowIndex="1">
             <font>
                 <Font size="13.0" />
             </font>
         </Button>
-        <Button fx:id="btnDeleteAccount" mnemonicParsing="false" onAction="#handleDeleteAction" prefHeight="36.0" prefWidth="330.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete User" GridPane.columnIndex="1" GridPane.rowIndex="1">
+        <Button fx:id="btnDeleteAccount" mnemonicParsing="false" onAction="#handleDeleteAction" prefHeight="36.0" prefWidth="330.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete User" GridPane.columnIndex="1" GridPane.rowIndex="2">
             <font>
                 <Font size="16.0" />
             </font>
         </Button>
-        <Button fx:id="btnHistory" mnemonicParsing="false" onAction="#handleHistoryAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Historial Compra" GridPane.columnIndex="1" GridPane.rowIndex="2">
+        <Button fx:id="btnHistory" mnemonicParsing="false" onAction="#handleHistoryAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Historial Compra" GridPane.columnIndex="1" GridPane.rowIndex="3">
             <font>
                 <Font size="16.0" />
             </font>
         </Button>
-        <Button fx:id="btnModifyProfile" mnemonicParsing="false" onAction="#handleModifyAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Modify User" GridPane.columnIndex="1" GridPane.rowIndex="3">
+        <Button fx:id="btnModifyProfile" mnemonicParsing="false" onAction="#handleModifyAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Modify User" GridPane.columnIndex="1" GridPane.rowIndex="4">
             <font>
                 <Font size="16.0" />
             </font>
         </Button>
+      <MenuBar GridPane.columnSpan="3" GridPane.valignment="TOP">
+         <menus>
+            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
+               <items>
+                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
+               <items>
+                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
+               <items>
+                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
    </children>
 </GridPane>

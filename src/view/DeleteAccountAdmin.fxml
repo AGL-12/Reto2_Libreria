@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -12,12 +16,12 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-
-<GridPane prefHeight="364.0" prefWidth="268.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteAccountAdminController">
+<GridPane prefHeight="342.0" prefWidth="268.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteAccountAdminController">
    <columnConstraints>
       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
    </columnConstraints>
    <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -27,13 +31,13 @@
       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
-      <Label prefHeight="30.0" prefWidth="240.0" text="DELETE ACCOUNT ADMIN">
+      <Label prefHeight="30.0" prefWidth="240.0" text="DELETE ACCOUNT ADMIN" GridPane.rowIndex="1">
          <font>
             <Font size="20.0" />
          </font>
       </Label>
-      <Label prefHeight="17.0" prefWidth="81.0" text="Select a user" GridPane.rowIndex="1" />
-      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="2">
+      <Label prefHeight="17.0" prefWidth="81.0" text="Select a user" GridPane.rowIndex="2" />
+      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="3">
          <children>
             <ImageView fitHeight="25.0" fitWidth="23.0" opacity="0.79">
                <image>
@@ -44,7 +48,7 @@
             <ComboBox fx:id="ComboBoxUser" prefHeight="25.0" prefWidth="117.0" />
          </children>
       </HBox>
-      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="3">
+      <HBox alignment="CENTER" spacing="5.0" GridPane.rowIndex="4">
          <children>
             <ImageView fitHeight="25.0" fitWidth="23.0">
                <image>
@@ -55,7 +59,30 @@
             <TextField fx:id="TextFieldPassword" prefHeight="25.0" prefWidth="117.0" />
          </children>
       </HBox>
-      <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.rowIndex="4" />
-      <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.rowIndex="5" />
+      <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.rowIndex="5" />
+      <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.rowIndex="6" />
+      <MenuBar>
+         <menus>
+            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
+               <items>
+                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
+               <items>
+                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
+               <items>
+                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
+               </items>
+            </Menu>
+         </menus>
+         <GridPane.margin>
+            <Insets bottom="25.0" />
+         </GridPane.margin>
+      </MenuBar>
    </children>
 </GridPane>

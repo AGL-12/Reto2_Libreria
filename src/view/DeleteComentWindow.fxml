@@ -4,14 +4,37 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="550.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteComentWindowController">
+<VBox alignment="TOP_CENTER" prefHeight="550.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteComentWindowController">
    <children>
+      <MenuBar>
+         <menus>
+            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
+               <items>
+                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
+               <items>
+                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+               </items>
+            </Menu>
+            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
+               <items>
+                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
+               </items>
+            </Menu>
+         </menus>
+      </MenuBar>
       <Label text="Administración de Comentarios">
          <font><Font name="System Bold" size="22.0" /></font>
          <VBox.margin><Insets top="20.0" /></VBox.margin>
