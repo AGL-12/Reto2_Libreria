@@ -37,7 +37,7 @@ import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
 import model.UserSession;
-import net.sf.jasperreports.engine.JasperCompileManager;
+
 import util.LogInfo;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -47,12 +47,16 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 
 /**
  * FXML Controller class
@@ -60,7 +64,6 @@ import net.sf.jasperreports.view.JasperViewer;
  * @author ander
  */
 public class ShoppingHistoryController implements Initializable {
-
 
     private final LogInfo logger = LogInfo.getInstance();
 
@@ -99,24 +102,49 @@ public class ShoppingHistoryController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         logger.logInfo("Accediendo a la ventana de Historial de Compras.");
-        // 1. Vinculamos columnas con los atributos del modelo Order.java
+
+        // 1. Vinculamos columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("idOrder"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("purchaseDate"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
 
-        // 2. Obtenemos el usuario de la sesión
+        // 2. Configurar Menú Contextual (ARREGLADO: Falta de punto y coma y paréntesis)
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem itemDetalle = new MenuItem("Ver Detalle del Pedido");
+        MenuItem itemJasper = new MenuItem("Exportar a JasperReport");
+
+        itemDetalle.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Order pedido = tableOrders.getSelectionModel().getSelectedItem();
+                if (pedido != null) {
+                    abrirDetalle(pedido);
+                }
+            }
+        });
+
+        itemJasper.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleInformeTecnico(event);
+            }
+        });
+
+        contextMenu.getItems().addAll(itemDetalle, itemJasper);
+        tableOrders.setContextMenu(contextMenu); // Corregido: punto y coma puesto
+
+        // 3. Cargar Datos del Usuario
         Profile userLogged = UserSession.getInstance().getUser();
-
         if (userLogged != null) {
-            // 3. Cargamos los datos desde el DAO
             allShops = dao.getHistory(userLogged.getId());
-
             if (allShops != null) {
                 tableOrders.getItems().setAll(allShops);
-                logger.logInfo("Historial cargado: " + allShops.size() + " pedidos encontrados para el usuario " + userLogged.getName());
+                logger.logInfo("Historial cargado: " + allShops.size() + " pedidos encontrados.");
             }
         }
     }
+
+
 
     @FXML
     private void clickFila(MouseEvent event) {

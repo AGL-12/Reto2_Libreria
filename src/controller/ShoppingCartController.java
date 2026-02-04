@@ -16,19 +16,22 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.event.EventHandler; // Necesario para clases anónimas
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.ContextMenuEvent; // Necesario para clic derecho
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Book;
 import model.ClassDAO;
@@ -42,6 +45,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import util.LogInfo;
 
 /**
  * Controlador de la vista del Carrito de la Compra. Gestiona la visualización
@@ -53,6 +57,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 public class ShoppingCartController implements Initializable, EventHandler<ActionEvent> {
 
+    private final LogInfo logger = LogInfo.getInstance();
     @FXML
     private VBox vBoxContenedorLibros;
     @FXML
@@ -83,13 +88,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        logger.logInfo("Cargando carrito de la compra.");
         Profile userLogged = UserSession.getInstance().getUser();
 
         if (userLogged != null) {
-            // 1. Cargar el objeto pedido completo desde la BD
             cartOder = dao.cartOrder(userLogged.getId());
-
-            // 2. Si existe pedido y tiene líneas, cargamos la vista
             if (cartOder != null && cartOder.getListPreBuy() != null && !cartOder.getListPreBuy().isEmpty()) {
                 cargarVistaLibros();
             } else {
@@ -97,6 +100,36 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 btnComprar.setDisable(true);
             }
         }
+
+        // --- CONFIGURACIÓN CLIC DERECHO (Sin Lambdas) ---
+        final ContextMenu cartMenu = new ContextMenu();
+        MenuItem itemComprar = new MenuItem("Finalizar Compra");
+        MenuItem itemLimpiar = new MenuItem("Limpiar Vista");
+
+        itemComprar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                handleComprar(event);
+            }
+        });
+
+        itemLimpiar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                vBoxContenedorLibros.getChildren().clear();
+                lblTotal.setText("Total: 0.00 €");
+                btnComprar.setDisable(true);
+            }
+        });
+
+        cartMenu.getItems().addAll(itemComprar, itemLimpiar);
+
+        vBoxContenedorLibros.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+            @Override
+            public void handle(ContextMenuEvent event) {
+                cartMenu.show(vBoxContenedorLibros, event.getScreenX(), event.getScreenY());
+            }
+        });
     }
 
     /**
@@ -318,7 +351,6 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
-
     @FXML
     private void handleHelpAction(ActionEvent event) {
         try {
@@ -349,6 +381,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
+
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
