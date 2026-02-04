@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -10,41 +15,66 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookCRUDWindowController">
+<GridPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="750.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BookCRUDWindowController">
     <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="198.79998779296875" minWidth="10.0" prefWidth="58.7999755859375" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="229.20001220703125" minWidth="10.0" prefWidth="106.40000000000002" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="249.79998779296875" minWidth="10.0" prefWidth="169.59995117187498" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="260.800048828125" minWidth="10.0" prefWidth="260.800048828125" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="198.0" minWidth="10.0" prefWidth="60.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="229.0" minWidth="10.0" prefWidth="120.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="250.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="280.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints maxHeight="25.60001220703125" minHeight="10.0" prefHeight="21.60001220703125" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="39.19998779296875" minHeight="10.0" prefHeight="31.2" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="64.0" minHeight="10.0" prefHeight="38.4" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="63.59998168945313" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="63.59998168945313" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="86.20001831054688" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="83.4" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="66.59999694824216" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="55.19998779296873" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="40.39999999999998" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <children>
-        <Button fx:id="btnConfirm" mnemonicParsing="false" text="Confirmar" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
-        <Button fx:id="btnReturn" mnemonicParsing="false" text="Volver" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
-        
-        <Label text="ISBN" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-        <Label text="Titulo" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-        <Label text="Nombre Autor" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-        <Label text="Apellido Autor" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-        <Label text="Hojas" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
-        <Label text="Stock" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-        <Label text="Sinopsis" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
-        <Label text="Precio" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
-        <Label text="Editorial" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="9" />
-        
-        <TextField fx:id="txtISBN" prefHeight="26.0" prefWidth="184.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+        <MenuBar GridPane.columnSpan="4">
+            <menus>
+                <Menu mnemonicParsing="true" text="Archivo">
+                    <items>
+                        <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="true" text="Acciones">
+                    <items>
+                        <MenuItem onAction="#handleCreateAction" text="Modo Añadir" />
+                        <MenuItem onAction="#handleModifyAction" text="Modo Modificar" />
+                        <SeparatorMenuItem />
+                        <MenuItem accelerator="Ctrl+L" onAction="#handleClearAction" text="Limpiar Campos" />
+                        <SeparatorMenuItem />
+                        <MenuItem accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                        <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico" />
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#returnAction" text="Volver Atrás" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="true" text="Ayuda">
+                    <items>
+                        <MenuItem onAction="#handleAboutAction" text="Acerca de" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+
+        <Label text="ISBN" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Título" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="Nombre Autor" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Label text="Apellido Autor" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <Label text="Páginas" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+        <Label text="Stock" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+        <Label text="Sinopsis" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+        <Label text="Precio" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+        <Label text="Editorial" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+
+        <TextField fx:id="txtISBN" promptText="Ingrese ISBN y pulse Enter" GridPane.columnIndex="2" GridPane.rowIndex="1" />
         <TextField fx:id="txtTitle" GridPane.columnIndex="2" GridPane.rowIndex="2" />
         <TextField fx:id="txtNombreAutor" GridPane.columnIndex="2" GridPane.rowIndex="3" />
         <TextField fx:id="txtApellidoAutor" GridPane.columnIndex="2" GridPane.rowIndex="4" />
@@ -53,18 +83,24 @@
         <TextField fx:id="txtSinopsis" GridPane.columnIndex="2" GridPane.rowIndex="7" />
         <TextField fx:id="txtPrice" GridPane.columnIndex="2" GridPane.rowIndex="8" />
         <TextField fx:id="txtEditorial" GridPane.columnIndex="2" GridPane.rowIndex="9" />
-        
-        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="3" GridPane.rowSpan="3">
+
+        <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.rowSpan="6">
             <children>
-                <Label text="Portada de libro" />
-                <StackPane prefHeight="150.0" prefWidth="200.0">
+                <Label text="Portada del Libro" />
+                <StackPane prefHeight="200.0" prefWidth="180.0" style="-fx-border-color: #5084C1; -fx-border-style: dashed;">
                     <children>
-                        <ImageView fx:id="idFrontPage" fitHeight="150.0" fitWidth="200.0" onDragDropped="#dropImage" onDragOver="#dragOver" pickOnBounds="true" preserveRatio="true" />
-                        <Label text="Arrastra la imagen" />
+                        <ImageView fx:id="idFrontPage" fitHeight="200.0" fitWidth="150.0" onDragDropped="#dropImage" onDragOver="#dragOver" pickOnBounds="true" preserveRatio="true" />
+                        <Label mouseTransparent="true" text="Arrastra la imagen aquí" />
                     </children>
                 </StackPane>
                 <Button fx:id="btnUploadFile" mnemonicParsing="false" onAction="#uploadFrontPage" text="Subir archivo" />
             </children>
+            <padding>
+                <Insets left="20.0" right="20.0" />
+            </padding>
         </VBox>
+
+        <Button fx:id="btnReturn" mnemonicParsing="false" onAction="#returnAction" text="Volver" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
+        <Button fx:id="btnConfirm" mnemonicParsing="false" onAction="#confirmAction" prefWidth="120.0" text="Confirmar" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="10" />
     </children>
 </GridPane>
