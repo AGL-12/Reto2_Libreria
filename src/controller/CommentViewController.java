@@ -8,6 +8,7 @@ package controller;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,6 +28,7 @@ import model.Commentate;
 import model.DBImplementation;
 import model.Profile;
 import model.UserSession;
+import java.util.logging.Logger;
 
 /**
  * Controlador para la vista individual de un comentario (CommentView.fxml).
@@ -38,6 +40,8 @@ import model.UserSession;
  * * @author mikel
  */
 public class CommentViewController implements Initializable {
+
+    private static final Logger LOGGER = Logger.getLogger(CommentViewController.class.getName());
 
     @FXML
     private Label lblUsuario;
@@ -90,10 +94,10 @@ public class CommentViewController implements Initializable {
     }
 
     /**
-     * Método principal para cargar los datos del comentario en la vista.
-     * Recibe un objeto {@link Commentate}, rellena los campos de texto y
-     * estrellas, y decide qué botones mostrar según si el usuario logueado es
-     * el autor del comentario o un administrador.
+     * Método principal para cargar los datos del comentario en la vista. Recibe
+     * un objeto {@link Commentate}, rellena los campos de texto y estrellas, y
+     * decide qué botones mostrar según si el usuario logueado es el autor del
+     * comentario o un administrador.
      *
      * * @param comment El objeto comentario con toda la información a mostrar.
      */
@@ -113,7 +117,7 @@ public class CommentViewController implements Initializable {
             txtComment.setText(comment.getCommentary());
             txtComment.getStyleClass().remove("comment-edit-mode");
         } else {
-            System.err.println("¡ERROR CRÍTICO! txtComment es NULL en el controlador.");
+            LOGGER.severe("ERROR CRÍTICO: txtComment es NULL en el controlador.");
         }
 
         if (starRateController != null) {
@@ -175,6 +179,7 @@ public class CommentViewController implements Initializable {
      * si queremos activar la edición programáticamente.
      */
     public void activeEditable() {
+        LOGGER.info("Activando modo edición manualmente (activeEditable).");
         // Mostramos los botones
         buttonBox.setVisible(true);
         buttonBox.setManaged(true);
@@ -196,6 +201,7 @@ public class CommentViewController implements Initializable {
     private void handleEdit(ActionEvent event) {
         if (!isEditing) {
             // Modo para empezar a editar
+            LOGGER.info("Usuario inició edición del comentario.");
             isEditing = true;
 
             // Habilitamos la escritura para que se pueda editar
@@ -210,11 +216,12 @@ public class CommentViewController implements Initializable {
             }
 
             // Cambiamos los botones
-            btnEdit.setText("💾 Guardar");
-            btnDelete.setText("❌ Cancelar");
+            btnEdit.setText("Guardar");
+            btnDelete.setText("Cancelar");
 
         } else {
             // Guardamos cambios
+            LOGGER.info("Intentando guardar cambios del comentario...");
             String nuevoTexto = txtComment.getText();
 
             if (nuevoTexto.trim().isEmpty()) {
@@ -233,6 +240,7 @@ public class CommentViewController implements Initializable {
                         Platform.runLater(() -> finalizarEdicion());
 
                     } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error al guardar el comentario en BD", e);
                         Platform.runLater(() -> showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR));
                     }
                 }
@@ -251,12 +259,13 @@ public class CommentViewController implements Initializable {
     private void handleDelete(ActionEvent event) {
         if (isEditing) {
             // Modo para cancelar la edición
-            // Restauramos el texto original
+            LOGGER.info("Edición cancelada por el usuario.");
             txtComment.setText(currentComment.getCommentary());
             finalizarEdicion();
 
         } else {
             // Modo para borrar comentario
+            LOGGER.info("Solicitando confirmación para borrar comentario...");
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Borrar");
             alert.setHeaderText("¿Seguro que quieres borrarlo?");
@@ -274,6 +283,7 @@ public class CommentViewController implements Initializable {
                         tarjeta.setManaged(false);
                     }
                 } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error crítico al borrar comentario", e);
                     showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR);
                 }
             }
