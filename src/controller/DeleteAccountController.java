@@ -11,8 +11,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -38,6 +36,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import util.LogInfo;
 
 /**
  * Controlador de la ventana de eliminar usuarios siendo el propio usuario.
@@ -46,11 +45,10 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 public class DeleteAccountController implements Initializable {
 
-    private static final Logger LOGGER = Logger.getLogger(DeleteAccountController.class.getName());
     private DBImplementation db = new DBImplementation();
 
     @FXML
-    private GridPane rootPane; // Necesario para el menú contextual
+    private GridPane rootPane; 
     @FXML
     private Label LabelUsername;
     @FXML
@@ -64,16 +62,81 @@ public class DeleteAccountController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Establecemos el nombre de usuario de la sesión
         Profile user = UserSession.getInstance().getUser();
         if (user != null) {
             LabelUsername.setText(user.getUsername());
         }
         
         initGlobalContextMenu();
+        LogInfo.getInstance().logInfo("Ventana de eliminación de cuenta propia inicializada.");
     }
 
-    // --- LÓGICA DE MENÚS Y ACCIONES ---
+    @FXML
+    private void delete(ActionEvent event) {
+        String password = TextFieldPassword.getText();
+        Profile user = UserSession.getInstance().getUser();
+
+        if (password.isEmpty()) {
+            LogInfo.getInstance().logWarning("Intento de eliminación de cuenta sin introducir contraseña.");
+            showAlert("Campo vacío", "Por favor, introduce tu contraseña para confirmar.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        if (user != null && user.getPassword().equals(password)) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.", ButtonType.YES, ButtonType.NO);
+            confirm.showAndWait();
+
+            if (confirm.getResult() == ButtonType.YES) {
+                try {
+                    db.dropOutUser(user);
+                    LogInfo.getInstance().logInfo("El usuario " + user.getUsername() + " ha eliminado su propia cuenta exitosamente.");
+                    showAlert("Cuenta eliminada", "Tu cuenta ha sido eliminada. Volviendo al inicio.", Alert.AlertType.INFORMATION);
+                    UserSession.getInstance().cleanUserSession();
+                    navigateTo("/view/LogInWindow.fxml", "Inicio de Sesión");
+                } catch (Exception ex) {
+                    LogInfo.getInstance().logSevere("Error crítico en la base de datos al intentar eliminar la cuenta del usuario: " + user.getUsername(), ex);
+                    showAlert("Error", "No se pudo eliminar la cuenta.", Alert.AlertType.ERROR);
+                }
+            }
+        } else {
+            LogInfo.getInstance().logWarning("Fallo de autenticación en eliminación de cuenta para el usuario: " + (user != null ? user.getUsername() : "Desconocido"));
+            showAlert("Error de autenticación", "La contraseña introducida es incorrecta.", Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false", "root", "abcd*1234");
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            if (reportStream != null) {
+                JasperReport jr = JasperCompileManager.compileReport(reportStream);
+                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
+                JasperViewer.viewReport(jp, false);
+                LogInfo.getInstance().logInfo("Informe técnico generado desde la ventana de eliminación de cuenta.");
+            }
+        } catch (Exception e) {
+            LogInfo.getInstance().logSevere("Error al generar el informe Jasper técnico desde eliminación de cuenta", e);
+            showAlert("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) { }
+        }
+    }
+
+    private void navigateTo(String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) LabelUsername.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle(title);
+            stage.show();
+            LogInfo.getInstance().logInfo("Navegación desde eliminación de cuenta hacia: " + fxmlPath);
+        } catch (IOException ex) {
+            LogInfo.getInstance().logSevere("Error de navegación en la ventana de eliminación de cuenta hacia: " + fxmlPath, ex);
+        }
+    }
 
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
@@ -94,15 +157,7 @@ public class DeleteAccountController implements Initializable {
         MenuItem itemExit = new MenuItem("Salir");
         itemExit.setOnAction(this::handleExit);
 
-        globalMenu.getItems().addAll(
-                itemLimpiar, 
-                new SeparatorMenuItem(), 
-                itemInforme, 
-                itemManual, 
-                itemAbout,
-                new SeparatorMenuItem(), 
-                itemExit
-        );
+        globalMenu.getItems().addAll(itemLimpiar, new SeparatorMenuItem(), itemInforme, itemManual, itemAbout, new SeparatorMenuItem(), itemExit);
 
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
@@ -111,10 +166,10 @@ public class DeleteAccountController implements Initializable {
             });
         }
         rootPane.setOnMousePressed(event -> {
-                if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
-                    globalMenu.hide();
-                }
-            });
+            if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
+                globalMenu.hide();
+            }
+        });
     }
 
     @FXML
@@ -124,6 +179,7 @@ public class DeleteAccountController implements Initializable {
 
     @FXML
     private void handleExit(ActionEvent event) {
+        LogInfo.getInstance().logInfo("Cierre de aplicación solicitado desde la ventana de baja de usuario.");
         Platform.exit();
         System.exit(0);
     }
@@ -142,78 +198,16 @@ public class DeleteAccountController implements Initializable {
                 temp.deleteOnExit();
                 Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 Desktop.getDesktop().open(temp);
+                LogInfo.getInstance().logInfo("Manual de usuario abierto desde la ventana de eliminación de cuenta.");
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error al abrir manual", e);
-        }
-    }
-
-    @FXML
-    private void handleInformeTecnico(ActionEvent event) {
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false", "root", "abcd*1234");
-            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            if (reportStream != null) {
-                JasperReport jr = JasperCompileManager.compileReport(reportStream);
-                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
-                JasperViewer.viewReport(jp, false);
-            }
-        } catch (Exception e) {
-            showAlert("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
-        } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) { }
-        }
-    }
-
-    // --- LÓGICA ORIGINAL ---
-
-    @FXML
-    private void delete(ActionEvent event) {
-        String password = TextFieldPassword.getText();
-        Profile user = UserSession.getInstance().getUser();
-
-        if (password.isEmpty()) {
-            showAlert("Campo vacío", "Por favor, introduce tu contraseña para confirmar.", Alert.AlertType.WARNING);
-            return;
-        }
-
-        if (user != null && user.getPassword().equals(password)) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.", ButtonType.YES, ButtonType.NO);
-            confirm.showAndWait();
-
-            if (confirm.getResult() == ButtonType.YES) {
-                try {
-                    db.dropOutUser(user);
-                    showAlert("Cuenta eliminada", "Tu cuenta ha sido eliminada. Volviendo al inicio.", Alert.AlertType.INFORMATION);
-                    UserSession.getInstance().cleanUserSession();
-                    navigateTo("/view/LogInWindow.fxml", "Inicio de Sesión");
-                } catch (Exception ex) {
-                    LOGGER.log(Level.SEVERE, "Error al borrar usuario", ex);
-                    showAlert("Error", "No se pudo eliminar la cuenta.", Alert.AlertType.ERROR);
-                }
-            }
-        } else {
-            showAlert("Error de autenticación", "La contraseña introducida es incorrecta.", Alert.AlertType.ERROR);
+            LogInfo.getInstance().logSevere("Error al intentar abrir el manual de usuario desde eliminación de cuenta", e);
         }
     }
 
     @FXML
     private void cancel(ActionEvent event) {
         navigateTo("/view/MenuWindow.fxml", "Mi Menú");
-    }
-
-    private void navigateTo(String fxmlPath, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Stage stage = (Stage) LabelUsername.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle(title);
-            stage.show();
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error de navegación a " + fxmlPath, ex);
-        }
     }
 
     private void showAlert(String title, String content, Alert.AlertType type) {

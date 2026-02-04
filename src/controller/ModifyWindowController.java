@@ -11,8 +11,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,7 +18,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -36,10 +33,10 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import util.LogInfo;
 
 public class ModifyWindowController implements Initializable {
 
-    private static final Logger LOGGER = Logger.getLogger(ModifyWindowController.class.getName());
     private DBImplementation db = new DBImplementation(); 
     private Profile profileToModify;
     private ContextMenu contextMenu;
@@ -55,32 +52,66 @@ public class ModifyWindowController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         setupUserData();
         initContextMenu();
+        LogInfo.getInstance().logInfo("Ventana de modificación de perfil abierta.");
     }
 
-    private void initContextMenu() {
-        contextMenu = new ContextMenu();
-        
-        MenuItem itemSave = new MenuItem("Guardar Cambios");
-        itemSave.setOnAction(e -> save(new ActionEvent(Button_SaveChanges, null)));
-        
-        MenuItem itemCancel = new MenuItem("Cancelar/Volver");
-        itemCancel.setOnAction(e -> cancel(new ActionEvent(Button_Cancel, null)));
-        
-        SeparatorMenuItem sep = new SeparatorMenuItem();
-        
-        MenuItem itemManual = new MenuItem("Manual de Usuario");
-        itemManual.setOnAction(this::handleReportAction);
+    @FXML
+    private void save(ActionEvent event) {
+        if (!TextField_NewPass.getText().equals(TextField_ConfirmPass.getText())) {
+            LogInfo.getInstance().logWarning("Intento de cambio de contraseña fallido: no coinciden.");
+            new Alert(Alert.AlertType.ERROR, "Las contraseñas no coinciden").show();
+            return;
+        }
 
-        contextMenu.getItems().addAll(itemSave, itemCancel, sep, itemManual);
+        try {
+            profileToModify.setName(TextField_Name.getText());
+            profileToModify.setSurname(TextField_Surname.getText());
+            profileToModify.setTelephone(TextField_Telephone.getText());
+            if (!TextField_NewPass.getText().isEmpty()) {
+                profileToModify.setPassword(TextField_NewPass.getText());
+            }
 
-        rootPane.setOnContextMenuRequested(event -> {
-            contextMenu.show(rootPane, event.getScreenX(), event.getScreenY());
-        });
-        rootPane.setOnMousePressed(event -> {
-                if (event.isPrimaryButtonDown() && contextMenu.isShowing()) {
-                    contextMenu.hide();
-                }
-            });
+            db.modificarUser(profileToModify);
+            LogInfo.getInstance().logInfo("Perfil actualizado correctamente: " + profileToModify.getUsername());
+            new Alert(Alert.AlertType.INFORMATION, "Usuario actualizado correctamente").show();
+            handleNavigation(event); 
+
+        } catch (Exception ex) {
+            LogInfo.getInstance().logSevere("Error al guardar cambios de perfil en la base de datos", ex);
+            new Alert(Alert.AlertType.ERROR, "Error al guardar los cambios").show();
+        }
+    }
+
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC", "root", "abcd*1234");
+            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
+            if (reportStream != null) {
+                JasperReport jr = JasperCompileManager.compileReport(reportStream);
+                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
+                JasperViewer.viewReport(jp, false);
+                LogInfo.getInstance().logInfo("Informe técnico generado desde modificación de perfil.");
+            }
+        } catch (Exception e) {
+            LogInfo.getInstance().logSevere("Error al generar informe técnico Jasper", e);
+        } finally {
+            try { if (con != null) con.close(); } catch (SQLException ex) { }
+        }
+    }
+
+    private void handleNavigation(ActionEvent event) {
+        try {
+            Profile loggedProfile = UserSession.getInstance().getUser();
+            String fxmlPath = (loggedProfile instanceof Admin) ? "/view/OptionsAdmin.fxml" : "/view/MenuWindow.fxml";
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            LogInfo.getInstance().logInfo("Navegando de vuelta tras modificación a: " + fxmlPath);
+        } catch (IOException ex) {
+            LogInfo.getInstance().logSevere("Error de navegación tras modificar perfil", ex);
+        }
     }
 
     private void setupUserData() {
@@ -102,7 +133,7 @@ public class ModifyWindowController implements Initializable {
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
             comboUsers.setItems(users);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error cargando usuarios", e);
+            LogInfo.getInstance().logSevere("Error al cargar usuarios en el combo", e);
         }
     }
 
@@ -115,80 +146,29 @@ public class ModifyWindowController implements Initializable {
         TextField_Telephone.setText(p.getTelephone());
     }
 
-    @FXML
-    private void save(ActionEvent event) {
-        if (!TextField_NewPass.getText().equals(TextField_ConfirmPass.getText())) {
-            new Alert(Alert.AlertType.ERROR, "Las contraseñas no coinciden").show();
-            return;
-        }
-
-        try {
-            profileToModify.setName(TextField_Name.getText());
-            profileToModify.setSurname(TextField_Surname.getText());
-            profileToModify.setTelephone(TextField_Telephone.getText());
-            if (!TextField_NewPass.getText().isEmpty()) {
-                profileToModify.setPassword(TextField_NewPass.getText());
-            }
-
-            db.modificarUser(profileToModify);
-            new Alert(Alert.AlertType.INFORMATION, "Usuario actualizado correctamente").show();
-            handleNavigation(event); 
-
-        } catch (Exception ex) {
-            new Alert(Alert.AlertType.ERROR, "Error al guardar los cambios").show();
-        }
+    private void initContextMenu() {
+        contextMenu = new ContextMenu();
+        MenuItem itemSave = new MenuItem("Guardar Cambios");
+        itemSave.setOnAction(e -> save(new ActionEvent(Button_SaveChanges, null)));
+        MenuItem itemCancel = new MenuItem("Cancelar/Volver");
+        itemCancel.setOnAction(e -> cancel(new ActionEvent(Button_Cancel, null)));
+        SeparatorMenuItem sep = new SeparatorMenuItem();
+        MenuItem itemManual = new MenuItem("Manual de Usuario");
+        itemManual.setOnAction(this::handleReportAction);
+        contextMenu.getItems().addAll(itemSave, itemCancel, sep, itemManual);
+        rootPane.setOnContextMenuRequested(event -> contextMenu.show(rootPane, event.getScreenX(), event.getScreenY()));
+        rootPane.setOnMousePressed(event -> { if (event.isPrimaryButtonDown() && contextMenu.isShowing()) contextMenu.hide(); });
     }
 
-    @FXML
-    private void cancel(ActionEvent event) {
-        handleNavigation(event);
-    }
-
-    // --- MÉTODOS DE MENÚ BAR ---
+    @FXML private void cancel(ActionEvent event) { handleNavigation(event); }
     @FXML private void handleExit(ActionEvent event) { Platform.exit(); System.exit(0); }
-    
-    @FXML private void handleAboutAction(ActionEvent event) {
-        new Alert(Alert.AlertType.INFORMATION, "BookStore App v1.0").show();
-    }
-
     @FXML private void handleReportAction(ActionEvent event) {
         try {
             InputStream is = getClass().getResourceAsStream("/documents/Manual_Usuario.pdf");
-            if (is != null) {
-                File temp = File.createTempFile("Manual", ".pdf");
-                Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                Desktop.getDesktop().open(temp);
-            }
-        } catch (Exception e) { LOGGER.log(Level.SEVERE, "Error manual", e); }
-    }
-
-    @FXML
-    private void handleInformeTecnico(ActionEvent event) {
-        Connection con = null;
-        try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC", "root", "abcd*1234");
-            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-            if (reportStream != null) {
-                JasperReport jr = JasperCompileManager.compileReport(reportStream);
-                JasperPrint jp = JasperFillManager.fillReport(jr, null, con);
-                JasperViewer.viewReport(jp, false);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al generar informe técnico", e);
-        } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) { }
-        }
-    }
-
-    private void handleNavigation(ActionEvent event) {
-        try {
-            Profile loggedProfile = UserSession.getInstance().getUser();
-            String fxmlPath = (loggedProfile instanceof Admin) ? "/view/OptionsAdmin.fxml" : "/view/MenuWindow.fxml";
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error navegación", ex);
-        }
+            File temp = File.createTempFile("Manual", ".pdf");
+            Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Desktop.getDesktop().open(temp);
+            LogInfo.getInstance().logInfo("Manual abierto desde edición de perfil.");
+        } catch (Exception e) { LogInfo.getInstance().logSevere("Error al abrir manual en edición", e); }
     }
 }
