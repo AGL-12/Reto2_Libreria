@@ -4,36 +4,56 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="MenuRoot" prefHeight="270.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuWindowController">
-    <children>
-        <Button fx:id="btnDeleteAccount" layoutX="66.0" layoutY="83.0" mnemonicParsing="false" onAction="#handleDeleteAction" prefHeight="36.0" prefWidth="330.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete User">
-            <font>
-                <Font size="16.0" />
-            </font>
-        </Button>
-        <Button fx:id="btnModifyProfile" layoutX="66.0" layoutY="185.0" mnemonicParsing="false" onAction="#handleModifyAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Modify User">
-            <font>
-                <Font size="16.0" />
-            </font>
-        </Button>
-        <Button fx:id="btnBack" layoutX="403.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleBackAction" style="-fx-background-color: #f33f3f; -fx-border-color: #000000; -fx-font-weight: bold;" text="Return">
+
+<GridPane prefHeight="357.0" prefWidth="518.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuWindowController">
+   <columnConstraints>
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <HBox alignment="CENTER">
+         <children>
+              <ImageView>
+                  <image>
+                      <Image url="@../images/person_23dp_789DE5_FILL0_wght400_GRAD0_opsz24.png" />
+                  </image>
+              </ImageView>
+              <Label fx:id="label_Username" text="Useraname" />
+         </children>
+      </HBox>
+        <Button fx:id="btnBack" mnemonicParsing="false" onAction="#handleBackAction" style="-fx-border-color: #000000; -fx-font-weight: bold;" text="Return" GridPane.columnIndex="2">
             <font>
                 <Font size="13.0" />
             </font>
         </Button>
-        <Button fx:id="btnHistory" layoutX="66.0" layoutY="135.0" mnemonicParsing="false" onAction="#handleHistoryAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Historial Compra">
+        <Button fx:id="btnDeleteAccount" mnemonicParsing="false" onAction="#handleDeleteAction" prefHeight="36.0" prefWidth="330.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete User" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <font>
                 <Font size="16.0" />
             </font>
         </Button>
-        <Label fx:id="label_Username" layoutX="38.0" layoutY="29.0" text="Useraname" />
-        <ImageView layoutX="14.0" layoutY="26.0">
-            <image>
-                <Image url="@../images/person_23dp_789DE5_FILL0_wght400_GRAD0_opsz24.png" />
-            </image>
-        </ImageView>
-    </children>
-</AnchorPane>
+        <Button fx:id="btnHistory" mnemonicParsing="false" onAction="#handleHistoryAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Historial Compra" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Button>
+        <Button fx:id="btnModifyProfile" mnemonicParsing="false" onAction="#handleModifyAction" prefHeight="36.0" prefWidth="330.0" style="-fx-border-color: #000000; -fx-background-color: A7C4E5;" text="Modify User" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Button>
+   </children>
+</GridPane>
