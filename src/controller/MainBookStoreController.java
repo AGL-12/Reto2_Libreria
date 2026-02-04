@@ -18,13 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -35,16 +33,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import model.Admin;
 import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
-import model.UserSession;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
+import util.LogInfo;
 
 /**
  *
@@ -83,7 +80,7 @@ public class MainBookStoreController {
             public void handle(ActionEvent event) {
                 // Obtenemos el texto actual del header y buscamos
                 String textoABuscar = headerController.getSearchTextField().getText().trim();
-                System.out.println("Buscando en BD: " + textoABuscar); // Log para que veas el delay
+                LogInfo.getInstance().logInfo("Buscando en BD: " + textoABuscar);
                 searchBooks(textoABuscar);
             }
         });
@@ -131,7 +128,7 @@ public class MainBookStoreController {
                 tileBooks.getChildren().add(libroBox);
             }
         } catch (IOException ex) {
-            Logger.getLogger(MainBookStoreController.class.getName()).log(Level.SEVERE, null, ex);
+            LogInfo.getInstance().logSevere("Error carga/render de libros", ex);
         }
     }
 

@@ -4,7 +4,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane fx:id="root" maxWidth="120.0" onMouseClicked="#handleClick" onMouseExited="#handleExit" onMouseMoved="#handleMovement" prefHeight="24.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.StarRateController">
+<StackPane fx:id="root" maxWidth="120.0" onMouseClicked="#handleClick" onMouseExited="#handleExit" onMouseMoved="#handleMovement" prefHeight="24.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.StarRateController">
    <children>
       <ImageView fitWidth="120.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT">
          <image>

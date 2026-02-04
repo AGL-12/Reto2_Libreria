@@ -7,7 +7,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import threads.SessionHolderThread;
-import utilities.HibernateUtil;
+import util.HibernateUtil;
 
 public class DBImplementation implements ClassDAO {
 

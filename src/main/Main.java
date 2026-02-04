@@ -21,7 +21,8 @@ import model.User;
 import model.UserSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import utilities.HibernateUtil;
+import util.HibernateUtil;
+import util.LogInfo;
 
 public class Main extends Application {
 
@@ -49,13 +50,16 @@ public class Main extends Application {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        System.setProperty("org.jboss.logging.provider", "jdk");
+        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
+
         // --- PRUEBA DE CONEXIÓN ---
-        System.out.println("Intentando conectar con Hibernate...");
+        LogInfo.getInstance().logInfo("Intentando conectar con Hibernate...");
 
         // Al llamar a getSessionFactory, Hibernate leerá el XML y creará las tablas
         HibernateUtil.getSessionFactory();
 
-        System.out.println("¡Conexión establecida y tablas creadas (si no existían)!");
+        LogInfo.getInstance().logInfo("¡Conexión establecida y tablas creadas (si no existían)!");
 
         // PRECARGAR DATOS (Si la BD está vacía)
         preloadData();
