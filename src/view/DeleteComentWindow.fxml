@@ -7,37 +7,45 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="550.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteComentWindowController">
+<VBox fx:id="rootPane" alignment="TOP_CENTER" prefHeight="550.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DeleteComentWindowController">
    <children>
       <MenuBar>
          <menus>
-            <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo">
+            <Menu mnemonicParsing="true" text="Archivo">
                <items>
-                  <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                  <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
                </items>
             </Menu>
-            <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
+            <Menu mnemonicParsing="true" text="Acciones">
                <items>
-                  <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
-                  <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                  <MenuItem accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                  <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                  <SeparatorMenuItem />
+                  <MenuItem onAction="#handleBack" text="Volver Atrás" />
                </items>
             </Menu>
-            <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
+            <Menu mnemonicParsing="true" text="Ayuda">
                <items>
-                  <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
+                  <MenuItem onAction="#handleAboutAction" text="Acerca de Nosotros" />
                </items>
             </Menu>
          </menus>
       </MenuBar>
+
       <Label text="Administración de Comentarios">
-         <font><Font name="System Bold" size="22.0" /></font>
-         <VBox.margin><Insets top="20.0" /></VBox.margin>
+         <font>
+            <Font name="System Bold" size="22.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
       </Label>
 
       <HBox alignment="CENTER" spacing="15.0">
@@ -53,15 +61,19 @@
           <TableColumn fx:id="colDate" prefWidth="120.0" text="Fecha" />
           <TableColumn fx:id="colComment" prefWidth="440.0" text="Contenido del Comentario" />
         </columns>
-         <VBox.margin><Insets left="20.0" right="20.0" /></VBox.margin>
+         <VBox.margin>
+            <Insets left="20.0" right="20.0" />
+         </VBox.margin>
       </TableView>
 
       <HBox alignment="CENTER" spacing="40.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#handleBack" text="Volver" />
-            <Button mnemonicParsing="false" onAction="#handleDeleteComment" style="-fx-background-color: #ffaaaa;" text="Eliminar Comentario" />
+            <Button mnemonicParsing="false" onAction="#handleDeleteComment" prefHeight="30.0" prefWidth="150.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Eliminar Comentario" />
+            <Button mnemonicParsing="false" onAction="#handleBack" prefHeight="30.0" prefWidth="100.0" text="Volver" />
          </children>
-         <VBox.margin><Insets bottom="20.0" /></VBox.margin>
+         <VBox.margin>
+            <Insets bottom="20.0" />
+         </VBox.margin>
       </HBox>
    </children>
 </VBox>

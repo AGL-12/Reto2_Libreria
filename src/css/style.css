@@ -380,7 +380,6 @@
     -fx-transition: all 0.3s ease;     
 }
 
-<<<<<<< HEAD
 /* Efecto HOVER*/
 .book-item:hover {
     -fx-background-color: #f9f9f9;     
@@ -404,10 +403,9 @@
 .history-container {
     -fx-padding: 20;
     -fx-background-color: white;
-=======
+}
 #mainVBox {
     -fx-background-color: #f4f4f4;
->>>>>>> 824487ded36254403b4230e31fecbe7740aff23a
 }
 
 #headerHBox {
@@ -434,7 +432,6 @@
     -fx-background-color: #c0392b;
 }
 
-<<<<<<< HEAD
 .history-button-container {
     -fx-padding: 10 0 0 0;
 }
@@ -612,5 +609,3 @@
     -fx-underline: true;
     -fx-text-fill: #7a9cc2;
 }
-=======
->>>>>>> 824487ded36254403b4230e31fecbe7740aff23a

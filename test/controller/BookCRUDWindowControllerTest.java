@@ -1,141 +1,109 @@
 package controller;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import main.Main;
 import model.DBImplementation;
+import model.Book;
+import org.junit.After;
 import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
-import javafx.scene.control.Button;
-import java.util.Set;
-import javafx.scene.Node;
-
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
-/**
- * Test de flujo completo: 
- * MainBookStore -> Login -> OptionsAdmin -> BookOption (Create) -> BookOption (Modify) -> MainBookStore (Verify)
- */
 public class BookCRUDWindowControllerTest extends ApplicationTest {
 
     private final DBImplementation db = new DBImplementation();
-    private final long ISBN_NUEVO = 7771112223L; 
     private final String ADMIN_USER = "admin";
     private final String ADMIN_PASS = "1234";
-    // Título que esperamos encontrar al final en la tienda
-    private final String TITULO_MODIFICADO = "Título Modificado en el Flow";
+    private final long ISBN_TEST = 999111222L;
+    private final String TITULO_TEST = "Libro JUnit Flow";
+    private final String TITULO_MODIFICADO = "Libro JUnit Modificado";
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Limpiamos el libro por si acaso existía de pruebas anteriores
-        try {
-            db.deleteBook(ISBN_NUEVO);
-        } catch (Exception e) {}
+        new Main().start(stage);
+    }
 
-        // Iniciamos en la ventana principal de la tienda
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
-        Parent root = loader.load();
-        // Nota: Asegúrate de que MainBookStoreController no falla si headerController es null o manéjalo aquí
-        // MainBookStoreController main = loader.getController();
-        // main.headerController.setMode(null, null); // Si es necesario inicializar el header
-        
-        stage.setScene(new Scene(root));
-        stage.show();
+    @After
+    public void tearDown() {
+        // Limpieza del libro de prueba en la base de datos
+        try {
+            Book b = db.getBookData(ISBN_TEST);
+            if (b != null) {
+                db.deleteBook(ISBN_TEST);
+            }
+        } catch (Exception e) {
+            System.err.println("Error en limpieza de libro: " + e.getMessage());
+        }
     }
 
     @Test
-    public void testFlujoCompletoCrearYModificar() {
-        // 1. LOGIN
+    public void testFlujoCompletoBookCRUD() {
+        // 1. LOGIN COMO ADMINISTRADOR
         clickOn("#btnLogIn");
-        WaitForAsyncUtils.waitForFxEvents();
-        
         clickOn("#TextField_Username").write(ADMIN_USER);
         clickOn("#PasswordField_Password").write(ADMIN_PASS);
         clickOn("#Button_LogIn");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 2. NAVEGAR A OPCIONES
-        clickOn("#btnOption"); // O #btnPerfil según tu header
+        // 2. NAVEGACIÓN A OPCIONES ADMIN (Desde MainBookStore)
+        clickOn("#btnOption");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 3. NAVEGAR A GESTIÓN LIBROS
-        verifyThat("#btnLibro", isVisible());
-        clickOn("#btnLibro");
+        // 3. ABRIR GESTIÓN DE LIBROS (Clic Derecho en el panel)
+        rightClickOn("#rootPane"); 
+        clickOn("Gestión de Libros"); 
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 4. MODO CREAR
-        clickOn("#btnAdd");
-        WaitForAsyncUtils.waitForFxEvents();
+        // 4. CREACIÓN DE LIBRO (Modo Añadir)
+        clickOn("Acciones");
+        clickOn("Modo Añadir");
 
-        clickOn("#txtISBN").write(String.valueOf(ISBN_NUEVO));
-        clickOn("#txtTitle").write("Libro de Prueba Flow");
-        clickOn("#txtNombreAutor").write("Autor");
-        clickOn("#txtApellidoAutor").write("test");
-        clickOn("#txtEditorial").write("Editorial Test");
-        clickOn("#txtPrice").write("25.50");
-        clickOn("#txtStock").write("10");
-        clickOn("#txtPages").write("200");
-        clickOn("#txtSinopsis").write("test");
+        // Usamos eraseText(30) en lugar de doubleClick para asegurar que el campo esté limpio
+        clickOn("#txtISBN").eraseText(30).write(String.valueOf(ISBN_TEST));
+        clickOn("#txtTitle").eraseText(30).write(TITULO_TEST);
+        clickOn("#txtNombreAutor").eraseText(30).write("Autor");
+        clickOn("#txtApellidoAutor").eraseText(30).write("JUnit");
+        clickOn("#txtEditorial").eraseText(30).write("Editorial Test");
+        clickOn("#txtPrice").eraseText(30).write("29.99");
+        clickOn("#txtStock").eraseText(30).write("10");
+        clickOn("#txtPages").eraseText(30).write("300");
+        clickOn("#txtSinopsis").eraseText(100).write("Sinopsis de prueba.");
         
         clickOn("#btnConfirm");
         WaitForAsyncUtils.waitForFxEvents();
-        cerrarAlerta();
+        push(KeyCode.ENTER); // Cerrar Alert de éxito
 
-        // Nota: Al confirmar creación, ¿tu ventana se cierra o vuelves manualmente?
-        // Asumo que vuelves manualmente con btnReturn si la ventana no se cierra sola.
-
-        clickOn("#btnModify");
+        // 5. MODIFICACIÓN DEL LIBRO CREADO
+        clickOn("Acciones");
+        clickOn("Modo Modificar");
+        
+        // Buscamos el libro escribiendo el ISBN y pulsando ENTER
+        clickOn("#txtISBN").eraseText(30).write(String.valueOf(ISBN_TEST)).push(KeyCode.ENTER);
         WaitForAsyncUtils.waitForFxEvents();
 
-        clickOn("#txtISBN").write(String.valueOf(ISBN_NUEVO)).push(KeyCode.ENTER);
-        WaitForAsyncUtils.waitForFxEvents();
-
-        // Modificar el título
-        clickOn("#txtTitle").push(KeyCode.CONTROL, KeyCode.A).push(KeyCode.BACK_SPACE);
+        // Modificamos el título: Seleccionamos todo y borramos
+        clickOn("#txtTitle");
+        push(KeyCode.CONTROL, KeyCode.A);
+        push(KeyCode.BACK_SPACE);
         write(TITULO_MODIFICADO);
-
+        
         clickOn("#btnConfirm");
         WaitForAsyncUtils.waitForFxEvents();
-        cerrarAlerta();
-        
-        // Salir del CRUD
-        clickOn("#btnReturn");
-        WaitForAsyncUtils.waitForFxEvents();
+        push(KeyCode.ENTER); // Cerrar Alert de éxito
 
-        // 6. VOLVER AL HOME (MAIN BOOK STORE)
-        // Desde OptionsAdmin/BookOptionWindow pulsamos Home
-        // Si "Home" es texto en un botón:
+        // 6. VOLVER A LA TIENDA Y VERIFICAR
+        clickOn("#btnReturn"); 
+        WaitForAsyncUtils.waitForFxEvents();
         clickOn("Home"); 
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 7. VERIFICACIÓN FINAL EN LA TIENDA
-        // OPCIONAL: Si tienes barra de búsqueda, úsala para filtrar y asegurar que el libro es visible.
-        // Si no usas búsqueda y el libro está muy abajo (scroll), el test fallará.
-        try {
-            // Intenta escribir en la barra de búsqueda si existe (Pon aquí el ID correcto, ej: #txtSearch)
-            clickOn("#txtSearch").write(TITULO_MODIFICADO);
-            WaitForAsyncUtils.waitForFxEvents();
-        } catch (Exception e) {
-            // Si no hay barra de búsqueda o falla, intentamos verificar directamente
-            System.out.println("No se usó barra de búsqueda, verificando visibilidad directa...");
-        }
-
-        // Verificamos que el título modificado es visible en la escena (MainBookStore)
+        // Verificamos en la tienda usando la barra de búsqueda
+        clickOn("#txtSearch").eraseText(30).write(TITULO_MODIFICADO);
+        sleep(1000); 
+        
         verifyThat(TITULO_MODIFICADO, isVisible());
-        sleep(4000);
-    }
-
-    private void cerrarAlerta() {
-        Set<Node> botones = lookup(".dialog-pane .button").queryAll();
-        for (Node nodo : botones) {
-            if (nodo instanceof Button) {
-                clickOn(nodo);
-                break;
-            }
-        }
     }
 }
