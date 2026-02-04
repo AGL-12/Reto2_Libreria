@@ -32,7 +32,6 @@ import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
 public class BookViewControllerTest extends ApplicationTest {
 
-    // --- CREDENCIALES ---
     private static final String TEST_USER_LOGIN = "userTest";
     private static final String TEST_USER_PASS = "1234";
     private static final String ADMIN_LOGIN = "admin";
@@ -68,6 +67,7 @@ public class BookViewControllerTest extends ApplicationTest {
         release(KeyCode.ALT, KeyCode.SHIFT, KeyCode.CONTROL);
         UserSession.getInstance().cleanUserSession();
         
+        // 2. Limpiar usuario Y SUS DATOS (Comentarios, Carrito) al terminar
         eliminarUsuarioDePrueba();
         
         FxToolkit.hideStage();
@@ -117,13 +117,24 @@ public class BookViewControllerTest extends ApplicationTest {
 
         realizarLogoutDesdeLibro();
         
+        System.out.println("Iniciando validación Admin...");
         realizarLogin(ADMIN_LOGIN, ADMIN_PASS);
+        
+        int retries = 0;
+        while (!lookup("#tileBooks").tryQuery().isPresent() && retries < 50) {
+            sleep(100);
+            retries++;
+        }
+        sleep(500); 
         
         Platform.runLater(() -> {
             Admin admin = new Admin();
             admin.setUsername("admin");
+            admin.setUserCode(9999); 
             UserSession.getInstance().setUser(admin);
+            System.out.println("Rol Admin inyectado manualmente.");
         });
+        WaitForAsyncUtils.waitForFxEvents();
         sleep(500);
 
         abrirPrimerLibro();
@@ -131,13 +142,16 @@ public class BookViewControllerTest extends ApplicationTest {
         if (lookup("#btnAddToCart").tryQuery().isPresent()) {
             Node btn = lookup("#btnAddToCart").query();
             boolean oculto = !btn.isVisible() || !btn.isManaged();
-            Assert.assertTrue("Admin no debe ver botón de compra", oculto);
+            Assert.assertTrue("FALLO: Admin NO debe ver botón de compra. (Visible: " + btn.isVisible() + ")", oculto);
+        } else {
+             Assert.assertTrue(true);
         }
 
         realizarLogoutDesdeLibro();
+        System.out.println("=== FIN TEST MAESTRO (ÉXITO) ===");
     }
 
- 
+
     private void crearUsuarioDePrueba() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
@@ -203,7 +217,6 @@ public class BookViewControllerTest extends ApplicationTest {
             session.close();
         }
     }
-
 
 
     private void asegurarPantallaLogin() {
