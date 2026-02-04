@@ -4,8 +4,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.TilePane?>
@@ -18,24 +16,22 @@
                 <fx:include fx:id="header" source="Header.fxml" />
                 <MenuBar>
                     <menus>
-                        <Menu mnemonicParsing="true" text="_Archivo"> 
+                        <Menu fx:id="menuArchivo" mnemonicParsing="true" text="Archivo"> 
                             <items>
-                                <SeparatorMenuItem />
-                                <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                                <MenuItem fx:id="iSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
                             </items>
                         </Menu>
 
-                        <Menu mnemonicParsing="true" text="A_cciones">
+                        <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
                             <items>
-                                <MenuItem fx:id="menuItemReport" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
-                                <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                                <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
+                                <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
                             </items>
                         </Menu>
 
-                        <Menu mnemonicParsing="true" text="A_yuda">
+                        <Menu fx:id="menuAyuda" mnemonicParsing="true" text="Ayuda">
                             <items>
-                                <SeparatorMenuItem />
-                                <MenuItem onAction="#handleAboutAction" text="Acerca de..." />
+                                <MenuItem fx:id="iAcercaDe" onAction="#handleAboutAction" text="Acerca de Nosotros" />
                             </items>
                         </Menu>
                     </menus>

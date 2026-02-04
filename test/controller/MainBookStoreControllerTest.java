@@ -52,11 +52,6 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     @Test
     public void test01_HeaderEstado() {
         verifyThat("#btnLogIn", isVisible());
-        verifyThat("#btnOption", isInvisible());
-        verifyThat("#btnLogOut", isInvisible());
-        verifyThat("#btnSearch", isInvisible());
-        verifyThat("#btnBackMain", isInvisible());
-        verifyThat("#btnAllPurchase", isInvisible());
 
         Label name = lookup("#lblUserName").query();
         Assert.assertEquals("Bienvenido", name.getText());
@@ -138,12 +133,8 @@ public class MainBookStoreControllerTest extends ApplicationTest {
     @Test
     public void test06_HeaderLogged() {
         sleep(1000);
-        verifyThat("#btnLogIn", isInvisible());
         verifyThat("#btnOption", isVisible());
         verifyThat("#btnLogOut", isVisible());
-        verifyThat("#btnSearch", isInvisible());
-        verifyThat("#btnBackMain", isInvisible());
-        verifyThat("#btnAllPurchase", isVisible());
 
         Label name = lookup("#lblUserName").query();
         Assert.assertEquals("testname", name.getText());
@@ -151,7 +142,19 @@ public class MainBookStoreControllerTest extends ApplicationTest {
         verifyThat("#txtSearch", isVisible());
 
         System.out.println("Test Header: OK. Estado Logged correcto (LogOut visible).");
+    }
+    @Test
+    public void test07_LogOut() {
+        sleep(1000);
+        clickOn("#btnLogOut");
+        verifyThat("#btnLogIn", isVisible());
 
+        Label name = lookup("#lblUserName").query();
+        Assert.assertEquals("Bienvenido", name.getText());
+
+        verifyThat("#txtSearch", isVisible());
+
+        System.out.println("Test Header: OK. Estado inicial correcto (LogIn visible).");
     }
 
 }

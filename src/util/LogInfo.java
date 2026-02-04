@@ -32,7 +32,7 @@ public class LogInfo {
             // Opcional: Si quieres ver los logs de Hibernate detallados, ajusta el nivel aquí
             // Level.INFO muestra arranque y paradas. 
             // Level.FINE muestra SQL (pero genera MUCHO texto).
-            ourLogger.setLevel(Level.FINE);
+            ourLogger.setLevel(Level.INFO);
 
             // 3. Configurar el archivo para INFO y general
             // 'true' = append (no borra el fichero al arrancar, añade al final)

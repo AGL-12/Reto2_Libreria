@@ -25,6 +25,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.ContextMenuEvent;
@@ -59,11 +60,24 @@ public class MainBookStoreController {
     private List<Book> allBooks = new ArrayList<>();
     private final ClassDAO dao = new DBImplementation();
 
-    @FXML
-    private MenuItem menuItemReport;
     // El temporizador para el delay
     private PauseTransition pause;
+    
     private ContextMenu globalMenu;
+    @FXML
+    private Menu menuArchivo;
+    @FXML
+    private MenuItem iSalir;
+    @FXML
+    private Menu menuAcciones;
+    @FXML
+    private MenuItem iManual;
+    @FXML
+    private MenuItem iJasper;
+    @FXML
+    private Menu menuAyuda;
+    @FXML
+    private MenuItem iAcercaDe;
 
     public void initialize() {
         initContexMenu();

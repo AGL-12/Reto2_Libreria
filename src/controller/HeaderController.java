@@ -94,34 +94,6 @@ public class HeaderController {
         }
     }
 
-    private void seeAllPurchase(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingHistory.fxml"));
-            Parent root = fxmlLoader.load();
-
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
-            stage.setScene(new Scene(root));
-
-            // 1. Calculamos cuánto mide la ventana nueva
-            stage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            stage.centerOnScreen();
-
-            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
-             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
-             *
-             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
-             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
-             * newStage.setX(centerX - (newStage.getWidth() / 2));
-             * newStage.setY(centerY - (newStage.getHeight() / 2));
-             */
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     @FXML
     private void backToMain(ActionEvent event) {
         try {
@@ -140,14 +112,6 @@ public class HeaderController {
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             stage.centerOnScreen();
 
-            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
-             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
-             *
-             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
-             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
-             * newStage.setX(centerX - (newStage.getWidth() / 2));
-             * newStage.setY(centerY - (newStage.getHeight() / 2));
-             */
             stage.show();
         } catch (IOException ex) {
             Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
@@ -161,12 +125,9 @@ public class HeaderController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LoginWindow.fxml"));
             Parent root = fxmlLoader.load();
 
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
-
             Stage oldStage = (Stage) rootHeader.getScene().getWindow();
             Stage newStage = new Stage();
 
-            // Estilo sin bordes
             newStage.setScene(new Scene(root));
 
             // 1. Calculamos cuánto mide la ventana nueva
@@ -175,14 +136,6 @@ public class HeaderController {
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             newStage.centerOnScreen();
 
-            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
-             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
-             *
-             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
-             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
-             * newStage.setX(centerX - (newStage.getWidth() / 2));
-             * newStage.setY(centerY - (newStage.getHeight() / 2));
-             */
             newStage.show();
             oldStage.close();
         } catch (IOException ex) {
@@ -215,14 +168,6 @@ public class HeaderController {
             // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             stage.centerOnScreen();
 
-            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
-             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
-             *
-             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
-             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
-             * newStage.setX(centerX - (newStage.getWidth() / 2));
-             * newStage.setY(centerY - (newStage.getHeight() / 2));
-             */
             stage.show();
         } catch (IOException ex) {
             Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
@@ -230,8 +175,7 @@ public class HeaderController {
     }
 
     @FXML
-    private void logOut(ActionEvent event
-    ) {
+    private void logOut(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
             Parent root = fxmlLoader.load();
@@ -241,13 +185,19 @@ public class HeaderController {
             MainBookStoreController main = fxmlLoader.getController();
             main.headerController.setMode(UserSession.getInstance().getUser(), null);
 
+            Stage oldStage = (Stage) rootHeader.getScene().getWindow();
             Stage newStage = new Stage();
 
             newStage.setScene(new Scene(root));
 
+            // 1. Calculamos cuánto mide la ventana nueva
             newStage.sizeToScene();
 
+            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             newStage.centerOnScreen();
+
+            newStage.show();
+            oldStage.close();
 
             newStage.show();
         } catch (IOException ex) {
