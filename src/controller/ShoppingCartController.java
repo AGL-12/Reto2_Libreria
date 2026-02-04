@@ -202,6 +202,13 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         lblTotal.setText("Total: " + String.format("%.2f", total) + " €");
     }
 
+    /**
+     * Implementación de la interfaz EventHandler. Este método es llamado por
+     * los PreOrderControllers cuando el usuario cambia la cantidad en el
+     * Spinner, forzando un recalculo del total.
+     *
+     * * @param event Evento de acción capturado.
+     */
     @Override
     public void handle(ActionEvent event) {
         actualizarPrecioTotal();
@@ -329,7 +336,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
-    // --- MÉTODOS DE GESTIÓN (Ya existentes en tu código, asegúrate de que el FXML los llame) ---
+    /**
+     * Finaliza la ejecución de la aplicación.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     public void handleExit(ActionEvent event) {
         // Cierra la aplicación
@@ -337,6 +348,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         System.exit(0);
     }
 
+    /**
+     * Cierra la sesión del usuario actual y redirige a la pantalla de Login.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     public void handleLogOut(ActionEvent event) {
         // Limpia la sesión y vuelve al Login
@@ -351,6 +367,12 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    /**
+     * Abre el manual de usuario en formato PDF utilizando el visor
+     * predeterminado del sistema.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleHelpAction(ActionEvent event) {
         try {
@@ -382,6 +404,12 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    /**
+     * Genera un informe técnico en PDF utilizando JasperReports basado en el
+     * historial. Establece conexión JDBC y carga el recurso .jrxml.
+     *
+     * * @param event El evento de acción disparado por el botón o menú.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -426,6 +454,12 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
         }
     }
 
+    /**
+     * Muestra una ventana de diálogo de alerta al usuario.
+     *
+     * * @param message Mensaje a mostrar.
+     * @param alertType Tipo de alerta (ERROR, INFORMATION, etc).
+     */
     private void showAlert(String message, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setHeaderText(null);

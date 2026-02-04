@@ -59,9 +59,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
 /**
- * FXML Controller class
+ * Controlador para la ventana de Historial de Compras. Permite al usuario
+ * visualizar sus pedidos pasados en una tabla, ver detalles mediante doble clic
+ * o menú contextual, y generar informes técnicos.
  *
- * @author ander
+ * * @author ander
  */
 public class ShoppingHistoryController implements Initializable {
 
@@ -84,21 +86,14 @@ public class ShoppingHistoryController implements Initializable {
 
     @FXML
     private MenuBar menuBar;
-    @FXML
-    private VBox mainVBox;
-    @FXML
-    private Menu menuAcciones;
-    @FXML
-    private MenuItem iManual;
-    @FXML
-    private MenuItem iJasper;
-    @FXML
-    private HBox headerHBox;
-    @FXML
-    private Label headerLabel;
-    @FXML
-    private Label infoLabel;
 
+    /**
+     * Inicializa el controlador, configura las columnas de la tabla, el menú
+     * contextual y carga los datos del historial del usuario logueado.
+     *
+     * * @param url La ubicación relativa del objeto raíz.
+     * @param rb Los recursos utilizados para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         logger.logInfo("Accediendo a la ventana de Historial de Compras.");
@@ -144,8 +139,12 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
-
-
+    /**
+     * Gestiona el evento de clic sobre una fila de la tabla. Si se detecta un
+     * doble clic, abre la ventana de detalles del pedido.
+     *
+     * * @param event El evento de ratón disparado.
+     */
     @FXML
     private void clickFila(MouseEvent event) {
         // AQUÍ ESTÁ EL TRUCO:
@@ -163,6 +162,12 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Abre una nueva ventana mostrando el desglose detallado del pedido
+     * seleccionado.
+     *
+     * * @param order El pedido del cual se mostrarán los detalles.
+     */
     private void abrirDetalle(Order order) {
         try {
             logger.logInfo("Abriendo detalle del pedido ID: " + order.getIdOrder());
@@ -185,6 +190,11 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Redirige al usuario a la ventana del menú principal.
+     *
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void volver(ActionEvent event) {
         try {
@@ -199,10 +209,19 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Redirige al usuario desde la ventana de historial hacia la ventana del 
+     * carrito de compras.
+     * <p>
+     * Este método carga el FXML del carrito, accede a su controlador para 
+     * configurar el modo del encabezado (Header) y cambia la escena actual.
+     * </p>
+     * * @param event El evento de acción disparado por el botón o elemento de menú.
+     */
     @FXML
     private void goToCart(ActionEvent event) {
         try {
-            logger.logInfo("Cerrando sesión desde el historial.");
+            logger.logInfo("Llendo al carrito de compra desde el historial.");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
             Parent root = loader.load();
             ShoppingCartController controller = loader.getController();
@@ -214,12 +233,22 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Finaliza la ejecución de la aplicación.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         javafx.application.Platform.exit();
         System.exit(0);
     }
 
+    /**
+     * Cierra la sesión del usuario actual y redirige a la pantalla de Login.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleLogOut(ActionEvent event) {
         logger.logInfo("Cerrando sesión desde el historial.");
@@ -233,6 +262,12 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Genera un informe técnico en PDF utilizando JasperReports basado en el
+     * historial. Establece conexión JDBC y carga el recurso .jrxml.
+     *
+     * * @param event El evento de acción disparado por el botón o menú.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -283,6 +318,12 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
+    /**
+     * Abre el manual de usuario en formato PDF utilizando el visor
+     * predeterminado del sistema.
+     *
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleHelpAction(ActionEvent event) {
         try {
@@ -314,7 +355,18 @@ public class ShoppingHistoryController implements Initializable {
         }
     }
 
-    private void showAlert(String string, Alert.AlertType alertType) {
+    /**
+     * Muestra una ventana de diálogo de alerta al usuario.
+     *
+     * * @param message Mensaje a mostrar.
+     * @param alertType Tipo de alerta (ERROR, INFORMATION, etc).
+     */
+    private void showAlert(String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle("Mensaje");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
