@@ -92,7 +92,7 @@ public class UtilGeneric {
         alert.showAndWait();
     }
 
-    public void helpAction() {
+        public void helpAction() {
         try {
             // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
             String resourcePath = "/documents/Manual_Usuario.pdf";
