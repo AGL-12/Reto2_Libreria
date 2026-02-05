@@ -1,15 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -30,7 +24,6 @@ import model.Admin;
 
 import java.io.IOException;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 
 //Imports para click derecho
 import javafx.scene.control.ContextMenu;
@@ -204,7 +197,7 @@ public class BookViewController {
             if (book.getCover() != null && !book.getCover().isEmpty()) {
                 Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
                 // Usamos el método local cutOutImage para asegurar el recorte correcto
-                cutOutImage(coverBook, originalImage, 140, 210);
+                UtilGeneric.getInstance().cutOutImage(coverBook, originalImage, 140, 210);
             }
         } catch (Exception e) {
             LogInfo.getInstance().logSevere("Error al procesar imagen del libro: " + book.getCover(), e);
@@ -227,9 +220,13 @@ public class BookViewController {
             // Es Administrador -> NUNCA puede comprar
             btnAddToCart.setVisible(false);
             btnAddToCart.setManaged(false);
+            btnAddComment.setVisible(false);
+            btnAddComment.setManaged(false);
 
         } else {
             // Es Usuario Normal (o invitado) -> Depende del Stock
+            btnAddComment.setVisible(true);
+            btnAddComment.setManaged(true);
             if (book.getStock() > 0) {
                 // Hay stock -> Botón VISIBLE
                 btnAddToCart.setVisible(true);
@@ -310,7 +307,11 @@ public class BookViewController {
             showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
             return;
         }
-
+        if (texto.length() > 500) {
+            LogInfo.getInstance().logWarning("Intento de publicar comentario demasiado largo: " + texto.length() + " caracteres.");
+            showAlert("El comentario es demasiado largo (máximo 500 caracteres).", Alert.AlertType.WARNING);
+            return;
+        }
         // Bloqueamos el botón para que el usuario no haga doble clic
         btnPublicar.setDisable(true);
 
@@ -401,35 +402,6 @@ public class BookViewController {
     @FXML
     private void handleReportAction(ActionEvent event) {
         UtilGeneric.getInstance().helpAction();
-    }
-
-    /**
-     * Método auxiliar para recortar y escalar la imagen de portada.
-     */
-    private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
-        imageView.setFitWidth(targetWidth);
-        imageView.setFitHeight(targetHeight);
-
-        double originalWidth = image.getWidth();
-        double originalHeight = image.getHeight();
-
-        double scaleX = targetWidth / originalWidth;
-        double scaleY = targetHeight / originalHeight;
-        double scale = Math.max(scaleX, scaleY);
-
-        double scaledWidth = originalWidth * scale;
-        double scaledHeight = originalHeight * scale;
-
-        double viewportWidth = targetWidth / scale;
-        double viewportHeight = targetHeight / scale;
-
-        double viewportX = (originalWidth - viewportWidth) / 2;
-        double viewportY = (originalHeight - viewportHeight) / 2;
-
-        imageView.setImage(image);
-        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
-        imageView.setSmooth(true);
-        imageView.setPreserveRatio(false);
     }
 
     /**

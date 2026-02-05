@@ -1,7 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Gestiona la sesión del usuario actual y su carrito de la compra. Implementa

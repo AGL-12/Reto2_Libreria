@@ -10,7 +10,6 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,7 +19,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -38,15 +36,17 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana de eliminar comentarios. Acceso restringido a
- * administradores para moderar comentarios filtrados por usuario.
- * Permite visualizar, buscar y eliminar comentarios específicos de la base de datos.
+ * administradores para moderar comentarios filtrados por usuario. Permite
+ * visualizar, buscar y eliminar comentarios específicos de la base de datos.
  *
  * @author unai azkorra
  * @version 1.0
  */
 public class DeleteComentWindowController implements Initializable {
 
-    /** Implementación de la lógica de acceso a datos. */
+    /**
+     * Implementación de la lógica de acceso a datos.
+     */
     private DBImplementation db = new DBImplementation();
 
     @FXML
@@ -62,12 +62,16 @@ public class DeleteComentWindowController implements Initializable {
     @FXML
     private ComboBox<User> comboUsers;
 
-    /** Menú contextual global para acciones rápidas. */
+    /**
+     * Menú contextual global para acciones rápidas.
+     */
     private ContextMenu globalMenu;
 
     /**
-     * Inicializa la ventana configurando las columnas de la tabla, cargando la lista
-     * de usuarios en el ComboBox y estableciendo los listeners de selección.
+     * Inicializa la ventana configurando las columnas de la tabla, cargando la
+     * lista de usuarios en el ComboBox y estableciendo los listeners de
+     * selección.
+     *
      * * @param location Ubicación relativa para el objeto raíz.
      * @param resources Recursos para localizar el objeto raíz.
      */
@@ -92,7 +96,7 @@ public class DeleteComentWindowController implements Initializable {
             // Carga inicial de usuarios para el filtro
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
             comboUsers.setItems(users);
-            
+
             // Listener para cargar comentarios automáticamente al seleccionar un usuario
             comboUsers.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
@@ -106,8 +110,9 @@ public class DeleteComentWindowController implements Initializable {
     }
 
     /**
-     * Recupera de la base de datos y muestra en la tabla todos los comentarios 
+     * Recupera de la base de datos y muestra en la tabla todos los comentarios
      * asociados a un nombre de usuario específico.
+     *
      * * @param username Nombre de usuario para filtrar los comentarios.
      */
     private void cargarComentarios(String username) {
@@ -121,7 +126,7 @@ public class DeleteComentWindowController implements Initializable {
     }
 
     /**
-     * Inicializa el menú contextual (clic derecho) con opciones de informes, 
+     * Inicializa el menú contextual (clic derecho) con opciones de informes,
      * manual de usuario y salida.
      */
     private void initGlobalContextMenu() {
@@ -154,6 +159,7 @@ public class DeleteComentWindowController implements Initializable {
 
     /**
      * Solicita el cierre de la aplicación de forma controlada.
+     *
      * * @param event Evento de acción disparado.
      */
     @FXML
@@ -164,7 +170,9 @@ public class DeleteComentWindowController implements Initializable {
     }
 
     /**
-     * Muestra un cuadro de diálogo informativo sobre la versión y propósito de la ventana.
+     * Muestra un cuadro de diálogo informativo sobre la versión y propósito de
+     * la ventana.
+     *
      * * @param event Evento de acción disparado.
      */
     @FXML
@@ -178,7 +186,9 @@ public class DeleteComentWindowController implements Initializable {
     }
 
     /**
-     * Abre el manual de usuario en formato PDF mediante la creación de un archivo temporal.
+     * Abre el manual de usuario en formato PDF mediante la creación de un
+     * archivo temporal.
+     *
      * * @param event Evento de acción disparado.
      */
     @FXML
@@ -198,7 +208,9 @@ public class DeleteComentWindowController implements Initializable {
     }
 
     /**
-     * Genera un informe técnico detallado utilizando JasperReports y lo muestra en un visor.
+     * Genera un informe técnico detallado utilizando JasperReports y lo muestra
+     * en un visor.
+     *
      * * @param event Evento de acción disparado.
      */
     @FXML
@@ -229,6 +241,7 @@ public class DeleteComentWindowController implements Initializable {
     /**
      * Elimina el comentario seleccionado de la tabla y de la base de datos.
      * Requiere que el usuario haya seleccionado una fila previamente.
+     *
      * * @param event Evento de acción disparado por el botón de eliminar.
      */
     @FXML
@@ -252,6 +265,7 @@ public class DeleteComentWindowController implements Initializable {
 
     /**
      * Regresa a la ventana anterior de opciones para administradores.
+     *
      * * @param event Evento de acción disparado por el botón volver.
      */
     @FXML

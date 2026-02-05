@@ -40,17 +40,21 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana de eliminar usuarios siendo el propio usuario.
- * Permite al usuario en sesión dar de baja su cuenta tras una confirmación por contraseña.
+ * Permite al usuario en sesión dar de baja su cuenta tras una confirmación por
+ * contraseña.
+ *
  * * @author unai azkorra
  * @version 1.1
  */
 public class DeleteAccountController implements Initializable {
 
-    /** Implementación de la base de datos para operaciones de borrado. */
+    /**
+     * Implementación de la base de datos para operaciones de borrado.
+     */
     private DBImplementation db = new DBImplementation();
 
     @FXML
-    private GridPane rootPane; 
+    private GridPane rootPane;
     @FXML
     private Label LabelUsername;
     @FXML
@@ -60,12 +64,15 @@ public class DeleteAccountController implements Initializable {
     @FXML
     private Button Button_Delete;
 
-    /** Menú contextual de la ventana. */
+    /**
+     * Menú contextual de la ventana.
+     */
     private ContextMenu globalMenu;
 
     /**
-     * Inicializa la ventana obteniendo el usuario de la sesión actual y configurando
-     * los componentes visuales iniciales.
+     * Inicializa la ventana obteniendo el usuario de la sesión actual y
+     * configurando los componentes visuales iniciales.
+     *
      * * @param location Ubicación relativa para el objeto raíz.
      * @param resources Recursos para localizar el objeto raíz.
      */
@@ -75,15 +82,17 @@ public class DeleteAccountController implements Initializable {
         if (user != null) {
             LabelUsername.setText(user.getUsername());
         }
-        
+
         initGlobalContextMenu();
         LogInfo.getInstance().logInfo("Ventana de eliminación de cuenta propia inicializada.");
     }
 
     /**
-     * Gestiona la lógica de eliminación de la cuenta propia del usuario.
-     * Valida que la contraseña coincida con la del perfil actual y solicita confirmación final.
-     * Si el borrado es exitoso, cierra la sesión y navega a la ventana de LogIn.
+     * Gestiona la lógica de eliminación de la cuenta propia del usuario. Valida
+     * que la contraseña coincida con la del perfil actual y solicita
+     * confirmación final. Si el borrado es exitoso, cierra la sesión y navega a
+     * la ventana de LogIn.
+     *
      * * @param event El evento de acción disparado por el botón de eliminar.
      */
     @FXML
@@ -121,6 +130,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Genera un informe técnico de la aplicación mediante JasperReports.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -139,12 +149,18 @@ public class DeleteAccountController implements Initializable {
             LogInfo.getInstance().logSevere("Error al generar el informe Jasper técnico desde eliminación de cuenta", e);
             showAlert("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) { }
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
     /**
      * Realiza la navegación hacia otra ventana FXML.
+     *
      * * @param fxmlPath Ruta relativa del archivo FXML.
      * @param title Título de la nueva ventana.
      */
@@ -201,6 +217,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Limpia el contenido del campo de contraseña.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -210,6 +227,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Solicita el cierre controlado de la aplicación.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -221,6 +239,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Muestra una ventana de información "Acerca de".
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -230,6 +249,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Abre el manual de usuario de la aplicación en formato PDF.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -250,6 +270,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Cancela la operación de borrado y regresa al menú principal del usuario.
+     *
      * * @param event El evento de acción disparado por el botón cancelar.
      */
     @FXML
@@ -259,6 +280,7 @@ public class DeleteAccountController implements Initializable {
 
     /**
      * Crea y muestra un cuadro de diálogo de alerta personalizado.
+     *
      * * @param title Título de la alerta.
      * @param content Texto descriptivo de la alerta.
      * @param type Tipo de alerta (INFORMATION, WARNING, ERROR, etc.).

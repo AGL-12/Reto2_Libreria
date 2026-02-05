@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import javafx.scene.control.ToggleGroup;
@@ -67,7 +62,7 @@ public class SignUpWindowController implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
-            stage.setTitle("Book&Bugs - Iniciar Sesión"); 
+            stage.setTitle("Book&Bugs - Iniciar Sesión");
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
             stage.setScene(new Scene(root));
             stage.show();

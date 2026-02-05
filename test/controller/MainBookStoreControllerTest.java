@@ -1,9 +1,6 @@
 package controller;
 
 import java.util.List;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -14,7 +11,6 @@ import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
 import model.User;
-import model.UserSession;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.After;

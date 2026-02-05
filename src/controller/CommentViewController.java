@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.net.URL;
@@ -242,7 +237,11 @@ public class CommentViewController implements Initializable {
                 UtilGeneric.getInstance().showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING, "Error");
                 return;
             }
-
+            if (nuevoTexto.length() > 500) {
+                LogInfo.getInstance().logWarning("Intento de editar comentario con demasiados caracteres: " + nuevoTexto.length());
+                showAlert("El comentario no puede superar los 500 caracteres.", Alert.AlertType.WARNING);
+                return;
+            }
             // Bloqueamos botón para evitar doble clic
             btnEdit.setDisable(true);
 

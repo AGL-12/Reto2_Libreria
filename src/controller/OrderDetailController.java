@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.net.URL;
@@ -52,8 +47,11 @@ public class OrderDetailController implements Initializable {
 
     /**
      * Recibe los datos de un pedido y los vincula a la tabla de la interfaz.
-     * Muestra el título del libro, la cantidad comprada y el precio total de esa línea.
-     * * @param order El objeto Order que contiene la información del pedido a detallar.
+     * Muestra el título del libro, la cantidad comprada y el precio total de
+     * esa línea.
+     *
+     * * @param order El objeto Order que contiene la información del pedido a
+     * detallar.
      */
     void setOrderData(Order order) {
         lblTitulo.setText("Pedido Nº " + order.getIdOrder());

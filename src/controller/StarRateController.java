@@ -68,7 +68,7 @@ public class StarRateController {
 
         // 2. Fijamos el gráfico
         updateStarsView(this.currentRate / 5.0);
-        
+
         LogInfo.getInstance().logInfo("Nota guardada: " + this.currentRate);
     }
 

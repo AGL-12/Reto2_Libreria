@@ -43,19 +43,22 @@ import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
 /**
- * Controlador de la ventana de eliminar usuarios siendo administrador.
- * Valida la operación mediante la contraseña del administrador en sesión para 
+ * Controlador de la ventana de eliminar usuarios siendo administrador. Valida
+ * la operación mediante la contraseña del administrador en sesión para
  * garantizar la seguridad del borrado.
+ *
  * * @author unai azkorra
  * @version 1.1
  */
 public class DeleteAccountAdminController implements Initializable {
 
-    /** Interfaz de acceso a datos. */
+    /**
+     * Interfaz de acceso a datos.
+     */
     private final ClassDAO dao = new DBImplementation();
 
     @FXML
-    private GridPane rootPane; 
+    private GridPane rootPane;
     @FXML
     private ComboBox<User> ComboBoxUser;
     @FXML
@@ -65,11 +68,15 @@ public class DeleteAccountAdminController implements Initializable {
     @FXML
     private Button Button_Cancel;
 
-    /** Menú contextual accesible mediante clic derecho. */
+    /**
+     * Menú contextual accesible mediante clic derecho.
+     */
     private ContextMenu globalMenu;
 
     /**
-     * Inicializa la ventana cargando la lista de usuarios y configurando el menú contextual.
+     * Inicializa la ventana cargando la lista de usuarios y configurando el
+     * menú contextual.
+     *
      * * @param location Ubicación relativa para el objeto raíz.
      * @param resources Recursos para localizar el objeto raíz.
      */
@@ -81,7 +88,8 @@ public class DeleteAccountAdminController implements Initializable {
     }
 
     /**
-     * Obtiene todos los usuarios de la base de datos y los carga en el ComboBox.
+     * Obtiene todos los usuarios de la base de datos y los carga en el
+     * ComboBox.
      */
     private void cargarUsuarios() {
         try {
@@ -93,9 +101,10 @@ public class DeleteAccountAdminController implements Initializable {
     }
 
     /**
-     * Maneja la lógica de eliminación de un usuario.
-     * Verifica que haya un usuario seleccionado y que la contraseña introducida coincida 
-     * con la del administrador logueado antes de proceder.
+     * Maneja la lógica de eliminación de un usuario. Verifica que haya un
+     * usuario seleccionado y que la contraseña introducida coincida con la del
+     * administrador logueado antes de proceder.
+     *
      * * @param event El evento de acción disparado por el botón de eliminar.
      */
     @FXML
@@ -134,6 +143,7 @@ public class DeleteAccountAdminController implements Initializable {
 
     /**
      * Muestra información sobre la aplicación.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -143,8 +153,9 @@ public class DeleteAccountAdminController implements Initializable {
     }
 
     /**
-     * Genera un informe técnico detallado mediante JasperReports.
-     * Abre una conexión SQL temporal para alimentar el reporte.
+     * Genera un informe técnico detallado mediante JasperReports. Abre una
+     * conexión SQL temporal para alimentar el reporte.
+     *
      * * @param event El evento de acción disparado.
      */
     @FXML
@@ -163,13 +174,18 @@ public class DeleteAccountAdminController implements Initializable {
             LogInfo.getInstance().logSevere("Error al generar informe técnico Jasper", e);
             showAlert("Error", "No se pudo generar el informe técnico.", Alert.AlertType.ERROR);
         } finally {
-            try { if (con != null) con.close(); } catch (SQLException ex) { }
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
     /**
-     * Configura el menú contextual global de la ventana con opciones de limpieza, 
-     * manual, informes y salida.
+     * Configura el menú contextual global de la ventana con opciones de
+     * limpieza, manual, informes y salida.
      */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
@@ -185,7 +201,7 @@ public class DeleteAccountAdminController implements Initializable {
         MenuItem itemExit = new MenuItem("Salir");
         itemExit.setOnAction(this::handleExit);
         globalMenu.getItems().addAll(itemLimpiar, new SeparatorMenuItem(), itemInforme, itemManual, itemAbout, new SeparatorMenuItem(), itemExit);
-        
+
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
@@ -201,30 +217,33 @@ public class DeleteAccountAdminController implements Initializable {
 
     /**
      * Limpia la selección del ComboBox de usuarios y el campo de contraseña.
+     *
      * * @param event El evento de acción disparado.
      */
-    @FXML 
-    private void handleClearAction(ActionEvent event) { 
-        ComboBoxUser.getSelectionModel().clearSelection(); 
-        TextFieldPassword.clear(); 
+    @FXML
+    private void handleClearAction(ActionEvent event) {
+        ComboBoxUser.getSelectionModel().clearSelection();
+        TextFieldPassword.clear();
     }
 
     /**
      * Finaliza la ejecución de la aplicación.
+     *
      * * @param event El evento de acción disparado.
      */
-    @FXML 
-    private void handleExit(ActionEvent event) { 
+    @FXML
+    private void handleExit(ActionEvent event) {
         LogInfo.getInstance().logInfo("Aplicación cerrada por administrador.");
-        Platform.exit(); 
-        System.exit(0); 
+        Platform.exit();
+        System.exit(0);
     }
 
     /**
      * Abre el manual de usuario en PDF creando un archivo temporal.
+     *
      * * @param event El evento de acción disparado.
      */
-    @FXML 
+    @FXML
     private void handleReportAction(ActionEvent event) {
         try {
             InputStream is = getClass().getResourceAsStream("/documents/Manual_Usuario.pdf");
@@ -232,13 +251,15 @@ public class DeleteAccountAdminController implements Initializable {
             Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             Desktop.getDesktop().open(temp);
             LogInfo.getInstance().logInfo("Manual de usuario abierto desde administración de cuentas.");
-        } catch (IOException e) { 
-            LogInfo.getInstance().logSevere("Error al abrir manual", e); 
+        } catch (IOException e) {
+            LogInfo.getInstance().logSevere("Error al abrir manual", e);
         }
     }
 
     /**
-     * Cancela la operación actual y regresa al menú de opciones de administrador.
+     * Cancela la operación actual y regresa al menú de opciones de
+     * administrador.
+     *
      * * @param event El evento de acción disparado por el botón cancelar.
      */
     @FXML
@@ -256,15 +277,16 @@ public class DeleteAccountAdminController implements Initializable {
 
     /**
      * Crea y muestra una ventana de alerta personalizada.
+     *
      * * @param title Título de la ventana.
      * @param message Mensaje a mostrar.
      * @param type Tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
      */
     private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type); 
-        alert.setTitle(title); 
-        alert.setHeaderText(null); 
-        alert.setContentText(message); 
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }

@@ -62,14 +62,14 @@ public class BookItemController {
 
             // Referencia a la ventana vieja (para cerrarla luego)
             Stage oldStage = (Stage) rootBookItem.getScene().getWindow();
-            
+
             // Crear la ventana NUEVA
             Stage newStage = new Stage();
-            newStage.setTitle("Book&Bugs - " + book.getTitle()); 
+            newStage.setTitle("Book&Bugs - " + book.getTitle());
             newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
 
             newStage.setScene(new Scene(root));
-            
+
             // Ajustes de tamaño y posición
             newStage.sizeToScene();
             newStage.centerOnScreen();

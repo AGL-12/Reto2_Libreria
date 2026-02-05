@@ -4,13 +4,11 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -33,9 +31,10 @@ import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
 /**
- * Controlador de la ventana principal de administración.
- * Proporciona acceso centralizado a la gestión de libros, usuarios y moderación 
- * de comentarios, además de herramientas de informes técnicos.
+ * Controlador de la ventana principal de administración. Proporciona acceso
+ * centralizado a la gestión de libros, usuarios y moderación de comentarios,
+ * además de herramientas de informes técnicos.
+ *
  * * @author unai azkorra
  * @version 1.0
  */
@@ -46,12 +45,14 @@ public class OptionsAdminController {
     @FXML
     private Button btnDeleteUser, btnEliminarComentario, btnModificarUsuario, btnLibro;
 
-    /** Menú contextual accesible mediante clic derecho para navegación rápida. */
+    /**
+     * Menú contextual accesible mediante clic derecho para navegación rápida.
+     */
     private ContextMenu globalMenu;
 
     /**
-     * Inicializa el panel de opciones administrativas.
-     * Configura el menú contextual global y registra el evento en el sistema de logs.
+     * Inicializa el panel de opciones administrativas. Configura el menú
+     * contextual global y registra el evento en el sistema de logs.
      */
     @FXML
     public void initialize() {
@@ -60,9 +61,9 @@ public class OptionsAdminController {
     }
 
     /**
-     * Inicializa y configura el menú contextual global.
-     * Define las opciones de gestión, informes técnicos, acceso al manual y salida,
-     * vinculándolas con sus respectivos métodos de ventana.
+     * Inicializa y configura el menú contextual global. Define las opciones de
+     * gestión, informes técnicos, acceso al manual y salida, vinculándolas con
+     * sus respectivos métodos de ventana.
      */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
@@ -113,6 +114,7 @@ public class OptionsAdminController {
 
     /**
      * Navega a la ventana de gestión (CRUD) de libros.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -122,6 +124,7 @@ public class OptionsAdminController {
 
     /**
      * Navega a la ventana de eliminación de cuentas de usuario.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -131,6 +134,7 @@ public class OptionsAdminController {
 
     /**
      * Navega a la ventana de moderación y eliminación de comentarios.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -140,6 +144,7 @@ public class OptionsAdminController {
 
     /**
      * Navega a la ventana de modificación de perfiles de usuario.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -148,8 +153,9 @@ public class OptionsAdminController {
     }
 
     /**
-     * Regresa a la ventana principal de la tienda (MainBookStore).
-     * Configura el encabezado de la tienda con la sesión del administrador actual.
+     * Regresa a la ventana principal de la tienda (MainBookStore). Configura el
+     * encabezado de la tienda con la sesión del administrador actual.
+     *
      * @param event El evento de acción disparado por el botón volver.
      */
     @FXML
@@ -175,6 +181,7 @@ public class OptionsAdminController {
 
     /**
      * Finaliza la ejecución de la aplicación.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -185,7 +192,9 @@ public class OptionsAdminController {
     }
 
     /**
-     * Muestra un cuadro de diálogo informativo sobre el panel de administración.
+     * Muestra un cuadro de diálogo informativo sobre el panel de
+     * administración.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -196,6 +205,7 @@ public class OptionsAdminController {
 
     /**
      * Abre el manual de usuario en formato PDF mediante un archivo temporal.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -216,6 +226,7 @@ public class OptionsAdminController {
 
     /**
      * Genera y visualiza un informe técnico detallado mediante JasperReports.
+     *
      * @param event El evento de acción disparado.
      */
     @FXML
@@ -245,8 +256,10 @@ public class OptionsAdminController {
     }
 
     /**
-     * Gestiona la navegación genérica entre las distintas vistas administrativas.
-     * Obtiene el escenario (Stage) actual a través del panel raíz para evitar errores de contexto.
+     * Gestiona la navegación genérica entre las distintas vistas
+     * administrativas. Obtiene el escenario (Stage) actual a través del panel
+     * raíz para evitar errores de contexto.
+     *
      * @param fxmlPath La ruta del archivo FXML que se desea cargar.
      */
     private void navigateTo(String fxmlPath) {
@@ -266,6 +279,7 @@ public class OptionsAdminController {
 
     /**
      * Muestra una alerta personalizada al usuario.
+     *
      * @param titulo El título de la ventana de alerta.
      * @param mensaje El mensaje a mostrar.
      * @param tipo El tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
