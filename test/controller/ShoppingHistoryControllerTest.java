@@ -1,8 +1,6 @@
 package controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import javafx.geometry.VerticalDirection;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -16,129 +14,200 @@ import model.Contain;
 import model.DBImplementation;
 import model.Order;
 import model.Profile;
-import model.User; // Importa tu modelo User
+import model.User;
 import model.UserSession;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.junit.After;
-import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
+import static org.junit.Assert.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxToolkit;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import org.testfx.util.WaitForAsyncUtils;
+import util.HibernateUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ShoppingHistoryControllerTest extends ApplicationTest {
 
-    private static ClassDAO dao = new DBImplementation();
-    private static final String TEST_USER = "UsuarioUnico";
+    // Unificamos las variables de usuario para evitar confusiones
+    private static final String TEST_USER = "userTester";
     private static final String TEST_PASS = "1234";
-    private Book testBook;
-    private Order testOrder;
-
-    @BeforeClass
-    public static void setupSpec() {
-        // 1. Limpieza preventiva
-        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
-        if (existente != null) {
-            dao.dropOutUser(existente);
-        }
-
-        // 2. CREACIÓN DIRECTA EN BASE DE DATOS
-        // Creamos el objeto directamente usando tu modelo para que ya exista al iniciar los tests
-        User nuevoUsuario = new User();
-        nuevoUsuario.setUsername(TEST_USER);
-        nuevoUsuario.setPassword(TEST_PASS);
-        nuevoUsuario.setEmail("test@unico.com");
-        nuevoUsuario.setName("Nombre");
-        nuevoUsuario.setSurname("Apellido");
-        nuevoUsuario.setTelephone("123456789");
-        // Asegúrate de que estos setters coincidan con los de tu clase User/Profile
-
-        dao.signUp(nuevoUsuario);
-    }
-
-    @AfterClass
-    public static void tearDownSpec() {
-        // Eliminación final tras todos los tests
-        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
-        if (existente != null) {
-            dao.dropOutUser(existente);
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        // Esto cierra la ventana de la aplicación después de cada test
-        FxToolkit.cleanupStages();
-        release(new KeyCode[]{}); // Libera teclas por si acaso
-        release(new MouseButton[]{}); // Libera el ratón
-    }
 
     @Override
     public void start(Stage stage) throws Exception {
         new Main().start(stage);
     }
 
+    @Before
+    public void setUp() {
+        // Limpiamos la sesión de la aplicación
+        UserSession.getInstance().cleanUserSession();
+        // Creamos el usuario en la BD antes de cada test para asegurar un entorno limpio
+        crearUsuarioDePrueba();
+        sleep(500);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        UserSession.getInstance().cleanUserSession();
+        // Borramos el usuario y sus datos de la BD al finalizar cada test
+        eliminarUsuarioDePrueba();
+        FxToolkit.cleanupStages();
+        release(new KeyCode[]{});
+        release(new MouseButton[]{});
+    }
+
     @Test
     public void test1_verificarHistorialVacio() {
         testLogIn();
         testNavegarAHistorial();
+        
         verifyThat("#tableOrders", isVisible());
         TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
         assertTrue("El historial debe estar vacío", tabla.getItems().isEmpty());
+        
+        // Volver a la tienda
         clickOn("#btnVolver");
-        clickOn("#btnBack");
     }
 
     @Test
-    public void test2_verificarHistorilaLleno() {
-        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
-        String tituloLibro = "1984";
-        clickOn(tituloLibro);
-        sleep(1000);
+    public void test2_verificarHistorialLleno() {
+        testLogIn();
+        
+        // Compramos un libro para que el historial tenga datos
+        clickOn("1984");
+        sleep(500);
         clickOn("#btnAddToCart");
-        clickOn("Aceptar");
-        sleep(1000);
+        cerrarAlertas();
+        
         clickOn("#btnBuy");
-        sleep(1000);
+        sleep(500);
         clickOn("#btnComprar");
-        clickOn("Aceptar");
+        cerrarAlertas();
+        
         testNavegarAHistorial();
-        tabla = lookup("#tableOrders").queryAs(TableView.class);
+        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
         assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());
     }
 
     @Test
     public void test3_verificarDetallesPedidos() {
+        testLogIn();
+        
+        // Primero generamos una compra
+        clickOn("1984");
+        clickOn("#btnAddToCart");
+        cerrarAlertas();
+        clickOn("#btnBuy");
+        clickOn("#btnComprar");
+        cerrarAlertas();
+
         testNavegarAHistorial();
         TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
-        assertTrue("Debe haber pedidos para probar el detalle", !tabla.getItems().isEmpty());
-        doubleClickOn(".table-row-cell");
-        verifyThat("#tableItems", isVisible());
-        verifyThat("#lblTitulo", isVisible());
+        
+        if (!tabla.getItems().isEmpty()) {
+            // Doble clic en la fila para abrir el detalle
+            doubleClickOn(".table-row-cell");
+            sleep(800);
+            verifyThat("#tableItems", isVisible());
+            verifyThat("#lblTitulo", isVisible());
+        } else {
+            Assert.fail("No se pudo generar un pedido para probar los detalles.");
+        }
     }
 
     private void testLogIn() {
-        // Al empezar, el usuario ya existe gracias al @BeforeClass
-        clickOn("#btnLogIn");
+        // Aseguramos que estamos en la pantalla de login
+        if (lookup("#btnLogIn").tryQuery().isPresent()) {
+            clickOn("#btnLogIn");
+        }
+        
         clickOn("#TextField_Username").write(TEST_USER);
         clickOn("#PasswordField_Password").write(TEST_PASS);
         clickOn("#Button_LogIn");
         WaitForAsyncUtils.waitForFxEvents();
+        sleep(1000); // Tiempo para cargar la tienda
     }
 
     private void testNavegarAHistorial() {
         clickOn("#btnOption");
+        sleep(500);
         clickOn("#btnHistory");
+        sleep(500);
     }
 
-    private void testLogOut() {
-        clickOn("#btnLogOut");
+    private void cerrarAlertas() {
+        sleep(500);
+        if (lookup(".dialog-pane").tryQuery().isPresent()) {
+            press(KeyCode.ENTER).release(KeyCode.ENTER);
+            sleep(300);
+        }
     }
 
+    private void crearUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Profile existing = (Profile) session.createQuery("FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER).uniqueResult();
+
+            if (existing == null) {
+                User testUser = new User();
+                testUser.setUsername(TEST_USER);
+                testUser.setPassword(TEST_PASS);
+                testUser.setEmail("test@history.com");
+                testUser.setName("Tester");
+                testUser.setSurname("History");
+                testUser.setTelephone("600000000");
+                testUser.setCardNumber("1234567890123456");
+                testUser.setGender("Other");
+                session.save(testUser);
+                tx.commit();
+            }
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    private void eliminarUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // 1. Borrar Comentarios
+            session.createQuery("DELETE FROM Commentate WHERE user.username = :u")
+                    .setParameter("u", TEST_USER).executeUpdate();
+
+            // 2. Borrar Pedidos (Cascada manual)
+            List<Integer> orderIds = session.createQuery("SELECT o.idOrder FROM Order o WHERE o.user.username = :u")
+                    .setParameter("u", TEST_USER).list();
+
+            if (orderIds != null && !orderIds.isEmpty()) {
+                session.createQuery("DELETE FROM Contain WHERE id.idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+                session.createQuery("DELETE FROM Order WHERE idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+            }
+
+            // 3. Borrar Perfil
+            session.createQuery("DELETE FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER).executeUpdate();
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
 }
