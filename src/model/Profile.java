@@ -36,6 +36,13 @@ public abstract class Profile implements Serializable {
 
     /**
      * Constructs a profile with the specified attributes.
+     * @param username Para el Login
+     * @param password Para el Login
+     * @param email Correo del usuario
+     * @param userCode ID unico
+     * @param surname Apellido
+     * @param name Nombre
+     * @param telephone Telefono del usuario
      */
     public Profile(String username, String password, String email, int userCode, String name, String telephone, String surname) {
         this.username = username;

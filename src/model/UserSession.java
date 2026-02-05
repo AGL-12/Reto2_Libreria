@@ -96,7 +96,7 @@ public class UserSession {
      * BD. Si no existe un pedido pendiente, crea uno nuevo. Si el libro ya está
      * en el carrito, incrementa su cantidad.
      *
-     * * @param book El libro que se desea añadir al carrito.
+     * @param book El libro que se desea añadir al carrito.
      */
     public void addToCart(Book book) {
         if (!(this.user instanceof User)) {

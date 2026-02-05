@@ -84,7 +84,7 @@ public class Book implements Serializable {
 
     /**
      * Constructor con todos los parámetros para inicializar un objeto Book.
-     * * @param ISBN Identificador ISBN.
+     * @param ISBN Identificador ISBN.
      * @param cover Portada del libro.
      * @param titulo Título de la obra.
      * @param author Autor del libro.

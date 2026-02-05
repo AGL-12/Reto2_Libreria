@@ -11,12 +11,12 @@ import util.HibernateUtil;
 
 public class DBImplementation implements ClassDAO {
 
-
     /**
      * metodo para hacer el login en la app
+     *
      * @param username credencial del login
      * @param password credencial para el login
-     * @return 
+     * @return userFound Con los datos 
      */
     @Override
     public Profile logIn(String username, String password) {
@@ -45,6 +45,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para hacer signUp
+     *
      * @param profile con los datos para crear el nuevo perfil
      */
     @Override
@@ -66,8 +67,10 @@ public class DBImplementation implements ClassDAO {
             throw e;
         }
     }
+
     /**
      * Metodo para eliminar usuarios
+     *
      * @param profile con los datos del usuario a eliminar
      */
     @Override
@@ -116,6 +119,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para crear un nuevo libro
+     *
      * @param book objeto con los datos del nuevo libro
      */
     @Override
@@ -141,6 +145,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para modificar un libro ya existente
+     *
      * @param book el objeto que se quiere modificar
      */
     @Override
@@ -166,8 +171,9 @@ public class DBImplementation implements ClassDAO {
     }
 
     /**
-     * metodo para eliminar libro aunque en la ejecucion no se usa
-     * se usa en los test
+     * metodo para eliminar libro aunque en la ejecucion no se usa se usa en los
+     * test
+     *
      * @param isbn del libro a eliminar
      */
     @Override
@@ -197,6 +203,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para obtener los datos de los libros
+     *
      * @param isbn del libro que estamos buscando
      * @return devuelve el objeto de libro encontrado
      */
@@ -216,10 +223,11 @@ public class DBImplementation implements ClassDAO {
         return book;
     }
 
-   /**
-    * metodo para obtener todos los libros de la base de datos
-    * @return una lista con todos los libros
-    */
+    /**
+     * metodo para obtener todos los libros de la base de datos
+     *
+     * @return una lista con todos los libros
+     */
     @Override
     public List<Book> getAllBooks() {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -250,6 +258,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para buscar libros
+     *
      * @param busqueda puede ser un isbn, fragmento del titulo o el autor
      * @return devuelve una lista de libros con el filtro aplicado
      */
@@ -277,8 +286,9 @@ public class DBImplementation implements ClassDAO {
     }
 
     /**
-     * metodo para crear autor
-     * si el autor existe devuelve el objeto de autor pero sino lo crea con el nombre y apellido
+     * metodo para crear autor si el autor existe devuelve el objeto de autor
+     * pero sino lo crea con el nombre y apellido
+     *
      * @param nombreAutor del autor a buscar/crear
      * @param apellidoAutor apellido del autor a buscar/crear
      * @return el autor completo
@@ -319,6 +329,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para conseguir los comentarios de un libro
+     *
      * @param isbn se usa para buscar los comentarios de ese libro
      * @return devuelve una lista de libros
      */
@@ -342,6 +353,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * busca los comentarios de un usuario
+     *
      * @param username del usuario que queremos buscar sus comentarios
      * @return devuelve una lista de comentarios
      */
@@ -366,6 +378,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para añadir comentarios
+     *
      * @param comment el obejto de comentario a crear
      */
     @Override
@@ -391,6 +404,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para eliminar comentario
+     *
      * @param comment objeto a eliminar
      */
     @Override
@@ -415,6 +429,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para actualizar el comentario
+     *
      * @param comment objeto a modificar
      */
     @Override
@@ -438,8 +453,10 @@ public class DBImplementation implements ClassDAO {
             }
         }
     }
+
     /**
      * metodo para coger los pedidos que no se han finalizado
+     *
      * @param user usuario al que pertenece el pedido
      * @return devuelve el objeto de la orden de ese usuario
      */
@@ -477,6 +494,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo que se encarga de guardar la orden actual
+     *
      * @param order el objeto que guarda
      */
     @Override
@@ -503,6 +521,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * busca el historial de compra
+     *
      * @param id busca mediente el id del usuario
      * @return devuelve la lista de pedidos finalizados
      */
@@ -536,6 +555,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para buscar un pedido en especifico
+     *
      * @param id del pedido a buscar
      * @return devuelve una lista con el contenido del pedido
      */
@@ -558,6 +578,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para cargar los articulos del carrito de compra
+     *
      * @param id del usuario
      * @return devuelve una lista con el contenido del carrito de compra
      */
@@ -594,8 +615,10 @@ public class DBImplementation implements ClassDAO {
         }
         return cart;
     }
+
     /**
      * metodo para finalizar un pedido y comprarlo
+     *
      * @param order es el objeto de order que finaliza
      * @return un boolean para indicar que se ha comprado
      */
@@ -665,6 +688,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para cargar todos los usuarios
+     *
      * @return devuelve una lista con los usuarios
      */
     @Override
@@ -699,6 +723,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * meotdo para modificar un usuairo
+     *
      * @param profile perfil que se va a modificar
      */
     @Override
@@ -725,6 +750,7 @@ public class DBImplementation implements ClassDAO {
 
     /**
      * metodo para eliminar un libro del contenido de un pedido sin comprar
+     *
      * @param contain objeto que se modifica
      */
     public void removeBookFromOrder(Contain contain) {

@@ -65,7 +65,7 @@ public class CommentViewController implements Initializable {
      * Establece el controlador padre (BookViewController) para poder
      * comunicarle cambios, como la eliminación de un comentario.
      *
-     * * @param parent El controlador de la vista de libro.
+     * @param parent El controlador de la vista de libro.
      */
     public void setParent(BookViewController parent) {
         this.parentController = parent;
@@ -108,7 +108,7 @@ public class CommentViewController implements Initializable {
      * decide qué botones mostrar según si el usuario logueado es el autor del
      * comentario o un administrador.
      *
-     * * @param comment El objeto comentario con toda la información a mostrar.
+     * @param comment El objeto comentario con toda la información a mostrar.
      */
     public void setData(Commentate comment) {
         this.currentComment = comment;

@@ -67,7 +67,7 @@ public class Commentate implements Serializable {
      * Crea un nuevo comentario inicializando la fecha de creación y la clave
      * compuesta.
      *
-     * * @param user El usuario que comenta.
+     * @param user El usuario que comenta.
      * @param book El libro comentado.
      * @param commentary El contenido del comentario.
      * @param valuation La puntuación asignada.
@@ -165,7 +165,7 @@ public class Commentate implements Serializable {
      * Devuelve la fecha de creación formateada como cadena de texto
      * (dd/MM/yyyy).
      *
-     * * @return La fecha formateada o una cadena vacía si la fecha es nula.
+     * @return La fecha formateada o una cadena vacía si la fecha es nula.
      */
     public String getFormattedDate() {
         if (dateCreation != null) {

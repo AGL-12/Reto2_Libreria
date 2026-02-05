@@ -22,7 +22,7 @@ public class Admin extends Profile {
 
     /**
      * Constructor con todos los parámetros para crear un administrador.
-     * * @param currentAccount La cuenta corriente del administrador.
+     * @param currentAccount La cuenta corriente del administrador.
      * @param username El nombre de usuario único para el acceso.
      * @param password La contraseña de la cuenta.
      * @param email El correo electrónico del administrador.

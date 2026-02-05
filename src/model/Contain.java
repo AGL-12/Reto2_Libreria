@@ -60,7 +60,7 @@ public class Contain implements Serializable {
 
     /**
      * Constructor parametrizado para crear una nueva línea de pedido.
-     * * @param quantity Cantidad de libros.
+     * @param quantity Cantidad de libros.
      * @param order Objeto pedido asociado.
      * @param book Objeto libro asociado.
      */
@@ -166,8 +166,8 @@ public class Contain implements Serializable {
 
     /**
      * Puente para sacar el Título. La tabla llama aquí cuando pones: new
-     * PropertyValueFactory<>("nombreLibro")
-     * * @return Título del libro asociado.
+     * PropertyValueFactory("nombreLibro")
+     * @return Título del libro asociado.
      */
     public String getNombreLibro() {
         // Gracias al JOIN FETCH, 'this.book' ya no es null, tiene datos.
@@ -176,8 +176,8 @@ public class Contain implements Serializable {
 
     /**
      * Puente para sacar el Precio Total. La tabla llama aquí cuando pones: new
-     * PropertyValueFactory<>("totalEuros")
-     * * @return Precio total formateado con símbolo de Euro.
+     * PropertyValueFactory("totalEuros")
+     * @return Precio total formateado con símbolo de Euro.
      */
     public String getTotalEuros() {
         // Multiplicamos el precio del libro (Book) por la cantidad (Contain)

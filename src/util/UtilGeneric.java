@@ -43,7 +43,7 @@ public class UtilGeneric {
      * Obtiene la instancia única de la clase UtilGeneric. Si no existe, la
      * crea; si existe, devuelve la actual.
      *
-     * * @return La instancia única de UtilGeneric.
+     * @return La instancia única de UtilGeneric.
      */
     public static UtilGeneric getInstance() {
         if (instance == null) {
@@ -55,7 +55,7 @@ public class UtilGeneric {
     /**
      * Muestra una ventana de alerta genérica de JavaFX.
      *
-     * * @param message El contenido del mensaje a mostrar.
+     * @param message El contenido del mensaje a mostrar.
      * @param type El tipo de alerta (ERROR, INFORMATION, WARNING, etc.).
      * @param title El título de la cabecera de la alerta.
      */

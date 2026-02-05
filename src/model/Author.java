@@ -43,7 +43,7 @@ public class Author implements Serializable {
 
     /**
      * Constructor con parámetros básicos.
-     * * @param idAuthor Identificador único del autor.
+     * @param idAuthor Identificador único del autor.
      * @param nombre Nombre del autor.
      * @param apellido Apellido del autor.
      */
@@ -60,7 +60,7 @@ public class Author implements Serializable {
 
     /**
      * Constructor completo con todos los atributos, incluyendo la lista de libros.
-     * * @param idAuthor Identificador único del autor.
+     * @param idAuthor Identificador único del autor.
      * @param name Nombre del autor.
      * @param surname Apellido del autor.
      * @param books Lista de libros escritos por el autor.

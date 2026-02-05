@@ -38,7 +38,7 @@ public class CommentateId implements Serializable {
     /**
      * Constructor parametrizado para inicializar la clave compuesta.
      *
-     * * @param userCode Identificador único del usuario.
+     * @param userCode Identificador único del usuario.
      * @param isbnBook Identificador ISBN único del libro.
      */
     public CommentateId(int userCode, long isbnBook) {

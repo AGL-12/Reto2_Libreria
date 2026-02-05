@@ -32,7 +32,7 @@ public class ContainId implements Serializable {
 
     /**
      * Constructor que inicializa los campos que conforman la clave primaria compuesta.
-     * * @param idOrder Identificador del pedido.
+     * @param idOrder Identificador del pedido.
      * @param isbnBook Código ISBN del libro.
      */
     public ContainId(int idOrder, long isbnBook) {

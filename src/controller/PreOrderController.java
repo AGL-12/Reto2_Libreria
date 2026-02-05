@@ -13,8 +13,10 @@ import model.Book;
 import util.UtilGeneric;
 
 /**
- * Controlador para los elementos individuales (filas) dentro del carrito de la compra.
- * Representa un libro específico en el pedido, permitiendo ajustar su cantidad o eliminarlo.
+ * Controlador para los elementos individuales (filas) dentro del carrito de la
+ * compra. Representa un libro específico en el pedido, permitiendo ajustar su
+ * cantidad o eliminarlo.
+ *
  * * @author ander
  * @version 1.0
  */
@@ -35,12 +37,13 @@ public class PreOrderController {
     private Book libro;
     private ShoppingCartController shoppingCartController;
 
-    
     /**
-     * Configura los datos del libro en la fila del carrito y establece los límites
-     * del selector de cantidad basándose en el stock disponible.
-     * * @param libro El libro a mostrar.
-     * @param cartController Referencia al controlador principal del carrito para permitir actualizaciones de precio.
+     * Configura los datos del libro en la fila del carrito y establece los
+     * límites del selector de cantidad basándose en el stock disponible.
+     *
+     * @param libro El libro a mostrar.
+     * @param cartController Referencia al controlador principal del carrito
+     * para permitir actualizaciones de precio.
      */
     public void setData(Book libro, ShoppingCartController cartController) {
         this.libro = libro;
@@ -72,19 +75,21 @@ public class PreOrderController {
         return this.libro;
     }
 
-    
     /**
-     * Obtiene la cantidad de ejemplares seleccionada actualmente por el usuario mediante el Spinner.
-     * * @return El valor entero seleccionado en el selector de cantidad.
+     * Obtiene la cantidad de ejemplares seleccionada actualmente por el usuario
+     * mediante el Spinner.
+     *
+     * @return El valor entero seleccionado en el selector de cantidad.
      */
     public int getCantidadSeleccionada() {
         // Devolvemos el número que el usuario ha elegido en el selector
         return spinnerCantidad.getValue();
     }
 
-    
     /**
-     * Gestiona la acción de eliminar este libro específico del carrito de la compra.
+     * Gestiona la acción de eliminar este libro específico del carrito de la
+     * compra.
+     *
      * * @param event El evento de pulsación del botón de borrado.
      */
     @FXML

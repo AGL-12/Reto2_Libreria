@@ -256,7 +256,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      * Elimina un libro específico del carrito de la compra tanto de la base de
      * datos como de la vista actual.
      *
-     * * @param libroAEliminar El objeto Book que se desea retirar del pedido.
+     * @param libroAEliminar El objeto Book que se desea retirar del pedido.
      */
     public void eliminarLibroDelCarrito(Book libroAEliminar) {
         logger.logInfo("Eliminando libro '" + libroAEliminar.getTitle() + "' (ISBN: " + libroAEliminar.getISBN() + ") del carrito.");
@@ -327,7 +327,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     /**
      * Finaliza la ejecución de la aplicación.
      *
-     * * @param event Evento de acción disparado.
+     * @param event Evento de acción disparado.
      */
     @FXML
     public void handleExit(ActionEvent event) {
@@ -339,7 +339,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     /**
      * Cierra la sesión del usuario actual y redirige a la pantalla de Login.
      *
-     * * @param event Evento de acción disparado.
+     * @param event Evento de acción disparado.
      */
     @FXML
     public void handleLogOut(ActionEvent event) {

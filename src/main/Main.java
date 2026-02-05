@@ -24,7 +24,7 @@ import util.LogInfo;
 import javafx.scene.image.Image;
 
 /**
- * Clase principal de la aplicación Book&Bugs.
+ * Clase principal de la aplicación BookBugs.
  * <p>
  * Se encarga de la inicialización del motor de persistencia (Hibernate), la
  * precarga de datos de prueba en la base de datos y el lanzamiento de la
