@@ -20,7 +20,6 @@ public class SessionHolderThread extends Thread {
             System.out.println("Hilo " + this.getId() + ": Reteniendo conexión física (Transacción abierta)...");
             Thread.sleep(30000); // 30 segundos de bloqueo
         } catch (InterruptedException e) {
-            e.printStackTrace();
         } finally {
             // AHORA cerramos la transacción y la sesión
             if (tx != null && tx.isActive()) {

@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.List;
 import javafx.geometry.VerticalDirection;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
@@ -11,9 +12,13 @@ import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
 import model.User;
+import model.UserSession;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertTrue;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -23,6 +28,7 @@ import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import org.testfx.matcher.control.LabeledMatchers;
+import util.HibernateUtil;
 
 /**
  * Test de integración para la gestión del carrito y el historial de compras.
@@ -36,49 +42,31 @@ public class ShoppingCartControllerTest extends ApplicationTest {
     private static final String TEST_PASS = "1234";
     private static final String NOMBRE_REAL = "NombreTest";
 
-    @BeforeClass
-    public static void setupSpec() {
-        // Limpieza de datos previos para asegurar un entorno de test controlado
-        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
-        if (existente != null) {
-            dao.dropOutUser(existente);
-        }
-
-        // Creación del usuario de prueba
-        User nuevoUsuario = new User();
-        nuevoUsuario.setUsername(TEST_USER);
-        nuevoUsuario.setPassword(TEST_PASS);
-        nuevoUsuario.setEmail("test@unico.com");
-        nuevoUsuario.setName(NOMBRE_REAL);
-        nuevoUsuario.setSurname("Apellido");
-        nuevoUsuario.setTelephone("123456789");
-
-        dao.signUp(nuevoUsuario);
+    @Override
+    public void start(Stage stage) throws Exception {
+        new Main().start(stage);
     }
 
-    @AfterClass
-    public static void tearDownSpec() {
-        // Borrado del usuario tras finalizar los tests para no dejar basura en la BD
-        Profile existente = dao.logIn(TEST_USER, TEST_PASS);
-        if (existente != null) {
-            dao.dropOutUser(existente);
-        }
+    @Before
+    public void setUp() {
+        // Limpiamos la sesión de la aplicación
+        UserSession.getInstance().cleanUserSession();
+        // Creamos el usuario en la BD antes de cada test para asegurar un entorno limpio
+        crearUsuarioDePrueba();
+        sleep(500);
     }
 
     @After
     public void tearDown() throws Exception {
-        // Esto cierra la ventana de la aplicación después de cada test
+        UserSession.getInstance().cleanUserSession();
+        // Borramos el usuario y sus datos de la BD al finalizar cada test
+        eliminarUsuarioDePrueba();
         FxToolkit.cleanupStages();
-        release(new KeyCode[]{}); // Libera teclas por si acaso
-        release(new MouseButton[]{}); // Libera el ratón
-    }
+        release(new KeyCode[]{});
+        release(new MouseButton[]{});
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        // Inicia la aplicación desde el punto de entrada principal
-        new Main().start(stage);
     }
-
+    
     /**
      * Método auxiliar para realizar el login al inicio de cada test.
      */
@@ -110,6 +98,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
 
     @Test
     public void test2_aumentarCantidadYVerificarPrecio() {
+        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
@@ -127,6 +116,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
 
     @Test
     public void test3_eliminarProducto() {
+        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
@@ -139,6 +129,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
 
     @Test
     public void test4_navegacionHistorial() {
+        testLogIn();
         clickOn("#btnOption");
         clickOn("#btnHistory");
         verifyThat("#tableOrders", isVisible());
@@ -150,6 +141,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
 
     @Test
     public void test5_verificarPersistenciaCarrito() {
+        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
@@ -167,5 +159,68 @@ public class ShoppingCartControllerTest extends ApplicationTest {
         VBox contenedor = lookup("#vBoxContenedorLibros").queryAs(VBox.class);
         assertTrue("El carrito debe mantener los productos tras re-loguear",
                 !contenedor.getChildren().isEmpty());
+    }
+    
+     private void crearUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Profile existing = (Profile) session.createQuery("FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER).uniqueResult();
+
+            if (existing == null) {
+                User testUser = new User();
+                testUser.setUsername(TEST_USER);
+                testUser.setPassword(TEST_PASS);
+                testUser.setEmail("test@history.com");
+                testUser.setName("Tester");
+                testUser.setSurname("History");
+                testUser.setTelephone("600000000");
+                testUser.setCardNumber("1234567890123456");
+                testUser.setGender("Other");
+                session.save(testUser);
+                tx.commit();
+            }
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    private void eliminarUsuarioDePrueba() {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // 1. Borrar Comentarios
+            session.createQuery("DELETE FROM Commentate WHERE user.username = :u")
+                    .setParameter("u", TEST_USER).executeUpdate();
+
+            // 2. Borrar Pedidos (Cascada manual)
+            List<Integer> orderIds = session.createQuery("SELECT o.idOrder FROM Order o WHERE o.user.username = :u")
+                    .setParameter("u", TEST_USER).list();
+
+            if (orderIds != null && !orderIds.isEmpty()) {
+                session.createQuery("DELETE FROM Contain WHERE id.idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+                session.createQuery("DELETE FROM Order WHERE idOrder IN (:ids)")
+                        .setParameterList("ids", orderIds).executeUpdate();
+            }
+
+            // 3. Borrar Perfil
+            session.createQuery("DELETE FROM Profile WHERE username = :u")
+                    .setParameter("u", TEST_USER).executeUpdate();
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 }
