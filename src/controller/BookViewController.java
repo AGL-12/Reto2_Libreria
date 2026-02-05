@@ -487,12 +487,23 @@ public class BookViewController {
      */
     public void onCommentDeleted() {
         LogInfo.getInstance().logInfo("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
-
         if (btnAddComment != null) {
-            btnAddComment.setVisible(true);
-            btnAddComment.setManaged(true);
-            btnAddComment.setDisable(false);
-            btnAddComment.requestFocus();
+            // Obtenemos el usuario actual de la sesión para mayor seguridad
+            Profile user = UserSession.getInstance().getUser();
+
+            if (user instanceof Admin) {
+                // Si es Admin, el botón debe permanecer oculto y no ocupar espacio
+                btnAddComment.setVisible(false);
+                btnAddComment.setManaged(false);
+                LogInfo.getInstance().logInfo("Usuario es Admin: El botón de comentar permanece oculto.");
+            } else {
+                // Si es un usuario normal (o invitado), lo reactivamos para que pueda volver a opinar
+                btnAddComment.setVisible(true);
+                btnAddComment.setManaged(true);
+                btnAddComment.setDisable(false);
+                btnAddComment.requestFocus();
+                LogInfo.getInstance().logInfo("Botón de comentar reactivado para el usuario.");
+            }
         }
     }
 }
