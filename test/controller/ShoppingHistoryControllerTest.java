@@ -104,7 +104,6 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
 
     @Test
     public void verificarHistorilaLleno() {
-
         String tituloLibro = "1984";
         scroll(VerticalDirection.DOWN);
         clickOn(tituloLibro);

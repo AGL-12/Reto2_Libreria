@@ -21,51 +21,46 @@ public class OptionsAdminControllerTest extends ApplicationTest {
 
     @Test
     public void testNavegacionAdminCompleta() {
-        // 1. LOGIN ADMIN
+        // 1. LOGIN
         clickOn("#btnLogIn");
         clickOn("#TextField_Username").write(ADMIN_USER);
         clickOn("#PasswordField_Password").write(ADMIN_PASS);
         clickOn("#Button_LogIn");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 2. ACCEDER A OPCIONES
+        // 2. ENTRAR A OPCIONES
         clickOn("#btnOption");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 3. NAVEGAR A GESTIÓN LIBROS (vía Menú superior)
+        // 3. GESTIÓN LIBROS (vía fx:id)
         clickOn("Acciones");
-        clickOn("Gestión de Libros");
+        clickOn("#miGestLibros");
         WaitForAsyncUtils.waitForFxEvents();
         verifyThat("#txtISBN", isVisible());
-        
-        // Volver (Usamos botón físico para estabilidad)
         clickOn("#btnReturn");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 4. NAVEGAR A ELIMINAR COMENTARIO (vía Menú superior)
+        // 4. ELIMINAR COMENTARIO (vía fx:id)
         clickOn("Acciones");
-        clickOn("Eliminar Comentario");
+        clickOn("#miElimComentario");
         WaitForAsyncUtils.waitForFxEvents();
-        verifyThat("#tableComments", isVisible());
-        
+        verifyThat("#tableComments", isVisible()); // Usando el ID real del FXML
         clickOn("Volver");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 5. NAVEGAR A BORRAR USUARIO (vía Menú superior)
+        // 5. BORRAR USUARIO (vía fx:id)
         clickOn("Acciones");
-        clickOn("Borrar Usuario");
+        clickOn("#miBorrarUsuario");
         WaitForAsyncUtils.waitForFxEvents();
         verifyThat("#ComboBoxUser", isVisible());
-        
         clickOn("#Button_Cancel");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 6. NAVEGAR A MODIFICAR USUARIO (vía Menú superior)
+        // 6. MODIFICAR USUARIO (vía fx:id)
         clickOn("Acciones");
-        clickOn("Modificar Usuario");
+        clickOn("#miModUsuario");
         WaitForAsyncUtils.waitForFxEvents();
         verifyThat("#comboUsers", isVisible());
-        
         clickOn("#Button_Cancel");
         WaitForAsyncUtils.waitForFxEvents();
 

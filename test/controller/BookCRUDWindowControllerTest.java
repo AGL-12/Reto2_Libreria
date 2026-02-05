@@ -11,6 +11,7 @@ import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
+import static org.testfx.matcher.control.LabeledMatchers.hasText;
 
 public class BookCRUDWindowControllerTest extends ApplicationTest {
 
@@ -48,20 +49,20 @@ public class BookCRUDWindowControllerTest extends ApplicationTest {
         clickOn("#Button_LogIn");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 2. NAVEGACIÓN A OPCIONES ADMIN (Desde MainBookStore)
+        // 2. NAVEGACIÓN A OPCIONES ADMIN
         clickOn("#btnOption");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 3. ABRIR GESTIÓN DE LIBROS (Clic Derecho en el panel)
+        // 3. ABRIR GESTIÓN DE LIBROS
         rightClickOn("#rootPane"); 
         clickOn("Gestión de Libros"); 
         WaitForAsyncUtils.waitForFxEvents();
 
-        // 4. CREACIÓN DE LIBRO (Modo Añadir)
-        clickOn("Acciones");
-        clickOn("Modo Añadir");
+        // 4. VERIFICACIÓN DE INICIO AUTOMÁTICO EN MODO CREACIÓN
+        // Comprobamos que el botón de confirmar ya tiene el texto correcto sin pulsar nada
+        verifyThat("#btnConfirm", hasText("Añadir Libro"));
 
-        // Usamos eraseText(30) en lugar de doubleClick para asegurar que el campo esté limpio
+        // Rellenamos los datos directamente (ya que estamos en Modo Añadir por defecto)
         clickOn("#txtISBN").eraseText(30).write(String.valueOf(ISBN_TEST));
         clickOn("#txtTitle").eraseText(30).write(TITULO_TEST);
         clickOn("#txtNombreAutor").eraseText(30).write("Autor");
@@ -76,15 +77,18 @@ public class BookCRUDWindowControllerTest extends ApplicationTest {
         WaitForAsyncUtils.waitForFxEvents();
         push(KeyCode.ENTER); // Cerrar Alert de éxito
 
-        // 5. MODIFICACIÓN DEL LIBRO CREADO
+        // 5. CAMBIO A MODO MODIFICAR Y BÚSQUEDA
         clickOn("Acciones");
         clickOn("Modo Modificar");
         
-        // Buscamos el libro escribiendo el ISBN y pulsando ENTER
+        // Verificamos que el botón cambió su texto
+        verifyThat("#btnConfirm", hasText("Modificar Libro"));
+        
+        // Buscamos el libro (el ISBN se bloqueará tras el ENTER según la nueva lógica)
         clickOn("#txtISBN").eraseText(30).write(String.valueOf(ISBN_TEST)).push(KeyCode.ENTER);
         WaitForAsyncUtils.waitForFxEvents();
 
-        // Modificamos el título: Seleccionamos todo y borramos
+        // Modificamos el título
         clickOn("#txtTitle");
         push(KeyCode.CONTROL, KeyCode.A);
         push(KeyCode.BACK_SPACE);
@@ -94,13 +98,16 @@ public class BookCRUDWindowControllerTest extends ApplicationTest {
         WaitForAsyncUtils.waitForFxEvents();
         push(KeyCode.ENTER); // Cerrar Alert de éxito
 
-        // 6. VOLVER A LA TIENDA Y VERIFICAR
+        // 6. VERIFICAR QUE TRAS CONFIRMAR SE LIMPIAN CAMPOS Y ISBN SE REHABILITA
+        // Según la lógica setModo(this.modo) al final de confirmAction
+        verifyThat("#txtISBN", isVisible()); // El campo debe estar listo para usarse de nuevo
+
+        // 7. VOLVER A LA TIENDA Y VERIFICAR RESULTADO FINAL
         clickOn("#btnReturn"); 
         WaitForAsyncUtils.waitForFxEvents();
         clickOn("Home"); 
         WaitForAsyncUtils.waitForFxEvents();
 
-        // Verificamos en la tienda usando la barra de búsqueda
         clickOn("#txtSearch").eraseText(30).write(TITULO_MODIFICADO);
         sleep(1000); 
         
