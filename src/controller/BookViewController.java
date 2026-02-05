@@ -36,7 +36,6 @@ import net.sf.jasperreports.view.JasperViewer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-// --------------------------------------
 
 //Imports para el informe
 import java.awt.Desktop;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 
 //Imports para click derecho
@@ -52,6 +52,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
+import static org.hsqldb.HsqlDateTime.e;
+
+import util.LogInfo;
 
 /**
  * Controlador principal para la vista detallada de un libro (BookView.fxml).
@@ -65,7 +68,7 @@ import javafx.stage.Stage;
  */
 public class BookViewController {
 
-    private static final Logger LOGGER = Logger.getLogger(BookViewController.class.getName());
+    private final LogInfo LOGGER = LogInfo.getInstance();
     @FXML
     private ImageView coverBook;
     @FXML
@@ -122,7 +125,7 @@ public class BookViewController {
      * cargar la vista. Configura los menús contextuales.
      */
     public void initialize() {
-        LOGGER.info("Inicializando BookViewController...");
+        LOGGER.logInfo("Inicializando BookViewController...");
         initGlobalContextMenu();
     }
 
@@ -133,7 +136,7 @@ public class BookViewController {
     private void initContextMenu() {
         if (currentUser instanceof Admin) {
             btnAddComment.setVisible(false);
-            LOGGER.info("Usuario es Admin: Botón de comentar oculto.");
+            LOGGER.logInfo("Usuario es Admin: Botón de comentar oculto.");
         }
         initGlobalContextMenu();
     }
@@ -145,47 +148,53 @@ public class BookViewController {
      * las tarjetas de comentario.
      */
     private void refreshList() {
-        LOGGER.info("Refrescando lista de comentarios...");
+        LOGGER.logInfo("Refrescando lista de comentarios...");
         commentsContainer.getChildren().clear();
         try {
-            // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
 
-            LOGGER.info("Se han recuperado " + comentarios.size() + " comentarios.");
-            // Obtiene el usuario actual
-            Profile currentUser = UserSession.getInstance().getUser();
+            // 1. COMPROBACIÓN: ¿El usuario ya ha comentado?
+            Profile userActual = UserSession.getInstance().getUser();
+            boolean yaComento = false;
 
-            // Ordena la lista de comentarios
-            if (currentUser != null) {
+            if (userActual != null) {
+                for (Commentate c : comentarios) {
+                    if (c.getUser().getUserCode() == userActual.getUserCode()) {
+                        yaComento = true;
+                        break;
+                    }
+                }
+            }
+            // Bloqueamos el botón si ya existe un comentario del usuario
+            btnAddComment.setDisable(yaComento);
+
+            // 2. Ordenación (tu lógica actual)
+            if (userActual != null) {
                 comentarios.sort((c1, c2) -> {
-                    int myId = currentUser.getUserCode();
+                    int myId = userActual.getUserCode();
                     boolean c1IsMine = c1.getUser().getUserCode() == myId;
                     boolean c2IsMine = c2.getUser().getUserCode() == myId;
-
-                    // Si c1 es mío, va antes
                     if (c1IsMine && !c2IsMine) {
                         return -1;
                     }
-                    // Si c2 es mío, c2 va antes
                     if (!c1IsMine && c2IsMine) {
                         return 1;
                     }
-                    // Si no, se quedan igual
                     return 0;
                 });
             }
+
+            // 3. Carga visual
             for (Commentate coment : comentarios) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
                 Parent commentBox = fxmlLoader.load();
-
                 CommentViewController con = fxmlLoader.getController();
                 con.setData(coment);
                 con.setParent(this);
-
                 commentsContainer.getChildren().add(commentBox);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error al cargar la vista de un comentario.", ex);
+            LOGGER.logSevere("Error al cargar la vista dinámica de comentarios (FXML)", ex);
         }
     }
 
@@ -197,9 +206,29 @@ public class BookViewController {
      */
     private void showAlert(String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
+        alert.setTitle("Book&Bugs - Gestión de Librería");
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // --- AÑADIR LOGO A LA ALERTA ---
+        try {
+            String imagePath = "/images/Book&Bugs_Logo.png";
+            InputStream imageStream = getClass().getResourceAsStream(imagePath);
+            if (imageStream != null) {
+                Image logo = new Image(imageStream);
+                ImageView imageView = new ImageView(logo);
+                imageView.setFitHeight(50); // Tamaño adecuado para la alerta
+                imageView.setPreserveRatio(true);
+                alert.setGraphic(imageView);
+
+                // También ponemos el icono en la barra de la ventana
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(logo);
+            }
+        } catch (Exception e) {
+            LOGGER.logWarning("No se pudo cargar el logo en la alerta: " + e.getMessage());
+        }
+
         alert.showAndWait();
     }
 
@@ -213,7 +242,7 @@ public class BookViewController {
      */
     void setData(Book book) {
         this.currentBook = book;
-        LOGGER.info("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
+        LOGGER.logInfo("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
         // 1. Cargar la imagen (con protección por si falla el archivo)
         try {
             if (book.getCover() != null && !book.getCover().isEmpty()) {
@@ -221,7 +250,7 @@ public class BookViewController {
                 cutOutImage(coverBook, originalImage, 140, 210);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al procesar imagen del libro", e);
+            LOGGER.logSevere("Error al procesar imagen del libro: " + book.getCover(), e);
         }
 
         // Rellenar textos
@@ -250,7 +279,7 @@ public class BookViewController {
                 btnAddToCart.setManaged(true);
             } else {
                 // No hay stock (0) -> Botón OCULTO (Desaparece)
-                LOGGER.info("Libro sin stock, ocultando botón de compra.");
+                LOGGER.logInfo("Libro sin stock, ocultando botón de compra.");
                 btnAddToCart.setVisible(false);
                 btnAddToCart.setManaged(false);
             }
@@ -268,10 +297,10 @@ public class BookViewController {
      */
     @FXML
     private void handleNewComment(ActionEvent event) {
-        LOGGER.info("Intento de añadir nuevo comentario.");
+        LOGGER.logInfo("Intento de añadir nuevo comentario.");
         // Validaciones
         if (currentUser == null) {
-            LOGGER.warning("Intento de comentar sin sesión iniciada.");
+            LOGGER.logWarning("Intento de comentar sin sesión iniciada.");
             showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
             return;
         }
@@ -280,13 +309,13 @@ public class BookViewController {
             List<Commentate> comentariosExistentes = dao.getCommentsByBook(currentBook.getISBN());
             for (Commentate c : comentariosExistentes) {
                 if (c.getUser().getUserCode() == currentUser.getUserCode()) {
-                    LOGGER.warning("El usuario ya ha comentado este libro.");
+                    LOGGER.logWarning("El usuario ya ha comentado este libro.");
                     showAlert("¡Ya has opinado sobre este libro!", Alert.AlertType.WARNING);
                     return;
                 }
             }
         } catch (Exception e) {
-            LOGGER.severe("Error comprobando comentarios existentes: " + e.getMessage());
+            LOGGER.logSevere("Error comprobando comentarios existentes: " + e.getMessage(), e);
         }
 
         // Muestra la caja mostrando el nombre
@@ -319,7 +348,7 @@ public class BookViewController {
      */
     @FXML
     private void handleCancelar(ActionEvent event) {
-        LOGGER.info("Cancelando escritura de comentario.");
+        LOGGER.logInfo("Cancelando escritura de comentario.");
         txtNuevoComentario.clear();
         cajaEscribir.setVisible(false);
         cajaEscribir.setManaged(false);
@@ -338,46 +367,64 @@ public class BookViewController {
     @FXML
     private void handlePublicar(ActionEvent event) {
         String texto = txtNuevoComentario.getText().trim();
-        LOGGER.info("Publicando comentario...");
-
         if (texto.isEmpty()) {
-            LOGGER.warning("Intento de publicar comentario vacío.");
             showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
             return;
         }
 
-        try {
-            Profile currentUser = UserSession.getInstance().getUser();
-            // Ahora cogemos el valor real:
-            float puntuacion = 0;
-            if (estrellasController != null) {
-                puntuacion = (float) estrellasController.getValueUser();
+        // Bloqueamos el botón para que el usuario no haga doble clic
+        btnPublicar.setDisable(true);
+
+        // Creamos el hilo de forma clásica (Clase anónima)
+        Thread hiloPublicar = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 1. Preparamos el objeto
+                    Profile user = UserSession.getInstance().getUser();
+                    float puntuacion = (estrellasController != null) ? (float) estrellasController.getValueUser() : 0;
+                    final Commentate newComment = new Commentate((User) user, currentBook, texto, puntuacion);
+
+                    // 2. Guardamos en la base de datos (Operación pesada)
+                    dao.addComment(newComment);
+
+                    // 3. Volvemos al hilo de la interfaz para actualizar la pantalla
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
+                                Parent tarjeta = loader.load();
+                                CommentViewController conHijo = loader.getController();
+
+                                conHijo.setData(newComment);
+                                conHijo.setParent(BookViewController.this); // IMPORTANTE: Pasamos el padre
+
+                                commentsContainer.getChildren().add(0, tarjeta);
+                                handleCancelar(null); // Limpia los campos
+
+                                btnAddComment.setDisable(true); // Ya ha comentado, deshabilitamos
+                                btnPublicar.setDisable(false);
+                                showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
+                            } catch (IOException ex) {
+                                LOGGER.logSevere("Error al cargar la tarjeta visual del comentario", ex);
+                            }
+                        }
+                    });
+                } catch (final Exception ex) {
+                    // Si hay error en la BD, avisamos al usuario
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            LOGGER.logSevere("Error crítico al publicar en la base de datos", ex);
+                            btnPublicar.setDisable(false);
+                            showAlert("Error: " + ex.getMessage(), Alert.AlertType.ERROR);
+                        }
+                    });
+                }
             }
-
-            // Creamos el comentario con la puntuación real
-            Commentate newComment = new Commentate((User) currentUser, currentBook, texto, puntuacion);
-            dao.addComment(newComment);
-
-            // Crear tarjeta visual
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
-            Parent tarjeta = loader.load();
-            CommentViewController controller = loader.getController();
-            controller.setData(newComment);
-            controller.setParent(this);
-
-            // Añadir arriba del todo
-            commentsContainer.getChildren().add(0, tarjeta);
-
-            // Cerrar y limpiar
-            handleCancelar(null);
-            btnAddComment.setDisable(true);
-
-            showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
-
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error crítico al guardar comentario", ex);
-            showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
-        }
+        });
+        hiloPublicar.start();
     }
 
     /**
@@ -388,7 +435,7 @@ public class BookViewController {
      */
     @FXML
     private void handleReportAction(ActionEvent event) {
-        LOGGER.info("Abriendo Manual de Usuario (PDF)...");
+        LOGGER.logInfo("Abriendo Manual de Usuario (PDF)...");
 
         try {
             String resourcePath = "/documents/Manual_Usuario.pdf";
@@ -396,7 +443,7 @@ public class BookViewController {
             InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
 
             if (pdfStream == null) {
-                LOGGER.severe("No se encontró el manual en: " + resourcePath);
+                LOGGER.logSevere("No se encontró el archivo del manual en la ruta: " + resourcePath, null);
                 showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
                 return;
             }
@@ -413,7 +460,7 @@ public class BookViewController {
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Excepción al abrir manual PDF", e);
+            LOGGER.logSevere("Excepción de E/S al intentar abrir el manual PDF", e);
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
@@ -470,32 +517,32 @@ public class BookViewController {
     private void handleAddToCart(ActionEvent event) {
         //Verifica que hay un libro seleccionado
         if (currentBook == null) {
-            LOGGER.severe("Error: currentBook es NULL.");
+            LOGGER.logSevere("Error: currentBook es NULL al intentar añadir al carrito.", null);
             showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
             return;
         }
 
         // Validar que el usuario puede comprar
         if (!UserSession.getInstance().isLoggedIn()) {
-            LOGGER.warning("Intento de compra sin login.");
+            LOGGER.logWarning("Intento de compra sin login.");
             showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
             return;
         }
 
         try {
             UserSession.getInstance().addToCart(currentBook);
-            LOGGER.info("Libro añadido al carrito exitosamente.");
+            LOGGER.logInfo("Libro añadido al carrito exitosamente.");
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al añadir al carrito", e);
+            LOGGER.logSevere("Error crítico al añadir al carrito", e);
             showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void handleExit(ActionEvent event) {
-        LOGGER.info("Cerrando aplicación desde el menú.");
+        LOGGER.logInfo("Cerrando aplicación desde el menú.");
         javafx.application.Platform.exit();
         System.exit(0);
     }
@@ -508,7 +555,7 @@ public class BookViewController {
      */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
-        LOGGER.info("Generando informe técnico JasperReports...");
+        LOGGER.logInfo("Generando informe técnico JasperReports...");
         Connection con = null;
         try {
             // Conecta a la base de datos
@@ -523,7 +570,7 @@ public class BookViewController {
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
 
             if (reportStream == null) {
-                LOGGER.severe("No se encuentra el archivo .jrxml");
+                LOGGER.logSevere("No se encuentra el archivo .jrxml en la ruta especificada", null);
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
                 return;
             }
@@ -538,7 +585,7 @@ public class BookViewController {
             JasperViewer.viewReport(jasperPrint, false);
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error generando informe Jasper", e);
+            LOGGER.logWarning("No se pudo cerrar la conexión de Jasper: " + e.getMessage());
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
             try {
@@ -552,7 +599,7 @@ public class BookViewController {
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
-        LOGGER.info("Cerrando sesión de usuario...");
+        LOGGER.logInfo("Cerrando sesión de usuario...");
         try {
             //Ruta para el pdf del manual
             String resourcePath = "/documents/Manual_Usuario.pdf";
@@ -577,14 +624,14 @@ public class BookViewController {
             }
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Excepción al intentar abrir el Manual de Usuario", e);
+            LOGGER.logSevere("Excepción al intentar abrir el Manual de Usuario", e);
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void handleAboutAction(ActionEvent event) {
-        LOGGER.info("Mostrando ventana 'Acerca de...'."); // Log de inicio
+        LOGGER.logInfo("Mostrando ventana 'Acerca de...'."); // Log de inicio
 
         String mensaje = "Book&Bugs - Gestión de Librería v1.0\n\n"
                 + "Desarrollado por el equipo de desarrollo:\n"
@@ -621,12 +668,11 @@ public class BookViewController {
                 Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
                 stage.getIcons().add(logo);
             } else {
-                LOGGER.warning("No se encontró la imagen del logo en la ruta: " + imagePath);
+                LOGGER.logWarning("No se encontró la imagen del logo en la ruta: " + imagePath);
             }
 
         } catch (Exception e) {
-            // Si falla la imagen, registramos el warning pero la alerta sigue funcionando
-            LOGGER.log(Level.WARNING, "Error no crítico al cargar el logo en About: " + e.getMessage(), e);
+            LOGGER.logSevere("Error no crítico al cargar el logo en About: " + e.getMessage(), e);
         }
 
         alert.showAndWait();
@@ -723,7 +769,7 @@ public class BookViewController {
      * mostrar y habilitar el botón de escribir opinión.
      */
     public void onCommentDeleted() {
-        LOGGER.info("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
+        LOGGER.logInfo("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
 
         if (btnAddComment != null) {
             // 1. Lo hacemos visible de nuevo
@@ -737,4 +783,5 @@ public class BookViewController {
             btnAddComment.requestFocus();
         }
     }
+
 }
