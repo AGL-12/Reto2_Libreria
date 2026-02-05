@@ -88,20 +88,23 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        logger.logInfo("Cargando carrito de la compra.");
+        logger.logInfo("Accediendo a la ventana ShoppingCart.");
         Profile userLogged = UserSession.getInstance().getUser();
 
         if (userLogged != null) {
+            logger.logInfo("Cargando carrito para el usuario: " + userLogged.getName());
             cartOder = dao.cartOrder(userLogged.getId());
             if (cartOder != null && cartOder.getListPreBuy() != null && !cartOder.getListPreBuy().isEmpty()) {
                 cargarVistaLibros();
             } else {
+                logger.logInfo("El carrito del usuario está vacío.");
                 lblTotal.setText("El carrito está vacío.");
                 btnComprar.setDisable(true);
             }
+        } else {
+            logger.logWarning("Intento de acceso al carrito sin sesión de usuario activa.");
         }
 
-        // --- CONFIGURACIÓN CLIC DERECHO (Sin Lambdas) ---
         final ContextMenu cartMenu = new ContextMenu();
         MenuItem itemComprar = new MenuItem("Finalizar Compra");
         MenuItem itemLimpiar = new MenuItem("Limpiar Vista");
@@ -138,40 +141,30 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     private void cargarVistaLibros() {
         Profile userLogged = UserSession.getInstance().getUser();
-        // 1. LIMPIEZA OBLIGATORIA: Borramos lo visual y lo lógico para empezar de cero
         vBoxContenedorLibros.getChildren().clear();
         libros.clear();
         cartOder = dao.cartOrder(userLogged.getId());
-
-        // 2. Llenamos la lista GLOBAL 'libros' con los datos del pedido
-        // (Antes creabas una lista local 'books' aquí, por eso fallaba el precio luego)
         for (Contain c : cartOder.getListPreBuy()) {
             if (c.getBook() != null) {
                 libros.add(c.getBook());
             }
         }
-
+        vBoxContenedorLibros.setSpacing(15); // Espacio entre cada fila de libro
+        vBoxContenedorLibros.setFillWidth(true);
         try {
-            // 3. Generamos la parte visual para cada libro
+            logger.logInfo("Generando vista dinámica de libros en el carrito.");
             for (Book lib : libros) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/PreOrder.fxml"));
-                //VBox libroBox = fxmlLoader.load();
                 HBox libroBox = fxmlLoader.load();
-
-                // Configuramos el controlador pequeño
                 PreOrderController preOrderController = fxmlLoader.getController();
                 preOrderController.setData(lib, this);
                 libroBox.setUserData(preOrderController);
-
-                // Añadimos al VBox principal
                 vBoxContenedorLibros.getChildren().add(libroBox);
             }
-
-            // 4. Calculamos el total inicial
             actualizarPrecioTotal();
 
         } catch (IOException ex) {
-            Logger.getLogger(ShoppingCartController.class.getName()).log(Level.SEVERE, "Error cargando vista", ex);
+            logger.logSevere("Error crítico al cargar la vista de libros (PreOrder.fxml).", ex);
         }
     }
 
@@ -184,11 +177,8 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     public void actualizarPrecioTotal() {
         double total = 0;
 
-        // Recorremos todas las tarjetas de libros
         for (javafx.scene.Node nodo : vBoxContenedorLibros.getChildren()) {
-            // CAMBIO: Verificar si es HBox, ya que PreOrder.fxml usa un HBox como raíz
             if (nodo instanceof HBox) {
-                // Recuperamos el controlador desde el userData
                 PreOrderController itemCtrl = (PreOrderController) nodo.getUserData();
 
                 if (itemCtrl != null) {
@@ -225,7 +215,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
     private void handleComprar(ActionEvent event
     ) {
         if (cartOder != null) {
-            // Sincronizamos las cantidades del Spinner con el objeto pedido antes de enviar a BD
+            logger.logInfo("Iniciando proceso de compra para el pedido ID: " + cartOder.getIdOrder());
             for (Node nodo : vBoxContenedorLibros.getChildren()) {
                 PreOrderController ctrl = (PreOrderController) nodo.getUserData();
                 for (Contain c : cartOder.getListPreBuy()) {
@@ -234,14 +224,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                     }
                 }
             }
-            // Usamos el ID del pedido que ya tenemos cargado en memoria
-            // Asegúrate de que tu DAO tiene el método 'buy(int idPedido)'
             boolean exito = dao.buy(cartOder);
 
             if (exito) {
+                logger.logInfo("Compra finalizada con éxito. Pedido ID: " + cartOder.getIdOrder());
                 mostrarAlerta(Alert.AlertType.INFORMATION, "Compra Exitosa", "Pedido realizado correctamente.");
-
-                // Limpiamos pantalla y datos
                 vBoxContenedorLibros.getChildren().clear();
                 libros.clear();
                 cartOder = null;
@@ -250,9 +237,11 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
                 UserSession.getInstance().setOrder(null);
 
             } else {
+                logger.logSevere("Fallo en la operación de compra en la base de datos.", null);
                 mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo finalizar la compra.");
             }
         } else {
+            logger.logWarning("Se pulsó comprar pero no existe un objeto de pedido activo.");
             mostrarAlerta(Alert.AlertType.WARNING, "Vacío", "No hay nada para comprar.");
         }
     }
@@ -272,6 +261,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      * * @param libroAEliminar El objeto Book que se desea retirar del pedido.
      */
     public void eliminarLibroDelCarrito(Book libroAEliminar) {
+        logger.logInfo("Eliminando libro '" + libroAEliminar.getTitle() + "' (ISBN: " + libroAEliminar.getISBN() + ") del carrito.");
         Profile userLogged = UserSession.getInstance().getUser();
         try {
             // 1. Obtienes la orden (que ya trae su List<Contain> cargada por Hibernate)
@@ -287,13 +277,13 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             }
 
             dao.removeBookFromOrder(lineaABorrar);
+            logger.logInfo("Libro eliminado correctamente de la base de datos.");
             UserSession.getInstance().refreshOrderAfterDeletion();
             cargarVistaLibros();
             actualizarPrecioTotal();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // Aquí podrías mostrar una alerta de error al usuario
+            logger.logSevere("Error al intentar eliminar un libro del pedido.", e);
         }
         cargarVistaLibros();
         actualizarPrecioTotal();
@@ -355,7 +345,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @FXML
     public void handleLogOut(ActionEvent event) {
-        // Limpia la sesión y vuelve al Login
+        logger.logInfo("Usuario cerrando sesión desde el carrito.");
         UserSession.getInstance().cleanUserSession();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LogInWindow.fxml"));
@@ -412,8 +402,10 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
      */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
+        logger.logInfo("Generando Informe Técnico Jasper desde el carrito.");
         Connection con = null;
         try {
+            logger.logInfo("Informe generado y mostrado correctamente.");
             // 1. CONEXIÓN A BASE DE DATOS
             // Ajusta el usuario y contraseña a los tuyos de MySQL
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
@@ -442,6 +434,7 @@ public class ShoppingCartController implements Initializable, EventHandler<Actio
             JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
 
         } catch (Exception e) {
+            logger.logSevere("Error al procesar el informe JasperReports.", e);
             e.printStackTrace();
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
