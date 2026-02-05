@@ -29,7 +29,6 @@ import model.Profile;
 import model.User;
 import model.UserSession;
 import model.Admin;
-import util.LogInfo;
 
 // Imports necesarios para jasper
 import net.sf.jasperreports.engine.*;
@@ -66,7 +65,8 @@ import javafx.stage.Stage;
  */
 public class BookViewController {
 
-    private final LogInfo LOGGER = LogInfo.getInstance();
+    private static final Logger LOGGER = Logger.getLogger(BookViewController.class.getName());
+
     @FXML
     private ImageView coverBook;
     @FXML
@@ -123,7 +123,7 @@ public class BookViewController {
      * cargar la vista. Configura los menús contextuales.
      */
     public void initialize() {
-        LOGGER.logInfo("Inicializando BookViewController...");
+        LOGGER.info("Inicializando BookViewController...");
         initGlobalContextMenu();
     }
 
@@ -134,7 +134,7 @@ public class BookViewController {
     private void initContextMenu() {
         if (currentUser instanceof Admin) {
             btnAddComment.setVisible(false);
-            LOGGER.logInfo("Usuario es Admin: Botón de comentar oculto.");
+            LOGGER.info("Usuario es Admin: Botón de comentar oculto.");
         }
         initGlobalContextMenu();
     }
@@ -146,13 +146,13 @@ public class BookViewController {
      * las tarjetas de comentario.
      */
     private void refreshList() {
-        LOGGER.logInfo("Refrescando lista de comentarios...");
+        LOGGER.info("Refrescando lista de comentarios...");
         commentsContainer.getChildren().clear();
         try {
             // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
 
-            LOGGER.logInfo("Se han recuperado " + comentarios.size() + " comentarios.");
+            LOGGER.info("Se han recuperado " + comentarios.size() + " comentarios.");
             // Obtiene el usuario actual
             Profile currentUser = UserSession.getInstance().getUser();
 
@@ -185,7 +185,7 @@ public class BookViewController {
                 commentsContainer.getChildren().add(commentBox);
             }
         } catch (IOException ex) {
-            LOGGER.logSevere("Error al cargar la vista de un comentario.", ex);
+            LOGGER.log(Level.SEVERE, "Error al cargar la vista de un comentario.", ex);
         }
     }
 
@@ -213,7 +213,7 @@ public class BookViewController {
      */
     void setData(Book book) {
         this.currentBook = book;
-        LOGGER.logInfo("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
+        LOGGER.info("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
         // 1. Cargar la imagen (con protección por si falla el archivo)
         try {
             if (book.getCover() != null && !book.getCover().isEmpty()) {
@@ -221,7 +221,7 @@ public class BookViewController {
                 cutOutImage(coverBook, originalImage, 140, 210);
             }
         } catch (Exception e) {
-            LOGGER.logSevere("Error al procesar imagen del libro", e);
+            LOGGER.log(Level.SEVERE, "Error al procesar imagen del libro", e);
         }
 
         // Rellenar textos
@@ -250,7 +250,7 @@ public class BookViewController {
                 btnAddToCart.setManaged(true);
             } else {
                 // No hay stock (0) -> Botón OCULTO (Desaparece)
-                LOGGER.logInfo("Libro sin stock, ocultando botón de compra.");
+                LOGGER.info("Libro sin stock, ocultando botón de compra.");
                 btnAddToCart.setVisible(false);
                 btnAddToCart.setManaged(false);
             }
@@ -268,10 +268,10 @@ public class BookViewController {
      */
     @FXML
     private void handleNewComment(ActionEvent event) {
-        LOGGER.logInfo("Intento de añadir nuevo comentario.");
+        LOGGER.info("Intento de añadir nuevo comentario.");
         // Validaciones
         if (currentUser == null) {
-            LOGGER.logWarning("Intento de comentar sin sesión iniciada.");
+            LOGGER.warning("Intento de comentar sin sesión iniciada.");
             showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
             return;
         }
@@ -280,13 +280,13 @@ public class BookViewController {
             List<Commentate> comentariosExistentes = dao.getCommentsByBook(currentBook.getISBN());
             for (Commentate c : comentariosExistentes) {
                 if (c.getUser().getUserCode() == currentUser.getUserCode()) {
-                    LOGGER.logWarning("El usuario ya ha comentado este libro.");
+                    LOGGER.warning("El usuario ya ha comentado este libro.");
                     showAlert("¡Ya has opinado sobre este libro!", Alert.AlertType.WARNING);
                     return;
                 }
             }
         } catch (Exception e) {
-            LOGGER.logSevere("Error comprobando comentarios existentes", e);
+            LOGGER.severe("Error comprobando comentarios existentes: " + e.getMessage());
         }
 
         // Muestra la caja mostrando el nombre
@@ -319,7 +319,7 @@ public class BookViewController {
      */
     @FXML
     private void handleCancelar(ActionEvent event) {
-        LOGGER.logInfo("Cancelando escritura de comentario.");
+        LOGGER.info("Cancelando escritura de comentario.");
         txtNuevoComentario.clear();
         cajaEscribir.setVisible(false);
         cajaEscribir.setManaged(false);
@@ -338,10 +338,10 @@ public class BookViewController {
     @FXML
     private void handlePublicar(ActionEvent event) {
         String texto = txtNuevoComentario.getText().trim();
-        LOGGER.logInfo("Publicando comentario...");
+        LOGGER.info("Publicando comentario...");
 
         if (texto.isEmpty()) {
-            LOGGER.logWarning("Intento de publicar comentario vacío.");
+            LOGGER.warning("Intento de publicar comentario vacío.");
             showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
             return;
         }
@@ -374,7 +374,7 @@ public class BookViewController {
             showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
 
         } catch (Exception ex) {
-            LOGGER.logSevere("Error crítico al guardar comentario", ex);
+            LOGGER.log(Level.SEVERE, "Error crítico al guardar comentario", ex);
             showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
@@ -387,7 +387,7 @@ public class BookViewController {
      */
     @FXML
     private void handleReportAction(ActionEvent event) {
-        LOGGER.logInfo("Abriendo Manual de Usuario (PDF)...");
+        LOGGER.info("Abriendo Manual de Usuario (PDF)...");
 
         try {
             String resourcePath = "/documents/Manual_Usuario.pdf";
@@ -395,7 +395,7 @@ public class BookViewController {
             InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
 
             if (pdfStream == null) {
-                LOGGER.logWarning("No se encontró el manual en: " + resourcePath);
+                LOGGER.severe("No se encontró el manual en: " + resourcePath);
                 showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
                 return;
             }
@@ -412,7 +412,7 @@ public class BookViewController {
             }
 
         } catch (IOException e) {
-            LOGGER.logSevere("Excepción al abrir manual PDF", e);
+            LOGGER.log(Level.SEVERE, "Excepción al abrir manual PDF", e);
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
@@ -469,32 +469,32 @@ public class BookViewController {
     private void handleAddToCart(ActionEvent event) {
         //Verifica que hay un libro seleccionado
         if (currentBook == null) {
-            LOGGER.logWarning("Error: currentBook es NULL al intentar añadir al carrito.");
+            LOGGER.severe("Error: currentBook es NULL.");
             showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
             return;
         }
 
         // Validar que el usuario puede comprar
         if (!UserSession.getInstance().isLoggedIn()) {
-            LOGGER.logWarning("Intento de compra sin login.");
+            LOGGER.warning("Intento de compra sin login.");
             showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
             return;
         }
 
         try {
             UserSession.getInstance().addToCart(currentBook);
-            LOGGER.logInfo("Libro añadido al carrito exitosamente.");
+            LOGGER.info("Libro añadido al carrito exitosamente.");
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
-            LOGGER.logSevere("Error al añadir al carrito", e);
+            LOGGER.log(Level.SEVERE, "Error al añadir al carrito", e);
             showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void handleExit(ActionEvent event) {
-        LOGGER.logInfo("Cerrando aplicación desde el menú.");
+        LOGGER.info("Cerrando aplicación desde el menú.");
         javafx.application.Platform.exit();
         System.exit(0);
     }
@@ -507,7 +507,7 @@ public class BookViewController {
      */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
-        LOGGER.logInfo("Generando informe técnico JasperReports...");
+        LOGGER.info("Generando informe técnico JasperReports...");
         Connection con = null;
         try {
             // Conecta a la base de datos
@@ -522,7 +522,7 @@ public class BookViewController {
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
 
             if (reportStream == null) {
-                LOGGER.logWarning("No se encuentra el archivo .jrxml para el informe.");
+                LOGGER.severe("No se encuentra el archivo .jrxml");
                 showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
                 return;
             }
@@ -537,7 +537,7 @@ public class BookViewController {
             JasperViewer.viewReport(jasperPrint, false);
 
         } catch (Exception e) {
-            LOGGER.logSevere("Error generando informe Jasper", e);
+            LOGGER.log(Level.SEVERE, "Error generando informe Jasper", e);
             showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
         } finally {
             try {
@@ -551,6 +551,7 @@ public class BookViewController {
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
+        LOGGER.info("Cerrando sesión de usuario...");
         try {
             //Ruta para el pdf del manual
             String resourcePath = "/documents/Manual_Usuario.pdf";
@@ -575,57 +576,58 @@ public class BookViewController {
             }
 
         } catch (Exception e) {
-            LOGGER.logSevere("Excepción al intentar abrir el Manual de Usuario", e);
+            LOGGER.log(Level.SEVERE, "Excepción al intentar abrir el Manual de Usuario", e);
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-    @FXML
+@FXML
     private void handleAboutAction(ActionEvent event) {
-        LOGGER.logInfo("Mostrando ventana 'Acerca de...'.");
+        LOGGER.info("Mostrando ventana 'Acerca de...'."); // Log de inicio
 
         String mensaje = "Book&Bugs - Gestión de Librería v1.0\n\n"
-                + "Desarrollado por el equipo de desarrollo:\n"
-                + "• Alex\n"
-                + "• Unai\n"
-                + "• Ander\n"
-                + "• Mikel\n\n"
-                + "Proyecto Reto 2 - 2025";
-
+                       + "Desarrollado por el equipo de desarrollo:\n"
+                       + "• Alex\n"
+                       + "• Unai\n"
+                       + "• Ander\n"
+                       + "• Mikel\n\n"
+                       + "Proyecto Reto 2 - 2025";
+        
         // Creamos la alerta
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Acerca de...");
         alert.setHeaderText("Información del Proyecto");
         alert.setContentText(mensaje);
-
+        
         // --- AÑADIR LOGO ---
         try {
             String imagePath = "/images/Book&Bugs_Logo.png";
             // Usar getResourceAsStream es más seguro para comprobar nulos antes de crear la Image
             java.io.InputStream imageStream = getClass().getResourceAsStream(imagePath);
-
+            
             if (imageStream != null) {
                 Image logo = new Image(imageStream);
                 ImageView imageView = new ImageView(logo);
-
+                
                 // Ajustar tamaño para que no salga gigante
-                imageView.setFitHeight(80);
+                imageView.setFitHeight(80); 
                 imageView.setPreserveRatio(true);
-
+                
                 // Poner la imagen a la izquierda del texto
                 alert.setGraphic(imageView);
-
+                
                 // Opcional: Poner el logo también en el icono de la ventana de la alerta
                 Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
                 stage.getIcons().add(logo);
             } else {
-                LOGGER.logWarning("No se encontró la imagen del logo en la ruta: " + imagePath);
+                LOGGER.warning("No se encontró la imagen del logo en la ruta: " + imagePath);
             }
-
+            
         } catch (Exception e) {
-            LOGGER.logWarning("Error no crítico al cargar el logo en About: " + e.getMessage());
+            // Si falla la imagen, registramos el warning pero la alerta sigue funcionando
+            LOGGER.log(Level.WARNING, "Error no crítico al cargar el logo en About: " + e.getMessage(), e);
         }
-
+        
         alert.showAndWait();
     }
 
