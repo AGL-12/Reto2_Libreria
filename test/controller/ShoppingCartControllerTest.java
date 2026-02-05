@@ -92,6 +92,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
 
     @Test
     public void test2_aumentarCantidadYVerificarPrecio() {
+        sleep(1000);
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
