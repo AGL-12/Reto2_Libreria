@@ -60,11 +60,11 @@
             </font>
         </Label>
 
-        <Button fx:id="btnHistory" onAction="#handleHistoryAction" prefWidth="250.0" text="Shopping History" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Button fx:id="btnDeleteAccount" onAction="#handleDeleteAction" prefWidth="250.0" text="Delete Account" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-        <Button fx:id="btnModifyProfile" onAction="#handleModifyAction" prefWidth="250.0" text="Modify User" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <Button fx:id="btnHistory" onAction="#handleHistoryAction" prefWidth="250.0" text="Historial de compra" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Button fx:id="btnDeleteAccount" onAction="#handleDeleteAction" prefWidth="250.0" text="Eliminar cuenta" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Button fx:id="btnModifyProfile" onAction="#handleModifyAction" prefWidth="250.0" text="Modificar Datos" GridPane.columnIndex="1" GridPane.rowIndex="4" />
       
-        <Button fx:id="btnBack" onAction="#handleBackAction" text="Back" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+        <Button fx:id="btnBack" onAction="#handleBackAction" text="Volver" GridPane.columnIndex="2" GridPane.rowIndex="1" />
       
         <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="1">
             <image>

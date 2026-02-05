@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -35,10 +36,22 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
+/**
+ * Controlador de la ventana de modificación de perfil.
+ * Permite a los usuarios actualizar sus datos personales y a los administradores
+ * gestionar la información de cualquier usuario registrado en el sistema.
+ * * @author unai azkorra
+ * @version 1.0
+ */
 public class ModifyWindowController implements Initializable {
 
+    /** Implementación de la lógica de acceso a datos. */
     private DBImplementation db = new DBImplementation(); 
+    
+    /** Perfil que está siendo modificado actualmente. */
     private Profile profileToModify;
+    
+    /** Menú contextual para acciones rápidas. */
     private ContextMenu contextMenu;
 
     @FXML private GridPane rootPane;
@@ -48,6 +61,12 @@ public class ModifyWindowController implements Initializable {
     @FXML private ComboBox<User> comboUsers;
     @FXML private Button Button_SaveChanges, Button_Cancel;
 
+    /**
+     * Inicializa la ventana configurando los datos del usuario, el menú contextual
+     * y registrando la actividad en el log.
+     * * @param url Ubicación relativa para el objeto raíz.
+     * @param rb Recursos para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupUserData();
@@ -55,6 +74,11 @@ public class ModifyWindowController implements Initializable {
         LogInfo.getInstance().logInfo("Ventana de modificación de perfil inicializada.");
     }
 
+    /**
+     * Configura la interfaz según el tipo de perfil logueado.
+     * Si es Administrador, habilita el ComboBox para elegir usuarios.
+     * Si es Usuario, carga directamente sus propios datos.
+     */
     private void setupUserData() {
         Profile loggedProfile = UserSession.getInstance().getUser();
         if (loggedProfile instanceof Admin) {
@@ -69,6 +93,9 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * Carga todos los usuarios registrados desde la base de datos al ComboBox.
+     */
     private void loadUsers() {
         try {
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
@@ -78,6 +105,10 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * Rellena los campos de texto de la interfaz con los datos del perfil seleccionado.
+     * * @param p El perfil cuyos datos se van a cargar en la ventana.
+     */
     private void fillFields(Profile p) {
         this.profileToModify = p;
         LabelUsername.setText(p.getUsername());
@@ -87,6 +118,11 @@ public class ModifyWindowController implements Initializable {
         TextField_Telephone.setText(p.getTelephone());
     }
 
+    /**
+     * Valida y guarda los cambios realizados en el perfil en la base de datos.
+     * Verifica que las contraseñas coincidan antes de persistir los datos.
+     * * @param event El evento de acción disparado por el botón de guardar.
+     */
     @FXML
     private void save(ActionEvent event) {
         if (!TextField_NewPass.getText().equals(TextField_ConfirmPass.getText())) {
@@ -114,12 +150,20 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * Muestra una alerta informativa "Acerca de".
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         LogInfo.getInstance().logInfo("Visualización de 'Acerca de' en ventana de modificación.");
         new Alert(Alert.AlertType.INFORMATION, "BookStore App v1.0").show();
     }
 
+    /**
+     * Genera un informe técnicoJasper y lo visualiza mediante JasperViewer.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -139,6 +183,11 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * Gestiona la redirección del usuario tras guardar cambios o cancelar.
+     * Redirige a la ventana de administración si es Admin, o al menú personal si es Usuario.
+     * * @param event El evento que originó la navegación.
+     */
     private void handleNavigation(ActionEvent event) {
         try {
             Profile loggedProfile = UserSession.getInstance().getUser();
@@ -152,6 +201,10 @@ public class ModifyWindowController implements Initializable {
         }
     }
 
+    /**
+     * Inicializa el menú contextual (clic derecho) con opciones de guardado, 
+     * cancelación y acceso al manual.
+     */
     private void initContextMenu() {
         contextMenu = new ContextMenu();
         MenuItem itemSave = new MenuItem("Guardar Cambios");
@@ -162,6 +215,7 @@ public class ModifyWindowController implements Initializable {
         MenuItem itemManual = new MenuItem("Manual de Usuario");
         itemManual.setOnAction(this::handleReportAction);
         contextMenu.getItems().addAll(itemSave, itemCancel, sep, itemManual);
+        
         rootPane.setOnContextMenuRequested(event -> {
             contextMenu.show(rootPane, event.getScreenX(), event.getScreenY());
         });
@@ -172,12 +226,26 @@ public class ModifyWindowController implements Initializable {
         });
     }
 
+    /**
+     * Cancela la operación actual y regresa a la ventana correspondiente.
+     * * @param event El evento de acción disparado por el botón cancelar.
+     */
     @FXML private void cancel(ActionEvent event) { handleNavigation(event); }
+
+    /**
+     * Solicita el cierre inmediato de la aplicación.
+     * * @param event El evento de acción disparado.
+     */
     @FXML private void handleExit(ActionEvent event) { 
         LogInfo.getInstance().logInfo("Cierre de aplicación desde modificación de perfil.");
         Platform.exit(); 
         System.exit(0); 
     }
+
+    /**
+     * Abre el manual de usuario en formato PDF mediante la creación de un archivo temporal.
+     * * @param event El evento de acción disparado.
+     */
     @FXML private void handleReportAction(ActionEvent event) {
         try {
             InputStream is = getClass().getResourceAsStream("/documents/Manual_Usuario.pdf");

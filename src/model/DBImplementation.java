@@ -11,8 +11,13 @@ import util.HibernateUtil;
 
 public class DBImplementation implements ClassDAO {
 
-    // --- GESTIÓN DE USUARIOS Y SESIÓN ---
-    // --- MÉTODOS DE USUARIO (LogIn, SignUp, etc.) ---
+
+    /**
+     * metodo para hacer el login en la app
+     * @param username credencial del login
+     * @param password credencial para el login
+     * @return 
+     */
     @Override
     public Profile logIn(String username, String password) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -38,6 +43,10 @@ public class DBImplementation implements ClassDAO {
         return userFound;
     }
 
+    /**
+     * metodo para hacer signUp
+     * @param profile con los datos para crear el nuevo perfil
+     */
     @Override
     public void signUp(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -57,7 +66,10 @@ public class DBImplementation implements ClassDAO {
             throw e;
         }
     }
-
+    /**
+     * Metodo para eliminar usuarios
+     * @param profile con los datos del usuario a eliminar
+     */
     @Override
     public void dropOutUser(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -102,6 +114,10 @@ public class DBImplementation implements ClassDAO {
         return usernames;
     }
 
+    /**
+     * metodo para crear un nuevo libro
+     * @param book objeto con los datos del nuevo libro
+     */
     @Override
     public void createBook(Book book) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -123,6 +139,10 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para modificar un libro ya existente
+     * @param book el objeto que se quiere modificar
+     */
     @Override
     public void modifyBook(Book book) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -145,6 +165,11 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para eliminar libro aunque en la ejecucion no se usa
+     * se usa en los test
+     * @param isbn del libro a eliminar
+     */
     @Override
     public void deleteBook(long isbn) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -170,6 +195,11 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para obtener los datos de los libros
+     * @param isbn del libro que estamos buscando
+     * @return devuelve el objeto de libro encontrado
+     */
     @Override
     public Book getBookData(long isbn) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -186,8 +216,10 @@ public class DBImplementation implements ClassDAO {
         return book;
     }
 
-    // --- RESTO DE MÉTODOS (Listar, Comentarios, Autores) ---
-    // Se mantienen igual que antes, solo asegúrate de no borrar getOrCreateAuthor
+   /**
+    * metodo para obtener todos los libros de la base de datos
+    * @return una lista con todos los libros
+    */
     @Override
     public List<Book> getAllBooks() {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -216,6 +248,11 @@ public class DBImplementation implements ClassDAO {
         return libros;
     }
 
+    /**
+     * metodo para buscar libros
+     * @param busqueda puede ser un isbn, fragmento del titulo o el autor
+     * @return devuelve una lista de libros con el filtro aplicado
+     */
     @Override
     public List<Book> buscarLibros(String busqueda) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -239,6 +276,13 @@ public class DBImplementation implements ClassDAO {
         return resultados;
     }
 
+    /**
+     * metodo para crear autor
+     * si el autor existe devuelve el objeto de autor pero sino lo crea con el nombre y apellido
+     * @param nombreAutor del autor a buscar/crear
+     * @param apellidoAutor apellido del autor a buscar/crear
+     * @return el autor completo
+     */
     @Override
 
     public Author getOrCreateAuthor(String nombreAutor, String apellidoAutor) {
@@ -273,6 +317,11 @@ public class DBImplementation implements ClassDAO {
         return author;
     }
 
+    /**
+     * metodo para conseguir los comentarios de un libro
+     * @param isbn se usa para buscar los comentarios de ese libro
+     * @return devuelve una lista de libros
+     */
     public List<Commentate> getCommentsByBook(long isbn) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Commentate> comments = new ArrayList<>();
@@ -291,8 +340,11 @@ public class DBImplementation implements ClassDAO {
         return comments;
     }
 
-    // NUEVO: Para la ventana de eliminar comentarios por usuario
-    // En DBImplementation.java
+    /**
+     * busca los comentarios de un usuario
+     * @param username del usuario que queremos buscar sus comentarios
+     * @return devuelve una lista de comentarios
+     */
     public List<Commentate> getCommentsByUser(String username) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Commentate> comments = new ArrayList<>();
@@ -312,6 +364,10 @@ public class DBImplementation implements ClassDAO {
         return comments;
     }
 
+    /**
+     * metodo para añadir comentarios
+     * @param comment el obejto de comentario a crear
+     */
     @Override
     public void addComment(Commentate comment) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -333,6 +389,10 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para eliminar comentario
+     * @param comment objeto a eliminar
+     */
     @Override
     public void deleteComment(Commentate comment) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -353,6 +413,10 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para actualizar el comentario
+     * @param comment objeto a modificar
+     */
     @Override
     public void updateComment(Commentate comment) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -374,7 +438,11 @@ public class DBImplementation implements ClassDAO {
             }
         }
     }
-
+    /**
+     * metodo para coger los pedidos que no se han finalizado
+     * @param user usuario al que pertenece el pedido
+     * @return devuelve el objeto de la orden de ese usuario
+     */
     // --- GESTIÓN DE PEDIDOS Y COMPRAS (TUS MÉTODOS MANTENIDOS) ---
     @Override
     public Order getUnfinishedOrder(User user) {
@@ -407,6 +475,10 @@ public class DBImplementation implements ClassDAO {
         return order;
     }
 
+    /**
+     * metodo que se encarga de guardar la orden actual
+     * @param order el objeto que guarda
+     */
     @Override
     public void saveOrder(Order order) {
         Session session = null;
@@ -429,6 +501,11 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * busca el historial de compra
+     * @param id busca mediente el id del usuario
+     * @return devuelve la lista de pedidos finalizados
+     */
     @Override
     public List<Order> getHistory(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -457,6 +534,11 @@ public class DBImplementation implements ClassDAO {
         return orders;
     }
 
+    /**
+     * metodo para buscar un pedido en especifico
+     * @param id del pedido a buscar
+     * @return devuelve una lista con el contenido del pedido
+     */
     @Override
     public List<Contain> getOrder(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -474,6 +556,11 @@ public class DBImplementation implements ClassDAO {
         return contains;
     }
 
+    /**
+     * metodo para cargar los articulos del carrito de compra
+     * @param id del usuario
+     * @return devuelve una lista con el contenido del carrito de compra
+     */
     @Override
     public List<Contain> getCartItem(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -507,7 +594,11 @@ public class DBImplementation implements ClassDAO {
         }
         return cart;
     }
-
+    /**
+     * metodo para finalizar un pedido y comprarlo
+     * @param order es el objeto de order que finaliza
+     * @return un boolean para indicar que se ha comprado
+     */
     @Override
     public boolean buy(Order order) {
         boolean comprado = false;
@@ -572,6 +663,10 @@ public class DBImplementation implements ClassDAO {
         return idOrder;
     }
 
+    /**
+     * metodo para cargar todos los usuarios
+     * @return devuelve una lista con los usuarios
+     */
     @Override
     public List<User> getAllUsers() {
         System.out.println("sesion");
@@ -602,6 +697,10 @@ public class DBImplementation implements ClassDAO {
         return users;
     }
 
+    /**
+     * meotdo para modificar un usuairo
+     * @param profile perfil que se va a modificar
+     */
     @Override
     public void modificarUser(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession(); //
@@ -624,6 +723,10 @@ public class DBImplementation implements ClassDAO {
         }
     }
 
+    /**
+     * metodo para eliminar un libro del contenido de un pedido sin comprar
+     * @param contain objeto que se modifica
+     */
     public void removeBookFromOrder(Contain contain) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;

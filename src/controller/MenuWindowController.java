@@ -35,7 +35,10 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana de opciones del usuario.
- * @author unai azkorra
+ * Gestiona el menú principal donde el usuario puede acceder a la modificación de su perfil,
+ * historial de compras y eliminación de cuenta.
+ * * @author unai azkorra
+ * @version 1.0
  */
 public class MenuWindowController implements Initializable {
 
@@ -43,22 +46,23 @@ public class MenuWindowController implements Initializable {
     @FXML private Button btnModifyProfile, btnDeleteAccount, btnHistory, btnBack;
     @FXML private Label label_Username;
 
-    @FXML
-    private Menu menuArchivo;
-    @FXML
-    private MenuItem iSalir;
-    @FXML
-    private Menu menuAcciones;
-    @FXML
-    private MenuItem iManual;
-    @FXML
-    private MenuItem iJasper;
-    @FXML
-    private Menu menuAyuda;
-    @FXML
-    private MenuItem iAcercaDe;
+    @FXML private Menu menuArchivo;
+    @FXML private MenuItem iSalir;
+    @FXML private Menu menuAcciones;
+    @FXML private MenuItem iManual;
+    @FXML private MenuItem iJasper;
+    @FXML private Menu menuAyuda;
+    @FXML private MenuItem iAcercaDe;
+
+    /** Menú contextual de acceso rápido. */
     private ContextMenu globalMenu;
 
+    /**
+     * Inicializa la ventana configurando el nombre del usuario en sesión
+     * e instanciando el menú contextual.
+     * * @param location Ubicación relativa para el objeto raíz.
+     * @param resources Recursos para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (UserSession.getInstance().getUser() != null) {
@@ -68,6 +72,9 @@ public class MenuWindowController implements Initializable {
         initGlobalContextMenu();
     }
 
+    /**
+     * Configura e inicializa el menú contextual (clic derecho) asociado al panel principal.
+     */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
@@ -103,28 +110,46 @@ public class MenuWindowController implements Initializable {
         }
     }
 
+    /**
+     * Navega a la ventana de modificación de perfil.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleModifyAction(ActionEvent event) {
         openWindow("/view/ModifyWindow.fxml", "Modificar Perfil");
     }
 
+    /**
+     * Navega a la ventana del historial de compras.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleHistoryAction(ActionEvent event) {
         openWindow("/view/ShoppingHistory.fxml", "Historial de Compras");
     }
 
+    /**
+     * Navega a la ventana de eliminación de cuenta.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleDeleteAction(ActionEvent event) {
         openWindow("/view/DeleteAccount.fxml", "Eliminar Cuenta");
     }
 
+    /**
+     * Regresa a la ventana principal de la tienda de libros.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleBackAction(ActionEvent event) {
         openWindow("/view/MainBookStore.fxml", "Tienda de Libros");
     }
 
-    // --- MÉTODOS DE MENÚ ---
-
+    /**
+     * Solicita el cierre inmediato de la aplicación.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         LogInfo.getInstance().logInfo("Cierre de aplicación solicitado desde MenuWindow.");
@@ -132,6 +157,10 @@ public class MenuWindowController implements Initializable {
         System.exit(0);
     }
 
+    /**
+     * Muestra una alerta informativa con detalles de la versión de la aplicación.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         LogInfo.getInstance().logInfo("Visualización de 'Acerca de' en menú de usuario.");
@@ -141,6 +170,10 @@ public class MenuWindowController implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Abre el manual de usuario en formato PDF mediante la creación de un archivo temporal.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleReportAction(ActionEvent event) {
         try {
@@ -157,6 +190,10 @@ public class MenuWindowController implements Initializable {
         }
     }
 
+    /**
+     * Genera un informe técnicoJasper y lo visualiza en el visor de JasperReports.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         try (Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bookstore", "root", "abcd*1234")) {
@@ -169,11 +206,19 @@ public class MenuWindowController implements Initializable {
         }
     }
 
+    /**
+     * Gestiona la lógica de apertura de nuevas ventanas y la transferencia de contexto.
+     * Especialmente diseñado para manejar la vuelta a la tienda principal asegurando
+     * que el encabezado reconozca al usuario en sesión.
+     * * @param fxmlPath Ruta del archivo FXML a cargar.
+     * @param title Título de la nueva escena.
+     */
     private void openWindow(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
+            // Lógica específica para inyectar datos si se vuelve a la tienda principal
             Object controller = loader.getController();
             if (controller instanceof MainBookStoreController) {
                 MainBookStoreController main = (MainBookStoreController) controller;

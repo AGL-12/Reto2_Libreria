@@ -5,65 +5,72 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import javax.persistence.*;
 
+/**
+ * Representa un comentario y valoración realizado por un usuario sobre un
+ * libro. Esta entidad utiliza una clave primaria compuesta definida en
+ * {@link CommentateId}.
+ */
 @Entity
 @Table(name = "commentate")
 public class Commentate implements Serializable {
 
     /**
-     * Identificador compuesto de la entidad (User ID + Book ISBN).
+     * Identificador compuesto que vincula al usuario y al libro comentado.
      */
     @EmbeddedId
     private CommentateId id;
 
     /**
-     * Texto del comentario u opinión escrito por el usuario. Almacenado como
-     * tipo TEXT en la base de datos.
+     * Texto descriptivo del comentario. Mapeado como tipo TEXT en la base de
+     * datos.
      */
     @Column(columnDefinition = "TEXT")
     private String commentary;
+
     /**
-     * Fecha y hora exacta en la que se creó el comentario.
+     * Marca de tiempo que indica cuándo se creó el comentario.
      */
     @Column(name = "date_creation")
     private Timestamp dateCreation;
+
     /**
-     * Valoración numérica otorgada al libro (ej. de 0 a 5 estrellas).
+     * Calificación numérica otorgada al libro.
      */
     @Column(name = "valuation")
     private float valuation;
-    /**
-     * El usuario que ha realizado el comentario.
-     * <p>
-     * Mapeado con {@code @MapsId("userCode")} para vincularlo con la parte
-     * correspondiente de la clave compuesta {@link CommentateId}.
-     * </p>
-     */
 
+    /**
+     * Usuario que ha realizado el comentario. Utiliza {@code MapsId} para
+     * sincronizar con la clave primaria compuesta.
+     */
     @ManyToOne
     @MapsId("userCode") // Conecta con el campo userCode del ID
     @JoinColumn(name = "id_user") // Nombre de la columna en BD
     private User user;
+
     /**
-     * El libro sobre el cual se realiza el comentario.
-     * <p>
-     * Mapeado con {@code @MapsId("isbnBook")} para vincularlo con la parte
-     * correspondiente de la clave compuesta {@link CommentateId}.
-     * </p>
+     * Libro al que hace referencia el comentario. Utiliza {@code MapsId} para
+     * sincronizar con la clave primaria compuesta.
      */
     @ManyToOne
     @MapsId("isbnBook") // Conecta con el campo isbnBook del ID
     @JoinColumn(name = "id_book") // Nombre de la columna en BD
     private Book book;
 
+    /**
+     * Constructor por defecto requerido por JPA/Hibernate.
+     */
     public Commentate() {
     }
 
     /**
-     * Constructor principal para crear un nuevo comentario. Inicializa
-     * automáticamente la fecha de creación al momento actual
-     * ({@code System.currentTimeMillis()}) y construye la clave compuesta
-     * {@link CommentateId} basándose en el usuario y el libro proporcionados.
+     * Crea un nuevo comentario inicializando la fecha de creación y la clave
+     * compuesta.
      *
+     * * @param user El usuario que comenta.
+     * @param book El libro comentado.
+     * @param commentary El contenido del comentario.
+     * @param valuation La puntuación asignada.
      */
     public Commentate(User user, Book book, String commentary, float valuation) {
         this.user = user;
@@ -76,6 +83,11 @@ public class Commentate implements Serializable {
         this.id = new CommentateId(user.getUserCode(), book.getISBN());
     }
 
+    /**
+     * Obtiene el identificador compuesto del comentario.
+     *
+     * @return El objeto CommentateId.
+     */
     public CommentateId getId() {
         return id;
     }
@@ -84,6 +96,11 @@ public class Commentate implements Serializable {
         this.id = id;
     }
 
+    /**
+     * Obtiene el libro asociado al comentario.
+     *
+     * @return El objeto Book.
+     */
     public Book getBook() {
         return book;
     }
@@ -92,6 +109,11 @@ public class Commentate implements Serializable {
         this.book = book;
     }
 
+    /**
+     * Obtiene el usuario autor del comentario.
+     *
+     * @return El objeto User.
+     */
     public User getUser() {
         return user;
     }
@@ -100,6 +122,11 @@ public class Commentate implements Serializable {
         this.user = user;
     }
 
+    /**
+     * Obtiene el texto del comentario.
+     *
+     * @return El comentario en formato String.
+     */
     public String getCommentary() {
         return commentary;
     }
@@ -108,6 +135,11 @@ public class Commentate implements Serializable {
         this.commentary = commentary;
     }
 
+    /**
+     * Obtiene la marca de tiempo de la creación.
+     *
+     * @return Objeto Timestamp.
+     */
     public Timestamp getDateCreation() {
         return dateCreation;
     }
@@ -116,6 +148,11 @@ public class Commentate implements Serializable {
         this.dateCreation = dateCreation;
     }
 
+    /**
+     * Obtiene la valoración numérica.
+     *
+     * @return Valor float de la puntuación.
+     */
     public float getValuation() {
         return valuation;
     }
@@ -125,13 +162,10 @@ public class Commentate implements Serializable {
     }
 
     /**
-     * Devuelve una representación en texto de la fecha de creación formateada.
-     * <p>
-     * Utiliza el patrón <b>"dd/MM/yyyy"</b>.
-     * </p>
+     * Devuelve la fecha de creación formateada como cadena de texto
+     * (dd/MM/yyyy).
      *
-     * @return Una cadena con la fecha formateada, o una cadena vacía si la
-     * fecha es nula.
+     * * @return La fecha formateada o una cadena vacía si la fecha es nula.
      */
     public String getFormattedDate() {
         if (dateCreation != null) {
@@ -140,5 +174,4 @@ public class Commentate implements Serializable {
         }
         return "";
     }
-
 }

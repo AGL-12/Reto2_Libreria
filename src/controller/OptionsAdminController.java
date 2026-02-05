@@ -4,11 +4,13 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,6 +34,10 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana principal de administración.
+ * Proporciona acceso centralizado a la gestión de libros, usuarios y moderación 
+ * de comentarios, además de herramientas de informes técnicos.
+ * * @author unai azkorra
+ * @version 1.0
  */
 public class OptionsAdminController {
 
@@ -40,14 +46,24 @@ public class OptionsAdminController {
     @FXML
     private Button btnDeleteUser, btnEliminarComentario, btnModificarUsuario, btnLibro;
 
+    /** Menú contextual accesible mediante clic derecho para navegación rápida. */
     private ContextMenu globalMenu;
 
+    /**
+     * Inicializa el panel de opciones administrativas.
+     * Configura el menú contextual global y registra el evento en el sistema de logs.
+     */
     @FXML
     public void initialize() {
         initGlobalContextMenu();
         LogInfo.getInstance().logInfo("Panel de Opciones Administrativas inicializado.");
     }
 
+    /**
+     * Inicializa y configura el menú contextual global.
+     * Define las opciones de gestión, informes técnicos, acceso al manual y salida,
+     * vinculándolas con sus respectivos métodos de ventana.
+     */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
@@ -95,26 +111,47 @@ public class OptionsAdminController {
         }
     }
 
+    /**
+     * Navega a la ventana de gestión (CRUD) de libros.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void opcionesLibroWindow(ActionEvent event) {
         navigateTo("/view/BookCRUDWindow.fxml");
     }
 
+    /**
+     * Navega a la ventana de eliminación de cuentas de usuario.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void deleteUserWindow(ActionEvent event) {
         navigateTo("/view/DeleteAccountAdmin.fxml");
     }
 
+    /**
+     * Navega a la ventana de moderación y eliminación de comentarios.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void eliminarComentarioWindow(ActionEvent event) {
         navigateTo("/view/DeleteComentWindow.fxml");
     }
 
+    /**
+     * Navega a la ventana de modificación de perfiles de usuario.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void modificarUsuarioWindow(ActionEvent event) {
         navigateTo("/view/ModifyWindow.fxml");
     }
 
+    /**
+     * Regresa a la ventana principal de la tienda (MainBookStore).
+     * Configura el encabezado de la tienda con la sesión del administrador actual.
+     * @param event El evento de acción disparado por el botón volver.
+     */
     @FXML
     private void btnVolver(ActionEvent event) {
         try {
@@ -136,6 +173,10 @@ public class OptionsAdminController {
         }
     }
 
+    /**
+     * Finaliza la ejecución de la aplicación.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         LogInfo.getInstance().logInfo("Aplicación cerrada por el administrador.");
@@ -143,12 +184,20 @@ public class OptionsAdminController {
         System.exit(0);
     }
 
+    /**
+     * Muestra un cuadro de diálogo informativo sobre el panel de administración.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         LogInfo.getInstance().logInfo("Visualización de 'Acerca de' en panel admin.");
         showAlert("Acerca de Nosotros", "BookStore App v1.0\nPanel de Control de Administración.", Alert.AlertType.INFORMATION);
     }
 
+    /**
+     * Abre el manual de usuario en formato PDF mediante un archivo temporal.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleReportAction(ActionEvent event) {
         try {
@@ -165,6 +214,10 @@ public class OptionsAdminController {
         }
     }
 
+    /**
+     * Genera y visualiza un informe técnico detallado mediante JasperReports.
+     * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -186,18 +239,21 @@ public class OptionsAdminController {
                     con.close();
                 }
             } catch (SQLException ex) {
+                // Error silencioso al cerrar conexión
             }
         }
     }
 
-    // Dentro de OptionsAdminController.java
+    /**
+     * Gestiona la navegación genérica entre las distintas vistas administrativas.
+     * Obtiene el escenario (Stage) actual a través del panel raíz para evitar errores de contexto.
+     * @param fxmlPath La ruta del archivo FXML que se desea cargar.
+     */
     private void navigateTo(String fxmlPath) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = fxmlLoader.load();
 
-            // CORRECCIÓN SEGURA: Usar el rootPane en lugar de un botón específico
-            // para evitar ClassCastException si la llamada viene de un MenuItem
             Stage stage = (Stage) rootPane.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
@@ -208,6 +264,12 @@ public class OptionsAdminController {
         }
     }
 
+    /**
+     * Muestra una alerta personalizada al usuario.
+     * @param titulo El título de la ventana de alerta.
+     * @param mensaje El mensaje a mostrar.
+     * @param tipo El tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
+     */
     private void showAlert(String titulo, String mensaje, Alert.AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);

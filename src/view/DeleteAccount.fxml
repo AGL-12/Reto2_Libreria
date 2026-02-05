@@ -52,7 +52,7 @@
                 </Menu>
             </menus>
         </MenuBar>
-        <Label prefHeight="31.0" prefWidth="188.0" text="DELETE ACCOUNT" textFill="#a7c4e5" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+        <Label prefHeight="31.0" prefWidth="188.0" text="ELIMINAR CUENTA" textFill="#a7c4e5" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="1">
             <font>
                 <Font name="Impact" size="25.0" />
             </font>
@@ -62,8 +62,8 @@
                 <Font name="Impact" size="14.0" />
             </font>
         </Label>
-        <TextField fx:id="TextFieldPassword" alignment="CENTER" maxWidth="200.0" promptText="Confirm Password" style="-fx-border-color: #000000;" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-        <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Delete Account" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-        <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancel" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+        <TextField fx:id="TextFieldPassword" alignment="CENTER" maxWidth="200.0" promptText="Confirmar Contrasena" style="-fx-border-color: #000000;" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+        <Button fx:id="Button_Delete" mnemonicParsing="false" onAction="#delete" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Eliminar Cuenta" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+        <Button fx:id="Button_Cancel" mnemonicParsing="false" onAction="#cancel" prefHeight="25.0" prefWidth="120.0" style="-fx-background-color: A7C4E5; -fx-border-color: #000000;" text="Cancelar" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
     </children>
 </GridPane>

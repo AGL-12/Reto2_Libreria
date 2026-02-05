@@ -43,13 +43,15 @@ import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
 /**
- * Controlador de la ventana de eliminar usuarios siendo admin.
- * Valida la operación mediante la contraseña del administrador en sesión.
- * @author unai azkorra
+ * Controlador de la ventana de eliminar usuarios siendo administrador.
+ * Valida la operación mediante la contraseña del administrador en sesión para 
+ * garantizar la seguridad del borrado.
+ * * @author unai azkorra
  * @version 1.1
  */
 public class DeleteAccountAdminController implements Initializable {
 
+    /** Interfaz de acceso a datos. */
     private final ClassDAO dao = new DBImplementation();
 
     @FXML
@@ -63,8 +65,14 @@ public class DeleteAccountAdminController implements Initializable {
     @FXML
     private Button Button_Cancel;
 
+    /** Menú contextual accesible mediante clic derecho. */
     private ContextMenu globalMenu;
 
+    /**
+     * Inicializa la ventana cargando la lista de usuarios y configurando el menú contextual.
+     * * @param location Ubicación relativa para el objeto raíz.
+     * @param resources Recursos para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cargarUsuarios();
@@ -72,6 +80,9 @@ public class DeleteAccountAdminController implements Initializable {
         LogInfo.getInstance().logInfo("Ventana de eliminación de cuentas (Admin) inicializada.");
     }
 
+    /**
+     * Obtiene todos los usuarios de la base de datos y los carga en el ComboBox.
+     */
     private void cargarUsuarios() {
         try {
             List<User> users = dao.getAllUsers();
@@ -81,6 +92,12 @@ public class DeleteAccountAdminController implements Initializable {
         }
     }
 
+    /**
+     * Maneja la lógica de eliminación de un usuario.
+     * Verifica que haya un usuario seleccionado y que la contraseña introducida coincida 
+     * con la del administrador logueado antes de proceder.
+     * * @param event El evento de acción disparado por el botón de eliminar.
+     */
     @FXML
     private void delete(ActionEvent event) {
         User selectedUser = ComboBoxUser.getSelectionModel().getSelectedItem();
@@ -115,12 +132,21 @@ public class DeleteAccountAdminController implements Initializable {
         }
     }
 
+    /**
+     * Muestra información sobre la aplicación.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         LogInfo.getInstance().logInfo("Visualización de 'Acerca de' en administración de cuentas.");
         showAlert("Acerca de Nosotros", "BookStore App v1.0\nGestión de administración de usuarios.", Alert.AlertType.INFORMATION);
     }
 
+    /**
+     * Genera un informe técnico detallado mediante JasperReports.
+     * Abre una conexión SQL temporal para alimentar el reporte.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -141,6 +167,10 @@ public class DeleteAccountAdminController implements Initializable {
         }
     }
 
+    /**
+     * Configura el menú contextual global de la ventana con opciones de limpieza, 
+     * manual, informes y salida.
+     */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
@@ -155,6 +185,7 @@ public class DeleteAccountAdminController implements Initializable {
         MenuItem itemExit = new MenuItem("Salir");
         itemExit.setOnAction(this::handleExit);
         globalMenu.getItems().addAll(itemLimpiar, new SeparatorMenuItem(), itemInforme, itemManual, itemAbout, new SeparatorMenuItem(), itemExit);
+        
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
@@ -168,22 +199,48 @@ public class DeleteAccountAdminController implements Initializable {
         }
     }
 
-    @FXML private void handleClearAction(ActionEvent event) { ComboBoxUser.getSelectionModel().clearSelection(); TextFieldPassword.clear(); }
-    @FXML private void handleExit(ActionEvent event) { 
+    /**
+     * Limpia la selección del ComboBox de usuarios y el campo de contraseña.
+     * * @param event El evento de acción disparado.
+     */
+    @FXML 
+    private void handleClearAction(ActionEvent event) { 
+        ComboBoxUser.getSelectionModel().clearSelection(); 
+        TextFieldPassword.clear(); 
+    }
+
+    /**
+     * Finaliza la ejecución de la aplicación.
+     * * @param event El evento de acción disparado.
+     */
+    @FXML 
+    private void handleExit(ActionEvent event) { 
         LogInfo.getInstance().logInfo("Aplicación cerrada por administrador.");
         Platform.exit(); 
         System.exit(0); 
     }
-    @FXML private void handleReportAction(ActionEvent event) {
+
+    /**
+     * Abre el manual de usuario en PDF creando un archivo temporal.
+     * * @param event El evento de acción disparado.
+     */
+    @FXML 
+    private void handleReportAction(ActionEvent event) {
         try {
             InputStream is = getClass().getResourceAsStream("/documents/Manual_Usuario.pdf");
             File temp = File.createTempFile("Manual", ".pdf");
             Files.copy(is, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             Desktop.getDesktop().open(temp);
             LogInfo.getInstance().logInfo("Manual de usuario abierto desde administración de cuentas.");
-        } catch (IOException e) { LogInfo.getInstance().logSevere("Error al abrir manual", e); }
+        } catch (IOException e) { 
+            LogInfo.getInstance().logSevere("Error al abrir manual", e); 
+        }
     }
 
+    /**
+     * Cancela la operación actual y regresa al menú de opciones de administrador.
+     * * @param event El evento de acción disparado por el botón cancelar.
+     */
     @FXML
     private void cancel(ActionEvent event) {
         try {
@@ -197,7 +254,17 @@ public class DeleteAccountAdminController implements Initializable {
         }
     }
 
+    /**
+     * Crea y muestra una ventana de alerta personalizada.
+     * * @param title Título de la ventana.
+     * @param message Mensaje a mostrar.
+     * @param type Tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
+     */
     private void showAlert(String title, String message, Alert.AlertType type) {
-        Alert alert = new Alert(type); alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(message); alert.showAndWait();
+        Alert alert = new Alert(type); 
+        alert.setTitle(title); 
+        alert.setHeaderText(null); 
+        alert.setContentText(message); 
+        alert.showAndWait();
     }
 }
