@@ -3,25 +3,40 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gestiona la sesión del usuario actual y su carrito de la compra.
+ * Implementa el patrón Singleton para asegurar que solo exista una instancia 
+ * de la sesión durante la ejecución de la aplicación.
+ * * @author reto din/adt
+ */
 public class UserSession {
 
-    // 1. La única instancia que existirá (static)
+    /** * La única instancia que existirá de la clase (Singleton).
+     */
     private static UserSession instance;
 
-    // 2. El dato del usuario logueado
+    /** * El perfil del usuario que ha iniciado sesión actualmente.
+     */
     private Profile user;
 
-    // 3. NUEVO: El carrito actual (Order)
+    /** * El pedido actual que funciona como carrito de la compra.
+     */
     private Order currentOrder;
 
-    // 4. NUEVO: Instancia del DAO para guardar en caliente
+    /** * Instancia del DAO para persistir los cambios en la base de datos.
+     */
     private final ClassDAO dao = new DBImplementation();
 
-    // Constructor privado
+    /**
+     * Constructor privado para evitar la instanciación externa.
+     */
     private UserSession() {
     }
 
-    // Singleton
+    /**
+     * Obtiene la instancia única de UserSession. Si no existe, la crea.
+     * @return La instancia única de la sesión.
+     */
     public static UserSession getInstance() {
         if (instance == null) {
             instance = new UserSession();
@@ -29,31 +44,51 @@ public class UserSession {
         return instance;
     }
 
-    // --- Getters y Setters de Usuario ---
+    /**
+     * Obtiene el perfil del usuario logueado.
+     * @return El objeto Profile del usuario actual.
+     */
     public Profile getUser() {
         return user;
     }
 
+    /**
+     * Establece el usuario de la sesión actual.
+     * @param user El perfil del usuario que inicia sesión.
+     */
     public void setUser(Profile user) {
         this.user = user;
     }
 
+    /**
+     * Limpia la sesión actual, eliminando los datos del usuario y del carrito.
+     */
     public void cleanUserSession() {
         this.user = null;
-        this.currentOrder = null; // Limpiamos también el carrito
+        this.currentOrder = null; 
     }
 
+    /**
+     * Comprueba si hay un usuario con sesión iniciada.
+     * @return true si el usuario no es nulo, false en caso contrario.
+     */
     public boolean isLoggedIn() {
         return user != null;
     }
 
-    // --- NUEVO: Getter del pedido para usarlo en la vista de pago ---
+    /**
+     * Obtiene el pedido actual (carrito) para su uso en las vistas.
+     * @return El objeto Order actual.
+     */
     public Order getCurrentOrder() {
         return currentOrder;
     }
 
     /**
-     * LÓGICA PRINCIPAL: Añadir al carrito y persistir en BD
+     * LÓGICA PRINCIPAL: Añade un libro al carrito y persiste los cambios en la BD.
+     * Si no existe un pedido pendiente, crea uno nuevo. Si el libro ya está en el 
+     * carrito, incrementa su cantidad.
+     * * @param book El libro que se desea añadir al carrito.
      */
     public void addToCart(Book book) {
         if (!(this.user instanceof User)) {
@@ -73,8 +108,7 @@ public class UserSession {
                 currentOrder.setPurchaseDate(new java.sql.Timestamp(System.currentTimeMillis()));
                 currentOrder.setListPreBuy(new ArrayList<>());
 
-                // --- PASO CLAVE ---
-                // Guardamos YA para tener ID. Esto hace que saveOrUpdate futuro funcione bien.
+                // Guardamos para generar el ID en la BD
                 dao.saveOrder(currentOrder);
             }
         }
@@ -95,20 +129,17 @@ public class UserSession {
 
         // 3. AÑADIR SI ES NUEVO
         if (!encontrado) {
-            // Al tener currentOrder un ID real, el Contain se crea bien
             Contain nuevaLinea = new Contain(1, currentOrder, book);
             currentOrder.getListPreBuy().add(nuevaLinea);
         }
 
         // 4. GUARDAR
-        // Al llamar a saveOrUpdate aquí, como currentOrder tiene ID, actualiza la lista.
         dao.saveOrder(currentOrder);
         System.out.println("Carrito guardado.");
     }
 
     /**
-     * Recupera el carrito de la BD al loguearse (se llama desde
-     * LogInWindowController)
+     * Recupera el carrito pendiente de la base de datos al iniciar sesión.
      */
     public void loadCartFromDB() {
         if (this.user != null && this.user instanceof User) {
@@ -126,17 +157,27 @@ public class UserSession {
         }
     }
 
-    // Añade este método para poder limpiar el pedido desde fuera
+    /**
+     * Permite establecer o actualizar el pedido actual desde un origen externo.
+     * @param order El nuevo objeto Order para el carrito.
+     */
     public void setOrder(Order order) {
-        this.currentOrder = order; // Asegúrate de que tu variable se llame 'currentOrder'
+        this.currentOrder = order; 
     }
 
+    /**
+     * Método no soportado actualmente para obtener los libros del carrito.
+     * @return Lanza UnsupportedOperationException.
+     */
     public Object getLibrosCarrito() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
     
+    /**
+     * Fuerza el refresco del pedido anulando la instancia actual de currentOrder,
+     * obligando a una nueva consulta a la base de datos en la próxima acción.
+     */
     public void refreshOrderAfterDeletion() {
-    // Forzamos a que la próxima vez que se añada algo, se busque de nuevo en la BD
-    this.currentOrder = null; 
-}
+        this.currentOrder = null; 
+    }
 }
