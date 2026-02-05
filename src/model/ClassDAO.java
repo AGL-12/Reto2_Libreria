@@ -25,9 +25,8 @@ public interface ClassDAO {
      * Registra un nuevo perfil en el sistema.
      *
      * @param profile El perfil a registrar.
-     * @throws exception.MyFormException para el controlador
      */
-    public void signUp(Profile profile) throws MyFormException;
+    public void signUp(Profile profile) ;
 
     /**
      * Elimina un usuario del sistema.

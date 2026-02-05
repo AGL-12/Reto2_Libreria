@@ -12,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.image.Image;
@@ -22,7 +21,6 @@ import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
 import model.UserSession;
-import util.UtilGeneric;
 
 /**
  * Controller for the Login window. Handles user login and navigation to the

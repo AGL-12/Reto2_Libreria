@@ -57,16 +57,16 @@ public class DBImplementation implements ClassDAO {
      * metodo para hacer signUp
      *
      * @param profile con los datos para crear el nuevo perfil
-     * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public void signUp(Profile profile) throws MyFormException {
+    public void signUp(Profile profile) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
             session.save(profile);
-            new SessionHolderThread(session, tx).start();
+            
+            tx.commit();
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -77,12 +77,11 @@ public class DBImplementation implements ClassDAO {
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
                 LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
-                throw new MyFormException("El servidor está ocupado (Timeout).");
             }
 
             LogInfo.getInstance().logSevere("Error en login DAO", e);
-            throw new MyFormException("Error en el inicio de sesión.");
         }
+        session.close();
     }
 
     /**
@@ -104,7 +103,7 @@ public class DBImplementation implements ClassDAO {
                 session.delete(persistentInstance);
                 tx.commit();
                 // Solo lanzamos el hilo si el borrado fue exitoso
-                new SessionHolderThread(session, tx);
+                new SessionHolderThread(session, tx).start();
             } else {
                 // Si no existe, simplemente hacemos commit de la transacción vacía y cerramos
                 tx.commit();
