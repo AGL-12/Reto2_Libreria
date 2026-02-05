@@ -34,23 +34,23 @@
             <menus>
                 <Menu mnemonicParsing="true" text="Archivo">
                     <items>
-                        <MenuItem accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
+                        <MenuItem fx:id="miSalir" accelerator="Ctrl+Q" onAction="#handleExit" text="Salir" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="true" text="Acciones">
                     <items>
-                        <MenuItem onAction="#opcionesLibroWindow" text="Gestión de Libros" />
-                        <MenuItem onAction="#eliminarComentarioWindow" text="Eliminar Comentario" />
-                        <MenuItem onAction="#modificarUsuarioWindow" text="Modificar Usuario" />
-                        <MenuItem onAction="#deleteUserWindow" text="Borrar Usuario" />
+                        <MenuItem fx:id="miGestLibros" onAction="#opcionesLibroWindow" text="Gestión de Libros" />
+                        <MenuItem fx:id="miElimComentario" onAction="#eliminarComentarioWindow" text="Eliminar Comentario" />
+                        <MenuItem fx:id="miModUsuario" onAction="#modificarUsuarioWindow" text="Modificar Usuario" />
+                        <MenuItem fx:id="miBorrarUsuario" onAction="#deleteUserWindow" text="Borrar Usuario" />
                         <SeparatorMenuItem />
-                        <MenuItem accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual de Usuario" />
-                        <MenuItem accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico" />
+                        <MenuItem fx:id="miManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual de Usuario" />
+                        <MenuItem fx:id="miInforme" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="true" text="Ayuda">
                     <items>
-                        <MenuItem onAction="#handleAboutAction" text="Acerca de Nosotros" />
+                        <MenuItem fx:id="miAbout" onAction="#handleAboutAction" text="Acerca de Nosotros" />
                     </items>
                 </Menu>
             </menus>

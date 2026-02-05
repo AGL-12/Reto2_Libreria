@@ -12,10 +12,6 @@ import org.testfx.util.WaitForAsyncUtils;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
-/**
- * Test de navegación para el panel de Menú de Usuario (MenuWindow).
- * Flujo: Main -> SignUp -> MenuWindow -> Subventanas (vía Menú) -> Home.
- */
 public class MenuWindowControllerTest extends ApplicationTest {
 
     private final DBImplementation db = new DBImplementation();
@@ -24,13 +20,11 @@ public class MenuWindowControllerTest extends ApplicationTest {
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Iniciamos la aplicación desde el punto de entrada principal
         new Main().start(stage); 
     }
 
     @After
     public void tearDown() {
-        // Limpieza del usuario de prueba para mantener la BD limpia
         try {
             User u = db.getAllUsers().stream()
                     .filter(user -> user.getUsername().equals(USER_TEST))
@@ -43,7 +37,6 @@ public class MenuWindowControllerTest extends ApplicationTest {
 
     @Test
     public void testNavegacionMenuUsuarioCompleta() {
-        // --- 1. SIGN UP (El usuario queda registrado y logueado) ---
         clickOn("#btnLogIn");
         clickOn("#Button_SignUp");
         
@@ -59,54 +52,42 @@ public class MenuWindowControllerTest extends ApplicationTest {
         clickOn("#buttonSignUp");
         
         WaitForAsyncUtils.waitForFxEvents();
-        push(KeyCode.ENTER); // Cerrar alerta de éxito del registro
+        push(KeyCode.ENTER); 
 
-        // --- 2. ENTRAR AL MENÚ DE USUARIO (Desde el Header) ---
         clickOn("#btnOption");
         WaitForAsyncUtils.waitForFxEvents();
-        // Validamos que estamos en la ventana correcta buscando el nodo raíz
         verifyThat("#rootPane", isVisible()); 
 
-        // --- 3. NAVEGAR A MODIFICAR PERFIL (Vía Menú Superior "Acciones") ---
         clickOn("Acciones");
         clickOn("Modificar Perfil");
         WaitForAsyncUtils.waitForFxEvents();
-        // Verificamos presencia de un campo único de ModifyWindow.fxml
         verifyThat("#TextField_Name", isVisible()); 
         
-        // Volver (Usamos botón físico para evitar errores de casting en vuestro controlador)
         clickOn("#Button_Cancel");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // --- 4. NAVEGAR A HISTORIAL DE COMPRAS (Vía Menú Superior "Acciones") ---
         clickOn("Acciones");
         clickOn("Historial de Compras");
         WaitForAsyncUtils.waitForFxEvents();
-        // Verificamos presencia de la tabla de ShoppingHistory.fxml
-        verifyThat("#tblHistory", isVisible()); 
         
-        // Volver
+        // CORRECCIÓN: Usamos el ID tableOrders que está definido en el FXML
+        verifyThat("#tableOrders", isVisible()); 
+        
         clickOn("#btnVolver");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // --- 5. NAVEGAR A ELIMINAR CUENTA (Vía Menú Superior "Acciones") ---
         clickOn("Acciones");
         clickOn("Eliminar Cuenta");
         WaitForAsyncUtils.waitForFxEvents();
-        // Verificamos presencia de campo de DeleteAccount.fxml
         verifyThat("#TextFieldPassword", isVisible()); 
         
-        // Volver
         clickOn("#Button_Cancel");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // --- 6. REGRESAR A LA TIENDA (Vía Menú Superior "Acciones") ---
         clickOn("Acciones");
         clickOn("Volver a la Tienda");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // --- 7. VERIFICACIÓN FINAL ---
-        // Confirmar que estamos de vuelta en MainBookStore viendo el catálogo
         verifyThat("#tileBooks", isVisible());
     }
 }
