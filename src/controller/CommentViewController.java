@@ -234,7 +234,11 @@ public class CommentViewController implements Initializable {
                 showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING);
                 return;
             }
-
+            if (nuevoTexto.length() > 500) {
+                LOGGER.logWarning("Intento de editar comentario con demasiados caracteres: " + nuevoTexto.length());
+                showAlert("El comentario no puede superar los 500 caracteres.", Alert.AlertType.WARNING);
+                return;
+            }
             // Bloqueamos botón para evitar doble clic
             btnEdit.setDisable(true);
 

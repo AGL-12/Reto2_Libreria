@@ -110,6 +110,21 @@ public class BookViewControllerTest extends ApplicationTest {
                 verificarExistenciaComentarios();
             }
         }
+        sleep(1000); 
+        if (lookup("#btnDelete").tryQuery().isPresent()) {
+            // Buscamos el primer botón de borrar que aparezca (será el nuestro porque ordenamos por usuario)
+            clickOn("#btnDelete"); 
+            sleep(500);
+            
+            // Confirmamos la alerta de borrado pulsando ENTER
+            cerrarAlertas(); 
+            
+            sleep(1000); // Damos tiempo a que la BD lo borre
+            // Cerramos la confirmación de "Borrado correctamente"
+            cerrarAlertas();
+            
+            System.out.println(">> Comentario borrado proactivamente desde la UI.");
+        }
 
         rightClickOn("#rootPane");
         sleep(600);
@@ -172,7 +187,6 @@ public class BookViewControllerTest extends ApplicationTest {
                 testUser.setGender("Other");
                 session.save(testUser);
                 tx.commit();
-                System.out.println(">> Usuario temporal creado: " + TEST_USER_LOGIN);
             }
         } catch (Exception e) {
             if (tx != null) {
@@ -184,46 +198,69 @@ public class BookViewControllerTest extends ApplicationTest {
         }
     }
 
-    private void eliminarUsuarioDePrueba() {
+  private void eliminarUsuarioDePrueba() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
 
-            session.createQuery("DELETE FROM Commentate WHERE user.username = :u")
+            // 1. Borrar Comentarios (Tabla Commentate)
+            // Usamos HQL. Si falla aquí, es que el nombre del atributo en Commentate.java no es 'user'
+            int comentariosBorrados = session.createQuery("DELETE FROM Commentate WHERE user.username = :u")
                     .setParameter("u", TEST_USER_LOGIN)
                     .executeUpdate();
+            System.out.println(">> Limpieza: " + comentariosBorrados + " comentarios borrados.");
 
-            List<Integer> orderIds = session.createQuery("SELECT idOrder FROM Order WHERE idUsuer.username = :u")
-                    .setParameter("u", TEST_USER_LOGIN).list();
+            // 2. Borrar Pedidos (Tablas Contain y Order)
+            List<Integer> orderIds = session.createQuery("SELECT o.idOrder FROM Order o WHERE o.user.username = :u")
+                    .setParameter("u", TEST_USER_LOGIN)
+                    .list();
 
             if (orderIds != null && !orderIds.isEmpty()) {
-                session.createQuery("DELETE FROM Contain WHERE order.idOrder IN (:ids)")
+                // Borrar líneas de pedido (Contain)
+                session.createQuery("DELETE FROM Contain WHERE id.idOrder IN (:ids)")
                         .setParameterList("ids", orderIds).executeUpdate();
 
+                // Borrar cabeceras de pedido (Order)
                 session.createQuery("DELETE FROM Order WHERE idOrder IN (:ids)")
                         .setParameterList("ids", orderIds).executeUpdate();
+                
             }
 
-            int deleted = session.createQuery("DELETE FROM Profile WHERE username = :u")
+            // 3. Borrar Usuario (Tabla Profile/User)
+            int usuariosBorrados = session.createQuery("DELETE FROM Profile WHERE username = :u")
                     .setParameter("u", TEST_USER_LOGIN)
                     .executeUpdate();
 
-            tx.commit();
-            if (deleted > 0) {
-                System.out.println(">> Usuario temporal y todos sus datos eliminados.");
+            if (usuariosBorrados > 0) {
+                System.out.println(">> Limpieza: Usuario de prueba eliminado definitivamente.");
             }
 
+            tx.commit();
+
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
+            if (tx != null) tx.rollback();
+            System.err.println(">> ERROR CRÍTICO AL LIMPIAR DATOS: " + e.getMessage());
+            e.printStackTrace();
+
+            try {
+                Session sessionEmergency = HibernateUtil.getSessionFactory().openSession();
+                Transaction tx2 = sessionEmergency.beginTransaction();
+                Profile p = (Profile) sessionEmergency.createQuery("FROM Profile WHERE username = :u")
+                        .setParameter("u", TEST_USER_LOGIN).uniqueResult();
+                if(p != null) {
+                    sessionEmergency.delete(p);
+                    tx2.commit();
+                    System.out.println(">> Limpieza de emergencia ejecutada.");
+                }
+                sessionEmergency.close();
+            } catch(Exception ex2) {
+                System.err.println(">> Falló incluso la limpieza de emergencia.");
             }
-            System.out.println("Aviso: Limpieza de datos incompleta: " + e.getMessage());
         } finally {
             session.close();
         }
     }
-
     private void asegurarPantallaLogin() {
         if (lookup("#TextField_Username").tryQuery().isPresent()) {
             return;
@@ -285,7 +322,8 @@ public class BookViewControllerTest extends ApplicationTest {
             }
         }
     }
-
+    
+ 
     private void realizarLogoutDesdeLibro() {
         try {
             rightClickOn("#rootPane");
@@ -340,7 +378,6 @@ public class BookViewControllerTest extends ApplicationTest {
             VBox container = lookup("#commentsContainer").queryAs(VBox.class);
 
             int cantidad = container.getChildren().size();
-            System.out.println(">> Validación de Comentarios: Se encontraron " + cantidad + " comentarios.");
 
             Assert.assertTrue("Fallo: El libro debería tener comentarios, pero la lista está vacía.", cantidad > 0);
         } else {

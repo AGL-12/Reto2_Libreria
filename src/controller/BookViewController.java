@@ -126,7 +126,8 @@ public class BookViewController {
      */
     public void initialize() {
         LOGGER.logInfo("Inicializando BookViewController...");
-        initGlobalContextMenu();
+        initContextMenu();
+        //initGlobalContextMenu();
     }
 
     /**
@@ -371,7 +372,11 @@ public class BookViewController {
             showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
             return;
         }
-
+        if (texto.length() > 500) {
+            LOGGER.logWarning("Intento de publicar comentario demasiado largo: " + texto.length() + " caracteres.");
+            showAlert("El comentario es demasiado largo (máximo 500 caracteres).", Alert.AlertType.WARNING);
+            return;
+        }
         // Bloqueamos el botón para que el usuario no haga doble clic
         btnPublicar.setDisable(true);
 
@@ -599,7 +604,6 @@ public class BookViewController {
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
-        LOGGER.logInfo("Cerrando sesión de usuario...");
         try {
             //Ruta para el pdf del manual
             String resourcePath = "/documents/Manual_Usuario.pdf";
