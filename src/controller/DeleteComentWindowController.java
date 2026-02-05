@@ -10,6 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -37,13 +38,15 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana de eliminar comentarios. Acceso restringido a
- * administradores para moderar comentarios por usuario.
+ * administradores para moderar comentarios filtrados por usuario.
+ * Permite visualizar, buscar y eliminar comentarios específicos de la base de datos.
  *
  * @author unai azkorra
  * @version 1.0
  */
 public class DeleteComentWindowController implements Initializable {
 
+    /** Implementación de la lógica de acceso a datos. */
     private DBImplementation db = new DBImplementation();
 
     @FXML
@@ -59,12 +62,20 @@ public class DeleteComentWindowController implements Initializable {
     @FXML
     private ComboBox<User> comboUsers;
 
+    /** Menú contextual global para acciones rápidas. */
     private ContextMenu globalMenu;
 
+    /**
+     * Inicializa la ventana configurando las columnas de la tabla, cargando la lista
+     * de usuarios en el ComboBox y estableciendo los listeners de selección.
+     * * @param location Ubicación relativa para el objeto raíz.
+     * @param resources Recursos para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initGlobalContextMenu();
 
+        // Configuración de celdas para la columna de Libro
         colBook.setCellValueFactory(cellData -> {
             if (cellData.getValue().getBook() != null) {
                 return new SimpleStringProperty(cellData.getValue().getBook().getTitle());
@@ -73,12 +84,16 @@ public class DeleteComentWindowController implements Initializable {
             }
         });
 
+        // Configuración de celdas para fecha y contenido del comentario
         colDate.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFormattedDate()));
         colComment.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCommentary()));
 
         try {
+            // Carga inicial de usuarios para el filtro
             ObservableList<User> users = FXCollections.observableArrayList(db.getAllUsers());
             comboUsers.setItems(users);
+            
+            // Listener para cargar comentarios automáticamente al seleccionar un usuario
             comboUsers.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
                     cargarComentarios(newVal.getUsername());
@@ -90,6 +105,11 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Recupera de la base de datos y muestra en la tabla todos los comentarios 
+     * asociados a un nombre de usuario específico.
+     * * @param username Nombre de usuario para filtrar los comentarios.
+     */
     private void cargarComentarios(String username) {
         try {
             ObservableList<Commentate> lista = FXCollections.observableArrayList(db.getCommentsByUser(username));
@@ -100,6 +120,10 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Inicializa el menú contextual (clic derecho) con opciones de informes, 
+     * manual de usuario y salida.
+     */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
@@ -128,6 +152,10 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Solicita el cierre de la aplicación de forma controlada.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         LogInfo.getInstance().logInfo("Cierre de aplicación solicitado desde moderación de comentarios.");
@@ -135,6 +163,10 @@ public class DeleteComentWindowController implements Initializable {
         System.exit(0);
     }
 
+    /**
+     * Muestra un cuadro de diálogo informativo sobre la versión y propósito de la ventana.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         LogInfo.getInstance().logInfo("Visualización de 'Acerca de' en moderación de comentarios.");
@@ -145,6 +177,10 @@ public class DeleteComentWindowController implements Initializable {
         alert.showAndWait();
     }
 
+    /**
+     * Abre el manual de usuario en formato PDF mediante la creación de un archivo temporal.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleReportAction(ActionEvent event) {
         try {
@@ -161,6 +197,10 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Genera un informe técnico detallado utilizando JasperReports y lo muestra en un visor.
+     * * @param event Evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -181,10 +221,16 @@ public class DeleteComentWindowController implements Initializable {
                     con.close();
                 }
             } catch (SQLException ex) {
+                // Error silencioso en cierre de conexión
             }
         }
     }
 
+    /**
+     * Elimina el comentario seleccionado de la tabla y de la base de datos.
+     * Requiere que el usuario haya seleccionado una fila previamente.
+     * * @param event Evento de acción disparado por el botón de eliminar.
+     */
     @FXML
     private void handleDeleteComment(ActionEvent event) {
         Commentate selected = tableComments.getSelectionModel().getSelectedItem();
@@ -204,14 +250,17 @@ public class DeleteComentWindowController implements Initializable {
         }
     }
 
+    /**
+     * Regresa a la ventana anterior de opciones para administradores.
+     * * @param event Evento de acción disparado por el botón volver.
+     */
     @FXML
     private void handleBack(ActionEvent event) {
         try {
-            // Obtenemos el stage de forma segura usando el rootPane (VBox) definido en el FXML
-            // Evitamos el ClassCastException porque MenuItem no hereda de Node
+            // Obtenemos el stage a través del nodo raíz del layout
             Stage stage = (Stage) rootPane.getScene().getWindow();
 
-            // Cargar la ventana de opciones de administrador
+            // Carga del recurso FXML de destino
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
             Parent root = loader.load();
 
@@ -219,10 +268,8 @@ public class DeleteComentWindowController implements Initializable {
             stage.setScene(scene);
             stage.show();
 
-            // Usamos el método logInfo de tu clase LogInfo
             LogInfo.getInstance().logInfo("Navegación atrás desde gestión de comentarios realizada.");
         } catch (IOException ex) {
-            // Usamos el método logSevere para registrar el error
             LogInfo.getInstance().logSevere("Error al volver a OptionsAdmin: " + ex.getMessage(), ex);
         }
     }

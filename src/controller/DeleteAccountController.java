@@ -40,11 +40,13 @@ import util.LogInfo;
 
 /**
  * Controlador de la ventana de eliminar usuarios siendo el propio usuario.
- * @author unai azkorra
+ * Permite al usuario en sesión dar de baja su cuenta tras una confirmación por contraseña.
+ * * @author unai azkorra
  * @version 1.1
  */
 public class DeleteAccountController implements Initializable {
 
+    /** Implementación de la base de datos para operaciones de borrado. */
     private DBImplementation db = new DBImplementation();
 
     @FXML
@@ -58,8 +60,15 @@ public class DeleteAccountController implements Initializable {
     @FXML
     private Button Button_Delete;
 
+    /** Menú contextual de la ventana. */
     private ContextMenu globalMenu;
 
+    /**
+     * Inicializa la ventana obteniendo el usuario de la sesión actual y configurando
+     * los componentes visuales iniciales.
+     * * @param location Ubicación relativa para el objeto raíz.
+     * @param resources Recursos para localizar el objeto raíz.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Profile user = UserSession.getInstance().getUser();
@@ -71,6 +80,12 @@ public class DeleteAccountController implements Initializable {
         LogInfo.getInstance().logInfo("Ventana de eliminación de cuenta propia inicializada.");
     }
 
+    /**
+     * Gestiona la lógica de eliminación de la cuenta propia del usuario.
+     * Valida que la contraseña coincida con la del perfil actual y solicita confirmación final.
+     * Si el borrado es exitoso, cierra la sesión y navega a la ventana de LogIn.
+     * * @param event El evento de acción disparado por el botón de eliminar.
+     */
     @FXML
     private void delete(ActionEvent event) {
         String password = TextFieldPassword.getText();
@@ -104,6 +119,10 @@ public class DeleteAccountController implements Initializable {
         }
     }
 
+    /**
+     * Genera un informe técnico de la aplicación mediante JasperReports.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
@@ -124,6 +143,11 @@ public class DeleteAccountController implements Initializable {
         }
     }
 
+    /**
+     * Realiza la navegación hacia otra ventana FXML.
+     * * @param fxmlPath Ruta relativa del archivo FXML.
+     * @param title Título de la nueva ventana.
+     */
     private void navigateTo(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -138,6 +162,9 @@ public class DeleteAccountController implements Initializable {
         }
     }
 
+    /**
+     * Inicializa el menú contextual global asociado al panel raíz.
+     */
     private void initGlobalContextMenu() {
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
@@ -172,11 +199,19 @@ public class DeleteAccountController implements Initializable {
         });
     }
 
+    /**
+     * Limpia el contenido del campo de contraseña.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleClearAction(ActionEvent event) {
         TextFieldPassword.clear();
     }
 
+    /**
+     * Solicita el cierre controlado de la aplicación.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         LogInfo.getInstance().logInfo("Cierre de aplicación solicitado desde la ventana de baja de usuario.");
@@ -184,11 +219,19 @@ public class DeleteAccountController implements Initializable {
         System.exit(0);
     }
 
+    /**
+     * Muestra una ventana de información "Acerca de".
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         showAlert("Acerca de", "BookStore App v1.1\nVentana de baja de usuario.", Alert.AlertType.INFORMATION);
     }
 
+    /**
+     * Abre el manual de usuario de la aplicación en formato PDF.
+     * * @param event El evento de acción disparado.
+     */
     @FXML
     private void handleReportAction(ActionEvent event) {
         try {
@@ -205,11 +248,21 @@ public class DeleteAccountController implements Initializable {
         }
     }
 
+    /**
+     * Cancela la operación de borrado y regresa al menú principal del usuario.
+     * * @param event El evento de acción disparado por el botón cancelar.
+     */
     @FXML
     private void cancel(ActionEvent event) {
         navigateTo("/view/MenuWindow.fxml", "Mi Menú");
     }
 
+    /**
+     * Crea y muestra un cuadro de diálogo de alerta personalizado.
+     * * @param title Título de la alerta.
+     * @param content Texto descriptivo de la alerta.
+     * @param type Tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
+     */
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
