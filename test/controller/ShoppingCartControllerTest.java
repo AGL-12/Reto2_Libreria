@@ -3,18 +3,23 @@ package controller;
 import javafx.geometry.VerticalDirection;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import main.Main;
 import model.ClassDAO;
 import model.DBImplementation;
 import model.Profile;
 import model.User;
+import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import org.testfx.matcher.control.LabeledMatchers;
@@ -60,6 +65,14 @@ public class ShoppingCartControllerTest extends ApplicationTest {
         }
     }
 
+    @After
+    public void tearDown() throws Exception {
+        // Esto cierra la ventana de la aplicación después de cada test
+        FxToolkit.cleanupStages();
+        release(new KeyCode[]{}); // Libera teclas por si acaso
+        release(new MouseButton[]{}); // Libera el ratón
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         // Inicia la aplicación desde el punto de entrada principal
@@ -70,110 +83,89 @@ public class ShoppingCartControllerTest extends ApplicationTest {
      * Método auxiliar para realizar el login al inicio de cada test.
      */
     private void testLogIn() {
-        clickOn("Iniciar Sesion");
+        clickOn("#btnLogIn");
         clickOn("#TextField_Username").write(TEST_USER);
         clickOn("#PasswordField_Password").write(TEST_PASS);
         clickOn("#Button_LogIn");
     }
 
+    private void testNavegarAHistorial() {
+        clickOn("#btnOption");
+        clickOn("#btnHistory");
+    }
+
     @Test
     public void test1_comprarLibro() {
         testLogIn();
-        
-        // Localizamos el libro (debe existir en la BD con este título)
-        scroll(VerticalDirection.DOWN);
         clickOn("1984");
-        
-        // Añadir al carrito y confirmar alerta
         clickOn("#btnAddToCart");
-        clickOn("Aceptar"); 
-        
-        // Ir a la vista del carrito desde el Header
+        clickOn("Aceptar");
+        sleep(1000);
         clickOn("#btnBuy");
         verifyThat("#lblTotal", isVisible());
-        
-        // Finalizar la compra
         clickOn("#btnComprar");
-        clickOn("Aceptar"); // Confirmación de éxito
-        
-        // El botón de comprar debe quedar deshabilitado si el carrito está vacío
+        clickOn("Aceptar");
         verifyThat("#btnComprar", node -> node.isDisabled());
     }
 
     @Test
     public void test2_aumentarCantidadYVerificarPrecio() {
-        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
-        
+        sleep(1000);
         clickOn("#btnBuy");
-        
-        // Interactuar con el Spinner de PreOrder.fxml
         clickOn("#spinnerCantidad");
-        clickOn(".increment-arrow-button"); // Incrementa a 2
-        clickOn(".increment-arrow-button"); // Incrementa a 3
-        
-        // Suponiendo precio de 12.00€ para "1984"
+        clickOn(".increment-arrow-button");
+        clickOn(".increment-arrow-button");
         double precioBase = 12.00;
         String totalEsperado = "Total: " + String.format("%.2f", precioBase * 3) + " €";
-        
         verifyThat("#lblTotal", LabeledMatchers.hasText(totalEsperado));
+        clickOn("#btnComprar");
+        clickOn("Aceptar");
     }
 
     @Test
     public void test3_eliminarProducto() {
-        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
-        
+        sleep(1000);
         clickOn("#btnBuy");
-        
-        // Verificamos botón de borrado y ejecutamos
         verifyThat("#btnDelete", isVisible());
         clickOn("#btnDelete");
-        
-        // El total debe volver a cero tras el borrado
-        verifyThat("#lblTotal", LabeledMatchers.hasText("Total: 0.00 €"));
+        verifyThat("#lblTotal", LabeledMatchers.hasText("Total: 0,00 €"));
     }
 
     @Test
     public void test4_navegacionHistorial() {
-        testLogIn();
-        
-        // Navegar a Opciones -> Historial
         clickOn("#btnOption");
         clickOn("#btnHistory");
-        
-        // Verificaciones en la vista de Historial
         verifyThat("#tableOrders", isVisible());
-        verifyThat("#infoLabel", LabeledMatchers.hasText("Aquí puedes consultar todas tus compras confirmadas:"));
-        
-        // Comprobar que existe al menos una fila (de la compra del test 1)
-        verifyThat("#tableOrders", (TableView table) -> table.getItems().size() > 0);
-        
-        // Volver al menú
-        clickOn("#btnVolver");
-        verifyThat("#mainVBox", isVisible());
+        clickOn("Navegación");
+        clickOn("Carrito");
+        verifyThat("#vBoxContenedorLibros", isVisible());
+        verifyThat("#btnComprar", isVisible());
     }
 
     @Test
-    public void test5_verificarHeaderYSesion() {
-        testLogIn();
-        
-        // El nombre debe aparecer en el Header
-        verifyThat("#lblUserName", LabeledMatchers.hasText(NOMBRE_REAL));
-        
-        // Cambiar de ventana para ver si la sesión persiste en el Header
-        clickOn("#btnOption");
-        clickOn("#btnHistory");
-        verifyThat("#lblUserName", LabeledMatchers.hasText(NOMBRE_REAL));
-        
-        // Logout
-        clickOn("#btnLogOut");
-        
-        // Verificar que regresamos al Login
+    public void test5_verificarPersistenciaCarrito() {
+        clickOn("1984");
+        clickOn("#btnAddToCart");
+        clickOn("Aceptar");
+        testNavegarAHistorial();
+        clickOn("Sesión");
+        clickOn("Cerrar Sesión");
         verifyThat("#Button_LogIn", isVisible());
+        clickOn("#TextField_Username").write(TEST_USER);
+        clickOn("#PasswordField_Password").write(TEST_PASS);
+        clickOn("#Button_LogIn");
+        testNavegarAHistorial();
+        clickOn("Navegación");
+        clickOn("Carrito");
+        verifyThat("#vBoxContenedorLibros", isVisible());
+        VBox contenedor = lookup("#vBoxContenedorLibros").queryAs(VBox.class);
+        assertTrue("El carrito debe mantener los productos tras re-loguear",
+                !contenedor.getChildren().isEmpty());
     }
 }

@@ -57,6 +57,7 @@ public class PreOrderController {
         this.shoppingCartController = cartController;
 
         lblTitle.setText(libro.getTitle());
+        lblTitle.setMaxWidth(100);
         lblPrice.setText(String.format("%.2f €", libro.getPrice()));
 
         // Esta es la parte que fallaba (Línea 57 aprox)
@@ -73,7 +74,7 @@ public class PreOrderController {
 
         if (libro.getCover() != null) {
             Image img = new Image(getClass().getResourceAsStream("/images/" + libro.getCover()));
-            UtilGeneric.getInstance().cutOutImage(imgBook, img, 80, 80);
+            UtilGeneric.getInstance().cutOutImage(imgBook, img, 130, 180);
         }
     }
 

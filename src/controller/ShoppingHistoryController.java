@@ -97,17 +97,12 @@ public class ShoppingHistoryController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         logger.logInfo("Accediendo a la ventana de Historial de Compras.");
-
-        // 1. Vinculamos columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("idOrder"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("purchaseDate"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
-
-        // 2. Configurar Menú Contextual (ARREGLADO: Falta de punto y coma y paréntesis)
         ContextMenu contextMenu = new ContextMenu();
         MenuItem itemDetalle = new MenuItem("Ver Detalle del Pedido");
         MenuItem itemJasper = new MenuItem("Exportar a JasperReport");
-
         itemDetalle.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -126,16 +121,19 @@ public class ShoppingHistoryController implements Initializable {
         });
 
         contextMenu.getItems().addAll(itemDetalle, itemJasper);
-        tableOrders.setContextMenu(contextMenu); // Corregido: punto y coma puesto
-
-        // 3. Cargar Datos del Usuario
+        tableOrders.setContextMenu(contextMenu);
         Profile userLogged = UserSession.getInstance().getUser();
         if (userLogged != null) {
             allShops = dao.getHistory(userLogged.getId());
+            logger.logInfo("Historial cargado correctamente para el usuario ID: " + userLogged.getId() + ". Pedidos encontrados: " + allShops.size());
             if (allShops != null) {
                 tableOrders.getItems().setAll(allShops);
                 logger.logInfo("Historial cargado: " + allShops.size() + " pedidos encontrados.");
+            } else {
+                logger.logInfo("El usuario ID: " + userLogged.getId() + " no tiene pedidos en su historial.");
             }
+        } else {
+            logger.logWarning("Se intentó cargar el historial sin una sesión de usuario activa.");
         }
     }
 
@@ -173,17 +171,14 @@ public class ShoppingHistoryController implements Initializable {
             logger.logInfo("Abriendo detalle del pedido ID: " + order.getIdOrder());
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OrderDetail.fxml"));
             Parent root = loader.load();
-
-            // Pasar los datos al controlador de la ventana nueva
             OrderDetailController controller = loader.getController();
             controller.setOrderData(order);
 
-            // Mostrar la ventana
             Stage stage = new Stage();
             stage.setTitle("Detalle Pedido " + order.getIdOrder());
             stage.setScene(new Scene(root));
             stage.show();
-
+            logger.logInfo("Ventana de detalles del pedido ID: " + order.getIdOrder() + " desplegada con éxito.");
         } catch (IOException ex) {
             logger.logSevere("Error al abrir la ventana de detalle de pedido", ex);
             ex.printStackTrace();
@@ -197,6 +192,7 @@ public class ShoppingHistoryController implements Initializable {
      */
     @FXML
     private void volver(ActionEvent event) {
+        logger.logInfo("El usuario regresa al menú principal desde el historial.");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
             Parent root = loader.load();
@@ -205,18 +201,21 @@ public class ShoppingHistoryController implements Initializable {
             stage.show();
 
         } catch (IOException e) {
+            logger.logSevere("Error al intentar regresar al MenuWindow.fxml", e);
             e.printStackTrace();
         }
     }
 
     /**
-     * Redirige al usuario desde la ventana de historial hacia la ventana del 
+     * Redirige al usuario desde la ventana de historial hacia la ventana del
      * carrito de compras.
      * <p>
-     * Este método carga el FXML del carrito, accede a su controlador para 
+     * Este método carga el FXML del carrito, accede a su controlador para
      * configurar el modo del encabezado (Header) y cambia la escena actual.
      * </p>
-     * * @param event El evento de acción disparado por el botón o elemento de menú.
+     *
+     * * @param event El evento de acción disparado por el botón o elemento de
+     * menú.
      */
     @FXML
     private void goToCart(ActionEvent event) {
@@ -257,7 +256,9 @@ public class ShoppingHistoryController implements Initializable {
             Parent root = FXMLLoader.load(getClass().getResource("/view/LogInWindow.fxml"));
             Stage stage = (Stage) tableOrders.getScene().getWindow();
             stage.setScene(new Scene(root));
+            logger.logInfo("Sesión cerrada y redirección a Login completada.");
         } catch (IOException e) {
+            logger.logSevere("Fallo en la redirección a Login tras cerrar sesión.", e);
             e.printStackTrace();
         }
     }
@@ -272,6 +273,7 @@ public class ShoppingHistoryController implements Initializable {
     private void handleInformeTecnico(ActionEvent event) {
         Connection con = null;
         try {
+            logger.logInfo("Iniciando generación de JasperReport técnico desde historial.");
             // 1. Obtener los datos de conexión desde tu configuración de Hibernate o manual
             // Nota: JasperReports necesita una conexión JDBC estándar
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=Europe/Madrid";
@@ -327,6 +329,7 @@ public class ShoppingHistoryController implements Initializable {
     @FXML
     private void handleHelpAction(ActionEvent event) {
         try {
+            logger.logInfo("El usuario ha solicitado abrir el Manual de Usuario.");
             // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
             String resourcePath = "/documents/Manual_Usuario.pdf";
 
@@ -334,6 +337,7 @@ public class ShoppingHistoryController implements Initializable {
             InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
 
             if (pdfStream == null) {
+                logger.logSevere("No se pudo localizar el manual PDF en la ruta: " + resourcePath, null);
                 showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
                 return;
             }
@@ -348,8 +352,9 @@ public class ShoppingHistoryController implements Initializable {
             } else {
                 showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
             }
-
+            logger.logInfo("Manual de usuario abierto en el visor del sistema.");
         } catch (Exception e) {
+            logger.logSevere("Error al intentar abrir el archivo PDF de ayuda.", e);
             e.printStackTrace();
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
         }

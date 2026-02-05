@@ -74,16 +74,9 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     @After
     public void tearDown() throws Exception {
         // Esto cierra la ventana de la aplicación después de cada test
-        FxToolkit.hideStage();
+        FxToolkit.cleanupStages();
         release(new KeyCode[]{}); // Libera teclas por si acaso
         release(new MouseButton[]{}); // Libera el ratón
-    }
-
-    @Before
-    public void setup() throws Exception {
-        // Esto vuelve a lanzar la aplicación antes de cada test
-        FxToolkit.registerPrimaryStage();
-        FxToolkit.setupApplication(Main.class);
     }
 
     @Override
@@ -92,7 +85,7 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void verificarHistorialVacio() {
+    public void test1_verificarHistorialVacio() {
         testLogIn();
         testNavegarAHistorial();
         verifyThat("#tableOrders", isVisible());
@@ -103,23 +96,33 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void verificarHistorilaLleno() {
+    public void test2_verificarHistorilaLleno() {
+        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
         String tituloLibro = "1984";
-        scroll(VerticalDirection.DOWN);
         clickOn(tituloLibro);
-        WaitForAsyncUtils.waitForFxEvents();
+        sleep(1000);
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
         sleep(1000);
         clickOn("#btnBuy");
+        sleep(1000);
         clickOn("#btnComprar");
         clickOn("Aceptar");
         testNavegarAHistorial();
-        /*tabla = lookup("#tableOrders").queryAs(TableView.class);
-        assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());*/
+        tabla = lookup("#tableOrders").queryAs(TableView.class);
+        assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());
     }
 
-   
+    @Test
+    public void test3_verificarDetallesPedidos() {
+        testNavegarAHistorial();
+        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
+        assertTrue("Debe haber pedidos para probar el detalle", !tabla.getItems().isEmpty());
+        doubleClickOn(".table-row-cell");
+        verifyThat("#tableItems", isVisible());
+        verifyThat("#lblTitulo", isVisible());
+    }
+
     private void testLogIn() {
         // Al empezar, el usuario ya existe gracias al @BeforeClass
         clickOn("#btnLogIn");

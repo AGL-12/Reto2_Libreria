@@ -5,80 +5,90 @@ import java.util.Objects;
 import javax.persistence.Embeddable;
 
 /**
- * Clase que representa la clave primaria compuesta para la entidad
- * {@link Commentate}.
- * <p>
- * En el modelo relacional, esta clase permite mapear la relación de muchos a
- * muchos entre Usuarios y Libros, asegurando que la combinación de
- * {@code userCode} e {@code isbnBook} sea única.
- * </p>
- * * Al ser una clase {@code @Embeddable}, Hibernate la utiliza para gestionar
- * la persistencia de la identidad de cada comentario. Implementa
- * {@link Serializable} como requisito de JPA para claves compuestas.
+ * Clase que representa la clave primaria compuesta para la entidad Commentate.
+ * Esta clase es de tipo {@link Embeddable}, lo que permite que sus atributos
+ * sean integrados como parte de otra entidad en la base de datos. * Implementa
+ * {@link Serializable} para permitir la persistencia y el manejo de la clave
+ * por parte de Hibernate/JPA.
  *
- * * @author mikel
+ * * @author alex
  * @version 1.0
  */
 @Embeddable
 public class CommentateId implements Serializable {
 
     /**
-     * Identificador único del usuario que realiza el comentario. Corresponde a
-     * la clave primaria de la entidad Profile/User.
+     * Código identificador del usuario. Coincide con la clave primaria (PK) de
+     * la entidad User/Profile.
      */
-    private int userCode; // Coincide con el PK de User/Profile
+    private int userCode;
+
     /**
-     * Identificador ISBN del libro sobre el que se realiza el comentario.
-     * Corresponde a la clave primaria de la entidad Book.
+     * Número de ISBN del libro comentado.
      */
     private long isbnBook;
 
     /**
-     * Constructor por defecto requerido por Hibernate para la instanciación
-     * mediante reflexión.
+     * Constructor por defecto (vacío). Requerido por JPA/Hibernate para la
+     * instanciación de la clave.
      */
-
     public CommentateId() {
     }
 
     /**
-     * Constructor completo para inicializar la clave compuesta.
+     * Constructor parametrizado para inicializar la clave compuesta.
      *
-     * * @param userCode Código único del usuario.
-     * @param isbnBook ISBN del libro asociado.
+     * * @param userCode Identificador único del usuario.
+     * @param isbnBook Identificador ISBN único del libro.
      */
     public CommentateId(int userCode, long isbnBook) {
         this.userCode = userCode;
         this.isbnBook = isbnBook;
     }
 
-    // Getters y Setters
+    /**
+     * Obtiene el código del usuario asociado a la clave.
+     *
+     * @return El código del usuario.
+     */
     public int getUserCode() {
         return userCode;
     }
 
+    /**
+     * Establece el código del usuario asociado a la clave.
+     *
+     * @param userCode El nuevo código del usuario.
+     */
     public void setUserCode(int userCode) {
         this.userCode = userCode;
     }
 
+    /**
+     * Obtiene el ISBN del libro asociado a la clave.
+     *
+     * @return El número de ISBN del libro.
+     */
     public long getIsbnBook() {
         return isbnBook;
     }
 
+    /**
+     * Establece el ISBN del libro asociado a la clave.
+     *
+     * @param isbnBook El nuevo número de ISBN del libro.
+     */
     public void setIsbnBook(long isbnBook) {
         this.isbnBook = isbnBook;
     }
 
     /**
-     * Compara este objeto con otro para verificar su igualdad.
-     * <p>
-     * Fundamental para que JPA pueda identificar de forma única la entidad en
-     * la caché de primer nivel y en operaciones de búsqueda.
-     * </p>
+     * Compara esta instancia con otro objeto para verificar su igualdad. Es
+     * obligatorio sobrescribir este método en claves compuestas de JPA.
      *
      * * @param o Objeto a comparar.
-     * @return {@code true} si ambos identificadores coinciden; {@code false} en
-     * caso contrario.
+     * @return true si ambos objetos tienen el mismo userCode e isbnBook; false
+     * en caso contrario.
      */
     @Override
     public boolean equals(Object o) {
@@ -93,9 +103,11 @@ public class CommentateId implements Serializable {
     }
 
     /**
-     * Genera un código hash basado en los atributos de la clave compuesta.
+     * Genera un valor hash basado en los atributos de la clave compuesta. Es
+     * obligatorio sobrescribir este método en claves compuestas de JPA para el
+     * correcto funcionamiento de colecciones y caché de persistencia.
      *
-     * * @return Valor entero hash representativo de la identidad del objeto.
+     * @return Valor hash de la instancia.
      */
     @Override
     public int hashCode() {
