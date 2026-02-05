@@ -75,20 +75,9 @@ public class HeaderController {
             Stage stage = (Stage) rootHeader.getScene().getWindow();
             stage.setScene(new Scene(root));
 
-            // 1. Calculamos cuánto mide la ventana nueva
             stage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
             stage.centerOnScreen();
 
-            /* * 2. OPCIÓN B (MATEMÁTICA): Centrar relativa a la ventana anterior 
-             * (Descomenta esto si quieres que salga encima de la vieja, no en medio de la pantalla)
-             *
-             * double centerX = oldStage.getX() + (oldStage.getWidth() / 2);
-             * double centerY = oldStage.getY() + (oldStage.getHeight() / 2);
-             * newStage.setX(centerX - (newStage.getWidth() / 2));
-             * newStage.setY(centerY - (newStage.getHeight() / 2));
-             */
             stage.show();
         } catch (IOException ex) {
             Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
