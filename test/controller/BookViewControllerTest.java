@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.TilePane;
+import javafx.scene.layout.VBox; // Importado VBox
 import javafx.stage.Stage;
 import main.Main;
 import model.Admin;
@@ -67,12 +68,11 @@ public class BookViewControllerTest extends ApplicationTest {
         release(KeyCode.ALT, KeyCode.SHIFT, KeyCode.CONTROL);
         UserSession.getInstance().cleanUserSession();
         
-        // 2. Limpiar usuario Y SUS DATOS (Comentarios, Carrito) al terminar
+        // Limpiar usuario Y SUS DATOS (Comentarios, Carrito) al terminar
         eliminarUsuarioDePrueba();
         
         FxToolkit.hideStage();
     }
-
 
     @Test
     public void testMasterFlow() {
@@ -84,6 +84,7 @@ public class BookViewControllerTest extends ApplicationTest {
         verifyThat("#titleBook", isVisible());
         verificarImagenSegura();
 
+        // --- 3. PROBAR CARRITO ---
         if (lookup("#btnAddToCart").tryQuery().isPresent()) {
             Button btn = lookup("#btnAddToCart").queryButton();
             if (btn.isVisible() && !btn.isDisabled()) {
@@ -95,6 +96,7 @@ public class BookViewControllerTest extends ApplicationTest {
             }
         }
 
+        // --- 4. PROBAR COMENTARIOS ---
         if (lookup("#btnAddComment").tryQuery().isPresent()) {
             clickOn("#btnAddComment");
             sleep(500);
@@ -104,6 +106,10 @@ public class BookViewControllerTest extends ApplicationTest {
                 sleep(800);
                 cerrarAlertas();
                 System.out.println("Comentario creado (será borrado al finalizar).");
+                
+                // --- NUEVA VALIDACIÓN: Verificar que el comentario existe visualmente ---
+                verificarExistenciaComentarios();
+                // -----------------------------------------------------------------------
             }
         }
 
@@ -150,7 +156,6 @@ public class BookViewControllerTest extends ApplicationTest {
         realizarLogoutDesdeLibro();
         System.out.println("=== FIN TEST MAESTRO (ÉXITO) ===");
     }
-
 
     private void crearUsuarioDePrueba() {
         Session session = HibernateUtil.getSessionFactory().openSession();
@@ -217,7 +222,6 @@ public class BookViewControllerTest extends ApplicationTest {
             session.close();
         }
     }
-
 
     private void asegurarPantallaLogin() {
         if (lookup("#TextField_Username").tryQuery().isPresent()) return;
@@ -321,5 +325,22 @@ public class BookViewControllerTest extends ApplicationTest {
                 sleep(300);
             }
         } catch (Exception e) {}
+    }
+
+    private void verificarExistenciaComentarios() {
+        sleep(500); 
+
+        verifyThat("#commentsContainer", isVisible());
+
+        if (lookup("#commentsContainer").tryQuery().isPresent()) {
+            VBox container = lookup("#commentsContainer").queryAs(VBox.class);
+            
+            int cantidad = container.getChildren().size();
+            System.out.println(">> Validación de Comentarios: Se encontraron " + cantidad + " comentarios.");
+
+            Assert.assertTrue("Fallo: El libro debería tener comentarios, pero la lista está vacía.", cantidad > 0);
+        } else {
+            Assert.fail("No se encontró el contenedor #commentsContainer en la interfaz.");
+        }
     }
 }

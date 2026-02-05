@@ -8,7 +8,6 @@ package controller;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +27,8 @@ import model.Commentate;
 import model.DBImplementation;
 import model.Profile;
 import model.UserSession;
-import java.util.logging.Logger;
+import util.LogInfo;
+import util.UtilGeneric;
 
 /**
  * Controlador para la vista individual de un comentario (CommentView.fxml).
@@ -41,8 +41,7 @@ import java.util.logging.Logger;
  */
 public class CommentViewController implements Initializable {
 
-    private static final Logger LOGGER = Logger.getLogger(CommentViewController.class.getName());
-
+    private BookViewController parentController;
     @FXML
     private Label lblUsuario;
     @FXML
@@ -61,6 +60,10 @@ public class CommentViewController implements Initializable {
     private Commentate currentComment;
     private final ClassDAO dao = new DBImplementation();
     private boolean isEditing = false;
+
+    public void setParent(BookViewController parent) {
+        this.parentController = parent;
+    }
 
     /**
      * Inicializa la clase controladora. Se ejecuta automáticamente al cargar el
@@ -117,7 +120,7 @@ public class CommentViewController implements Initializable {
             txtComment.setText(comment.getCommentary());
             txtComment.getStyleClass().remove("comment-edit-mode");
         } else {
-            LOGGER.severe("ERROR CRÍTICO: txtComment es NULL en el controlador.");
+            LogInfo.getInstance().logWarning("ERROR CRÍTICO: txtComment es NULL en el controlador.");
         }
 
         if (starRateController != null) {
@@ -179,7 +182,7 @@ public class CommentViewController implements Initializable {
      * si queremos activar la edición programáticamente.
      */
     public void activeEditable() {
-        LOGGER.info("Activando modo edición manualmente (activeEditable).");
+        LogInfo.getInstance().logInfo("Activando modo edición manualmente (activeEditable).");
         // Mostramos los botones
         buttonBox.setVisible(true);
         buttonBox.setManaged(true);
@@ -201,7 +204,7 @@ public class CommentViewController implements Initializable {
     private void handleEdit(ActionEvent event) {
         if (!isEditing) {
             // Modo para empezar a editar
-            LOGGER.info("Usuario inició edición del comentario.");
+            LogInfo.getInstance().logInfo("Usuario inició edición del comentario.");
             isEditing = true;
 
             // Habilitamos la escritura para que se pueda editar
@@ -221,11 +224,11 @@ public class CommentViewController implements Initializable {
 
         } else {
             // Guardamos cambios
-            LOGGER.info("Intentando guardar cambios del comentario...");
+            LogInfo.getInstance().logInfo("Intentando guardar cambios del comentario...");
             String nuevoTexto = txtComment.getText();
 
             if (nuevoTexto.trim().isEmpty()) {
-                showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING);
+                UtilGeneric.getInstance().showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING,"Error");
                 return;
             }
             new Thread(new Runnable() {
@@ -240,8 +243,8 @@ public class CommentViewController implements Initializable {
                         Platform.runLater(() -> finalizarEdicion());
 
                     } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Error al guardar el comentario en BD", e);
-                        Platform.runLater(() -> showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR));
+                        LogInfo.getInstance().logSevere("Error al guardar el comentario en BD", e);
+                        Platform.runLater(() -> UtilGeneric.getInstance().showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR, "Error"));
                     }
                 }
             }).start();
@@ -259,13 +262,12 @@ public class CommentViewController implements Initializable {
     private void handleDelete(ActionEvent event) {
         if (isEditing) {
             // Modo para cancelar la edición
-            LOGGER.info("Edición cancelada por el usuario.");
+            LogInfo.getInstance().logInfo("Edición cancelada por el usuario.");
             txtComment.setText(currentComment.getCommentary());
             finalizarEdicion();
 
         } else {
-            // Modo para borrar comentario
-            LOGGER.info("Solicitando confirmación para borrar comentario...");
+            // Lógica de borrar comentario
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Borrar");
             alert.setHeaderText("¿Seguro que quieres borrarlo?");
@@ -274,17 +276,27 @@ public class CommentViewController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 try {
+                    // 1. Borrar de la base de datos
                     dao.deleteComment(currentComment);
 
-                    // Borrar visualmente
-                    if (buttonBox != null && buttonBox.getParent() != null) {
-                        Node tarjeta = buttonBox.getParent();
-                        tarjeta.setVisible(false);
-                        tarjeta.setManaged(false);
+                    // 2. Borrar visualmente (Método seguro)
+                    Node source = (Node) event.getSource();
+                    Node fichaComentario = source.getParent().getParent();
+                    if (fichaComentario != null && fichaComentario.getParent() != null) {
+                        ((javafx.scene.layout.Pane) fichaComentario.getParent()).getChildren().remove(fichaComentario);
                     }
+
+                    // 3. AVISAR AL PADRE (BookViewController)
+                    if (parentController != null) {
+                        System.out.println("Enviando aviso al padre para habilitar botón...");
+                        parentController.onCommentDeleted();
+                    } else {
+                        System.err.println("Error: parentController es NULL. No se puede avisar.");
+                    }
+
                 } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Error crítico al borrar comentario", e);
-                    showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR);
+                    LogInfo.getInstance().logSevere("Error crítico al borrar comentario", e);
+                    UtilGeneric.getInstance().showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR, "Error");
                 }
             }
         }
@@ -300,18 +312,6 @@ public class CommentViewController implements Initializable {
         txtComment.getStyleClass().remove("comment-edit-mode");
         btnEdit.setText("Editar"); // O pon tu icono "✏️"
         btnDelete.setText("Borrar"); // O pon tu icono "🗑️"
-    }
-
-    /**
-     * Muestra una alerta simple al usuario.
-     *
-     * * @param message El mensaje a mostrar.
-     * @param type El tipo de alerta (ERROR, WARNING, INFORMATION).
-     */
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setContentText(message);
-        alert.show();
     }
 
 }

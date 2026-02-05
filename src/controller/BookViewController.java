@@ -70,7 +70,6 @@ import util.UtilGeneric;
 public class BookViewController {
 
     private static final Logger LOGGER = Logger.getLogger(BookViewController.class.getName());
-
     @FXML
     private ImageView coverBook;
     @FXML
@@ -185,6 +184,7 @@ public class BookViewController {
 
                 CommentViewController con = fxmlLoader.getController();
                 con.setData(coment);
+                con.setParent(this);
 
                 commentsContainer.getChildren().add(commentBox);
             }
@@ -367,6 +367,7 @@ public class BookViewController {
             Parent tarjeta = loader.load();
             CommentViewController controller = loader.getController();
             controller.setData(newComment);
+            controller.setParent(this);
 
             // Añadir arriba del todo
             commentsContainer.getChildren().add(0, tarjeta);
@@ -556,6 +557,26 @@ public class BookViewController {
                     globalMenu.hide();
                 }
             });
+        }
+    }
+
+    /**
+     * Método público que llamará el hijo (comentario) cuando se borre. Vuelve a
+     * mostrar y habilitar el botón de escribir opinión.
+     */
+    public void onCommentDeleted() {
+        LOGGER.info("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
+
+        if (btnAddComment != null) {
+            // 1. Lo hacemos visible de nuevo
+            btnAddComment.setVisible(true);
+            btnAddComment.setManaged(true);
+
+            // 2. IMPORTANTE: Lo rehabilitamos (estaba en setDisable(true) tras publicar)
+            btnAddComment.setDisable(false);
+
+            // 3. Opcional: Solicitar foco para que el usuario vea que ha vuelto
+            btnAddComment.requestFocus();
         }
     }
 }

@@ -23,55 +23,78 @@ import util.HibernateUtil;
 import util.LogInfo;
 import javafx.scene.image.Image;
 
+/**
+ * Clase principal de la aplicación Book&Bugs.
+ * <p>
+ * Se encarga de la inicialización del motor de persistencia (Hibernate), la
+ * precarga de datos de prueba en la base de datos y el lanzamiento de la
+ * interfaz gráfica de usuario (JavaFX).
+ * </p>
+ *
+ * @version 1.0
+ */
 public class Main extends Application {
 
     /**
-     * Starts the JavaFX application by loading the login window.
+     * Inicia la aplicación JavaFX cargando la ventana principal de la librería.
+     * Configura el título, el icono de la ventana y el modo inicial del header.
      *
-     * @param stage the primary stage for this application
-     * @throws Exception if the FXML file cannot be loaded
+     * @param stage El escenario principal (ventana) proporcionado por JavaFX.
+     * @throws Exception Si ocurre un error al cargar el archivo FXML de la
+     * vista.
      */
     @Override
     public void start(Stage stage) throws Exception {
+        LogInfo.getInstance().logInfo("Cargando vista principal: MainBookStore.fxml");
         FXMLLoader fxmlloader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
         Parent root = fxmlloader.load();
         MainBookStoreController main = fxmlloader.getController();
         main.headerController.setMode(UserSession.getInstance().getUser(), null);
         Scene scene = new Scene(root);
         stage.setTitle("Book&Bugs");
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"))); 
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
         stage.setScene(scene);
         stage.show();
+        LogInfo.getInstance().logInfo("Ventana principal desplegada correctamente.");
     }
 
     /**
-     * Main method to launch the JavaFX application.
+     * Punto de entrada principal de la JVM. Configura los proveedores de log,
+     * inicializa Hibernate y lanza la aplicación.
      *
-     * @param args command-line arguments (not used)
+     * @param args Argumentos de línea de comandos (no utilizados).
      */
     public static void main(String[] args) {
         System.setProperty("org.jboss.logging.provider", "jdk");
         System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
-
-        // --- PRUEBA DE CONEXIÓN ---
         LogInfo.getInstance().logInfo("Intentando conectar con Hibernate...");
+        try {
+            // Inicializar SessionFactory (Hibernate lee cfg.xml y mapea entidades)
+            HibernateUtil.getSessionFactory();
+            LogInfo.getInstance().logInfo("¡Conexión establecida y tablas verificadas!");
+            // Rellenar la base de datos si es la primera vez que se ejecuta
+            preloadData();
+            // Lanzar JavaFX
+            launch(args);
 
-        // Al llamar a getSessionFactory, Hibernate leerá el XML y creará las tablas
-        HibernateUtil.getSessionFactory();
-
-        LogInfo.getInstance().logInfo("¡Conexión establecida y tablas creadas (si no existían)!");
-
-        // PRECARGAR DATOS (Si la BD está vacía)
-        preloadData();
-        // Una vez comprobado, ya puedes lanzar la app
-        launch(args);
-
-        // Al cerrar la app
-        HibernateUtil.shutdown();
+        } catch (Exception e) {
+            LogInfo.getInstance().logSevere("Fallo crítico en el arranque de la aplicación", e);
+        } finally {
+            // Asegurar el cierre de conexiones al terminar
+            LogInfo.getInstance().logInfo("Cerrando factoría de sesiones de Hibernate...");
+            HibernateUtil.shutdown();
+            LogInfo.getInstance().logInfo("=== APLICACIÓN FINALIZADA ===");
+        }
     }
 
     /**
-     * Método estático para rellenar la BD con datos de prueba
+     * Comprueba si la base de datos contiene información y, en caso negativo,
+     * inserta un conjunto de datos iniciales (Admin, Usuarios, Autores y
+     * Libros).
+     * <p>
+     * Utiliza una transacción de Hibernate para asegurar la integridad de la
+     * precarga.
+     * </p>
      */
     private static void preloadData() {
         Session session = HibernateUtil.getSessionFactory().openSession();
