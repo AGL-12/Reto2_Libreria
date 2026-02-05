@@ -22,7 +22,7 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public Profile logIn(String username, String password) throws MyFormException{
+    public Profile logIn(String username, String password) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         Profile userFound = null;
@@ -33,16 +33,20 @@ public class DBImplementation implements ClassDAO {
                     .setParameter("user", username)
                     .setParameter("pass", password)
                     .uniqueResult();
-            new SessionHolderThread(session,tx).start();
+            new SessionHolderThread(session, tx).start();
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
                 throw new MyFormException("El servidor está ocupado (Timeout).");
             }
-            
+
             LogInfo.getInstance().logSevere("Error en login DAO", e);
             throw new MyFormException("Error en el inicio de sesión.");
         }
@@ -56,24 +60,25 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public void signUp(Profile profile) throws MyFormException{
+    public void signUp(Profile profile) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
             session.save(profile);
-            new SessionHolderThread(session,tx).start();
-        } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            tx.commit(); // CONFIRMA los datos primero para que el Admin los vea
 
-            if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
-                throw new MyFormException("El servidor está ocupado (Timeout).");
+            // Ahora que el usuario existe en BD, el hilo retiene la conexión 30s
+            new SessionHolderThread(session, tx);
+
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
             }
-            
-            LogInfo.getInstance().logSevere("Error en login DAO", e);
-            throw new MyFormException("Error en el inicio de sesión.");
+            if (session.isOpen()) {
+                session.close();
+            }
+            throw e;
         }
     }
 
@@ -88,21 +93,29 @@ public class DBImplementation implements ClassDAO {
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            // Usamos merge por si el objeto viene desconectado de la sesión anterior
-            session.delete(session.merge(profile));
 
-            tx.commit();
+            // Usamos get() en lugar de load() para verificar si existe realmente
+            Profile persistentInstance = session.get(Profile.class, profile.getUserCode());
+
+            if (persistentInstance != null) {
+                session.delete(persistentInstance);
+                tx.commit();
+                // Solo lanzamos el hilo si el borrado fue exitoso
+                new SessionHolderThread(session, tx);
+            } else {
+                // Si no existe, simplemente hacemos commit de la transacción vacía y cerramos
+                tx.commit();
+                session.close();
+            }
+
         } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
-            e.printStackTrace();
-            // Si falla, lanzamos el error para que salga la alerta en la ventana
-            throw new RuntimeException("Error al eliminar usuario: " + e.getMessage());
-        } finally {
             if (session.isOpen()) {
                 session.close();
             }
+            throw new RuntimeException("Error al eliminar usuario: " + e.getMessage(), e);
         }
     }
 
@@ -443,22 +456,26 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException para el controlador
      */
     @Override
-    public void updateComment(Commentate comment) throws MyFormException{
+    public void updateComment(Commentate comment) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
             session.update(comment);
-            new SessionHolderThread(session,tx).start();
+            new SessionHolderThread(session, tx).start();
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
                 throw new MyFormException("El servidor está ocupado (Timeout).");
             }
-            
+
             LogInfo.getInstance().logSevere("Error en login DAO", e);
             throw new MyFormException("Error en el inicio de sesión.");
         }
@@ -737,26 +754,44 @@ public class DBImplementation implements ClassDAO {
      * @param profile perfil que se va a modificar
      */
     @Override
-    public void modificarUser(Profile profile) {
-        Session session = HibernateUtil.getSessionFactory().openSession(); //
-        Transaction tx = null;
-        try {
-            tx = session.beginTransaction();
-            // merge actualiza el registro en la base de datos con el estado del objeto profile
-            session.merge(profile);
+public void modificarUser(Profile profile) {
+    Session session = HibernateUtil.getSessionFactory().openSession();
+    Transaction tx = null;
+    try {
+        tx = session.beginTransaction();
 
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
+        // IMPORTANTE: Si el perfil es un User, Hibernate gestiona sus listas.
+        // Al usar merge, Hibernate intentará sincronizar el estado.
+        // Si el objeto 'profile' que viene tiene una lista nueva (null o new ArrayList), dará el error.
+        
+        if (profile instanceof User) {
+            // Cargamos el usuario actual de la BD para mantener su colección original
+            User currentUser = session.get(User.class, profile.getUserCode());
+            if (currentUser != null) {
+                // Actualizamos solo los campos básicos, manteniendo la referencia de purchaseList
+                currentUser.setName(profile.getName());
+                currentUser.setSurname(profile.getSurname());
+                currentUser.setTelephone(profile.getTelephone());
+                currentUser.setPassword(profile.getPassword());
+                currentUser.setEmail(profile.getEmail());
+                // Los campos específicos de User
+                currentUser.setCardNumber(((User) profile).getCardNumber());
+                currentUser.setGender(((User) profile).getGender());
+                
+                session.update(currentUser);
             }
-            e.printStackTrace();
-            throw new RuntimeException("Error al actualizar el perfil: " + e.getMessage());
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+        } else {
+            session.merge(profile);
         }
+
+        tx.commit(); 
+        
+    } catch (Exception e) {
+        if (tx != null && tx.isActive()) tx.rollback();
+        if (session.isOpen()) session.close();
+        throw new RuntimeException("Error al actualizar: " + e.getMessage());
     }
+}
 
     /**
      * metodo para eliminar un libro del contenido de un pedido sin comprar

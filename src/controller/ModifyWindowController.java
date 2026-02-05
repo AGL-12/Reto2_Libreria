@@ -1,3 +1,5 @@
+package controller;
+
 
 import java.awt.Desktop;
 import java.io.File;
@@ -134,13 +136,7 @@ public class ModifyWindowController implements Initializable {
         TextField_Telephone.setText(p.getTelephone());
     }
 
-    /**
-     * Valida y guarda los cambios realizados en el perfil en la base de datos.
-     * Verifica que las contraseñas coincidan antes de persistir los datos.
-     *
-     * * @param event El evento de acción disparado por el botón de guardar.
-     */
-    @FXML
+        @FXML
     private void save(ActionEvent event) {
         if (!TextField_NewPass.getText().equals(TextField_ConfirmPass.getText())) {
             LogInfo.getInstance().logWarning("Intento de cambio de contraseña fallido: las contraseñas no coinciden.");
