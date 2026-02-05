@@ -1,11 +1,11 @@
 package controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Book;
 import model.UserSession;
+import util.UtilGeneric;
 
 public class BookItemController {
 
@@ -64,8 +65,6 @@ public class BookItemController {
             
             // Crear la ventana NUEVA
             Stage newStage = new Stage();
-            
-
             newStage.setTitle("Book&Bugs - " + book.getTitle()); 
             newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
 
@@ -81,44 +80,6 @@ public class BookItemController {
         } catch (IOException ex) {
             Logger.getLogger(BookItemController.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    /**
-     * 1. Calcula cuánto hay que escalar la imagen para llenar el hueco. 2.
-     * Calcula el centro de la imagen (Viewport). 3. Aplica el recorte.
-     */
-    private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
-        // Establecemos el tamaño final que tendrá el ImageView
-        imageView.setFitWidth(targetWidth);
-        imageView.setFitHeight(targetHeight);
-
-        // Algoritmo "Center Crop"
-        double originalWidth = image.getWidth();
-        double originalHeight = image.getHeight();
-
-        double scaleX = targetWidth / originalWidth;
-        double scaleY = targetHeight / originalHeight;
-
-        // Elegimos el factor de escala mayor para asegurar que llenamos todo el hueco
-        double scale = Math.max(scaleX, scaleY);
-
-        // Calculamos el tamaño que tendría la imagen escalada
-        double scaledWidth = originalWidth * scale;
-        double scaledHeight = originalHeight * scale;
-
-        // Calculamos el Viewport (la ventana de recorte sobre la imagen original)
-        double viewportWidth = targetWidth / scale;
-        double viewportHeight = targetHeight / scale;
-
-        // Centramos el recorte (x, y)
-        double viewportX = (originalWidth - viewportWidth) / 2;
-        double viewportY = (originalHeight - viewportHeight) / 2;
-
-        // Aplicamos la imagen y el recorte
-        imageView.setImage(image);
-        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
-        imageView.setSmooth(true); // Suavizado para mejor calidad
-        imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
 
     private void setComponents() {
@@ -148,7 +109,7 @@ public class BookItemController {
         }
 
         // 2. Intentar cargar la imagen del libro
-        java.io.InputStream imageStream = getClass().getResourceAsStream("/images/" + imageName);
+        InputStream imageStream = getClass().getResourceAsStream("/images/" + imageName);
 
         // 3. Si no existe, cargar una imagen de respaldo QUE SEPAS QUE EXISTE (ej. el logo)
         if (imageStream == null) {
@@ -160,14 +121,14 @@ public class BookItemController {
         // 4. Cargar la imagen solo si tenemos un stream válido
         if (imageStream != null) {
             Image originalImage = new Image(imageStream);
-            cutOutImage(cover, originalImage, 140, 210);
+            UtilGeneric.getInstance().cutOutImage(cover, originalImage, 140, 210);
         }
 
         // 5. Cargar imagen SoldOut con seguridad
-        java.io.InputStream soldOutStream = getClass().getResourceAsStream("/images/soldOut.png");
+        InputStream soldOutStream = getClass().getResourceAsStream("/images/soldOut.png");
         if (soldOutStream != null) {
             Image soldOugImage = new Image(soldOutStream);
-            cutOutImage(soldOut, soldOugImage, 140, 210);
+            UtilGeneric.getInstance().cutOutImage(soldOut, soldOugImage, 140, 210);
         } else {
             System.out.println("⚠️ No se encontró la imagen soldOut.png");
         }

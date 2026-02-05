@@ -38,12 +38,8 @@ public class Main extends Application {
         MainBookStoreController main = fxmlloader.getController();
         main.headerController.setMode(UserSession.getInstance().getUser(), null);
         Scene scene = new Scene(root);
-        stage.setTitle("Libreria Book&Bugs");
         stage.setTitle("Book&Bugs");
-        
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"))); 
-        // 
-       // stage.setTitle("Libreria che");
         stage.setScene(scene);
         stage.show();
     }

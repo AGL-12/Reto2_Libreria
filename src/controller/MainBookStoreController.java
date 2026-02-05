@@ -1,44 +1,26 @@
 package controller;
 
-import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.PauseTransition;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Book;
 import model.ClassDAO;
 import model.DBImplementation;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 import util.UtilGeneric;
 
@@ -54,14 +36,6 @@ public class MainBookStoreController {
     private TilePane tileBooks;
     @FXML
     public HeaderController headerController;
-
-    private List<Book> allBooks = new ArrayList<>();
-    private final ClassDAO dao = new DBImplementation();
-
-    // El temporizador para el delay
-    private PauseTransition pause;
-
-    private ContextMenu globalMenu;
     @FXML
     private Menu menuArchivo;
     @FXML
@@ -76,6 +50,12 @@ public class MainBookStoreController {
     private Menu menuAyuda;
     @FXML
     private MenuItem iAcercaDe;
+
+    private List<Book> allBooks = new ArrayList<>();
+    private final ClassDAO dao = new DBImplementation();
+    // El temporizador para el delay
+    private PauseTransition pause;
+    private ContextMenu globalMenu;
 
     public void initialize() {
         initContexMenu();
@@ -231,44 +211,9 @@ public class MainBookStoreController {
         UtilGeneric.getInstance().aboutAction();
     }
 
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     @FXML
     private void handleReportAction(ActionEvent event) {
-        // --- HEMOS BORRADO EL BLOQUE IF DE SEGURIDAD ---
-        // Ahora entra cualquier usuario (Admin o Normal)
-        try {
-            // CAMBIO: Ahora apuntamos al Manual de Usuario en vez de al Informe de Stock
-            String resourcePath = "/documents/Manual_Usuario.pdf";
-
-            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
-
-            if (pdfStream == null) {
-                showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
-                return;
-            }
-
-            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
-            tempFile.deleteOnExit();
-
-            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(tempFile);
-            } else {
-                showAlert("Error: No se puede abrir el visor de PDF.", Alert.AlertType.ERROR);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
+        UtilGeneric.getInstance().helpAction();
     }
 
     private void initRenderBooks() {

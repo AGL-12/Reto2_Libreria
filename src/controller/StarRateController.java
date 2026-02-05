@@ -5,6 +5,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import util.LogInfo;
 
 public class StarRateController {
 
@@ -67,8 +68,8 @@ public class StarRateController {
 
         // 2. Fijamos el gráfico
         updateStarsView(this.currentRate / 5.0);
-
-        System.out.println("Nota guardada: " + this.currentRate);
+        
+        LogInfo.getInstance().logInfo("Nota guardada: " + this.currentRate);
     }
 
     @FXML

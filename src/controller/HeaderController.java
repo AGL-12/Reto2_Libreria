@@ -6,13 +6,12 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -59,179 +58,129 @@ public class HeaderController {
 
     @FXML
     public void clearSearch() {
-        txtSearch.setText(""); // Borra texto
-        txtSearch.requestFocus(); // Mantiene el foco para seguir escribiendo
+        txtSearch.setText("");
+        txtSearch.requestFocus();
     }
 
     @FXML
     private void goToBuy(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
-            Parent root = fxmlLoader.load();
-
-            ShoppingCartController shopCont = fxmlLoader.getController();
-            shopCont.headerController.setMode(UserSession.getInstance().getUser(), "buying");
-
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
-            stage.setScene(new Scene(root));
-
-            stage.sizeToScene();
-            stage.centerOnScreen();
-
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigate(event, "/view/ShoppingCart.fxml", "Carrito de Compra");
     }
 
     @FXML
     private void backToMain(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
-            Parent root = fxmlLoader.load();
-
-            MainBookStoreController mainCont = fxmlLoader.getController();
-            mainCont.headerController.setMode(UserSession.getInstance().getUser(), null);
-
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
-            stage.setScene(new Scene(root));
-
-            // 1. Calculamos cuánto mide la ventana nueva
-            stage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            stage.centerOnScreen();
-
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        navigate(event, "/view/MainBookStore.fxml", "Librería");
     }
 
     @FXML
-    private void logIn(ActionEvent event
-    ) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/LoginWindow.fxml"));
-            Parent root = fxmlLoader.load();
-
-            Stage oldStage = (Stage) rootHeader.getScene().getWindow();
-            Stage newStage = new Stage();
-
-            newStage.setScene(new Scene(root));
-
-            // 1. Calculamos cuánto mide la ventana nueva
-            newStage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            newStage.centerOnScreen();
-            newStage.setTitle("Book&Bugs - Login");
-            newStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png")));
-
-            newStage.show();
-            oldStage.close();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @FXML
-    private void option(ActionEvent event
-    ) {
-        Profile pf = UserSession.getInstance().getUser();
-        try {
-            FXMLLoader fxmlLoader;
-            if (pf instanceof User) {
-                fxmlLoader = new FXMLLoader(getClass().getResource("/view/MenuWindow.fxml"));
-            } else if (pf instanceof Admin) {
-                fxmlLoader = new FXMLLoader(getClass().getResource("/view/OptionsAdmin.fxml"));
-            } else {
-                showAlert("No tiene una sesion iniciada", Alert.AlertType.WARNING);
-                return;
-            }
-            Parent root = fxmlLoader.load();
-
-            Stage stage = (Stage) rootHeader.getScene().getWindow();
-            stage.setScene(new Scene(root));
-
-            // 1. Calculamos cuánto mide la ventana nueva
-            stage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            stage.centerOnScreen();
-
-            stage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    private void logIn(ActionEvent event) {
+        // Al ir al login, mantenemos la ventana.
+        navigate(event, "/view/LoginWindow.fxml", "Book&Bugs - Login");
     }
 
     @FXML
     private void logOut(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/MainBookStore.fxml"));
-            Parent root = fxmlLoader.load();
+        // 1. Limpiamos la sesión
+        UserSession.getInstance().cleanUserSession();
 
-            UserSession.getInstance().cleanUserSession();
+        // 2. Navegamos al Main (ahora se cargará como anónimo)
+        navigate(event, "/view/MainBookStore.fxml", "Librería");
+    }
 
-            MainBookStoreController main = fxmlLoader.getController();
-            main.headerController.setMode(UserSession.getInstance().getUser(), null);
+    @FXML
+    private void option(ActionEvent event) {
+        Profile pf = UserSession.getInstance().getUser();
 
-            Stage oldStage = (Stage) rootHeader.getScene().getWindow();
-            Stage newStage = new Stage();
-
-            newStage.setScene(new Scene(root));
-
-            // 1. Calculamos cuánto mide la ventana nueva
-            newStage.sizeToScene();
-
-            // 2. OPCIÓN A: Centrar en el medio del monitor (lo más fácil)
-            newStage.centerOnScreen();
-
-            newStage.show();
-            oldStage.close();
-
-            newStage.show();
-        } catch (IOException ex) {
-            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, null, ex);
+        if (pf instanceof User) {
+            navigate(event, "/view/MenuWindow.fxml", "Opciones de Usuario");
+        } else if (pf instanceof Admin) {
+            navigate(event, "/view/OptionsAdmin.fxml", "Panel de Administración");
         }
     }
 
     private void configurarBotonBorrar() {
-        // Si hay un icono mejor: btnSearch.setGraphic(new ImageView(...));
-        btnSearch.visibleProperty().bind(txtSearch.textProperty().isNotEmpty());
+        if (btnSearch != null && txtSearch != null) {
+            btnSearch.visibleProperty().bind(txtSearch.textProperty().isNotEmpty());
+        }
     }
 
     public void setMode(Profile user, String filter) {
-        if (user == null) {
-            btnOption.setManaged(false);
-            btnLogOut.setManaged(false);
-            btnBuy.setManaged(false);
-        } else if (user instanceof User) {
-            btnLogIn.setManaged(false);
+        boolean loggedIn = (user != null);
+        boolean isAdmin = (user instanceof Admin);
+
+        // Gestión de botones de usuario
+        btnOption.setVisible(loggedIn);
+        btnOption.setManaged(loggedIn);
+
+        btnLogOut.setVisible(loggedIn);
+        btnLogOut.setManaged(loggedIn);
+
+        // Botón Login (solo visible si NO estás logueado)
+        btnLogIn.setVisible(!loggedIn);
+        btnLogIn.setManaged(!loggedIn);
+
+        // Botón Comprar (solo visible si logueado y NO es admin)
+        boolean canBuy = loggedIn && !isAdmin;
+        btnBuy.setVisible(canBuy);
+        btnBuy.setManaged(canBuy);
+
+        // Texto de bienvenida
+        if (loggedIn) {
             lblUserName.setText(user.getName());
-        } else if (user instanceof Admin) {
-            btnLogIn.setManaged(false);
-            lblUserName.setText(user.getName());
-            btnBuy.setManaged(false);
-        }
-        if (filter == null) {
-            btnBackMain.setManaged(false);
         } else {
-            stackSearch.setVisible(false);
+            lblUserName.setText("Bienvenido");
         }
+
+        // Gestión de filtros de vista (para ocultar buscador o botón volver)
+        boolean isMainView = (filter == null);
+
+        // Botón Volver (Solo visible si NO estamos en la vista principal)
+        btnBackMain.setVisible(!isMainView);
+        btnBackMain.setManaged(!isMainView);
+
+        // Buscador (Solo visible en la vista principal)
+        stackSearch.setVisible(isMainView);
+
+        // Caso especial: En el carrito no mostramos el botón de comprar (obvio)
         if ("buying".equals(filter)) {
+            btnBuy.setVisible(false);
             btnBuy.setManaged(false);
-        }
-        if ("book view".equals(filter)) {
         }
     }
 
-    private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    /**
+     * metodo reutilizable para cada oopcion del header.
+     */
+    private void navigate(ActionEvent event, String fxmlPath, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            configurarControladorDestino(loader.getController());
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+
+            if (title != null) {
+                stage.setTitle(title);
+            }
+            stage.sizeToScene();
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(HeaderController.class.getName()).log(Level.SEVERE, "Error navegando a " + fxmlPath, ex);
+        }
+    }
+
+    /**
+     * Configura los controladores que requieren pasar datos de sesión o modo.
+     */
+    private void configurarControladorDestino(Object controller) {
+        Profile user = UserSession.getInstance().getUser();
+
+        if (controller instanceof MainBookStoreController) {
+            ((MainBookStoreController) controller).headerController.setMode(user, null);
+        } else if (controller instanceof ShoppingCartController) {
+            ((ShoppingCartController) controller).headerController.setMode(user, "buying");
+        }
+        // Puedes añadir más 'else if' si otros controladores necesitan datos iniciales
     }
 }
