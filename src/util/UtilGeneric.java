@@ -225,7 +225,7 @@ public class UtilGeneric {
      * Ajusta el tamaño de la portada del libro y aplica un recorte centrado
      * (Center Crop) para mantener la estética de la interfaz.
      *
-     * * @param imageView El contenedor donde se mostrará la imagen.
+     * @param imageView El contenedor donde se mostrará la imagen.
      * @param image La imagen original del libro.
      * @param targetWidth Ancho objetivo.
      * @param targetHeight Alto objetivo.

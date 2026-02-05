@@ -25,8 +25,14 @@ import util.LogInfo;
 import util.UtilGeneric;
 
 /**
+ * Controlador principal de la vista de la librería (Tienda).
+ * <p>
+ * Esta clase gestiona la visualización del catálogo de libros, el sistema de
+ * búsqueda en tiempo real, la carga dinámica de items y la gestión del menú
+ * contextual global.
+ * </p>
  *
- * @author Alexander
+ * * @author Alexander
  */
 public class MainBookStoreController {
 
@@ -53,15 +59,27 @@ public class MainBookStoreController {
 
     private List<Book> allBooks = new ArrayList<>();
     private final ClassDAO dao = new DBImplementation();
+
     // El temporizador para el delay
     private PauseTransition pause;
     private ContextMenu globalMenu;
 
+    /**
+     * Método de inicialización del controlador. Se ejecuta automáticamente al
+     * cargar el FXML. Inicializa el menú contextual y carga los libros desde la
+     * base de datos.
+     */
     public void initialize() {
         initContexMenu();
         initRenderBooks();
     }
 
+    /**
+     * Filtra la lista de libros mostrados basándose en el texto proporcionado.
+     * Si el texto está vacío, restaura la lista completa.
+     *
+     * * @param text El texto a buscar.
+     */
     private void searchBooks(String text) {
         if (text == null || text.trim().isEmpty()) {
             showBooks(allBooks);
@@ -75,6 +93,16 @@ public class MainBookStoreController {
         showBooks(filteredBooks);
     }
 
+    /**
+     * Renderiza visualmente una lista de libros en el {@link TilePane}.
+     * <p>
+     * Este método limpia el contenedor actual y, para cada libro de la lista,
+     * carga dinámicamente el archivo FXML {@code BookItem.fxml} y lo añade a la
+     * vista.
+     * </p>
+     *
+     * * @param allBooks La lista de objetos {@link Book} a visualizar.
+     */
     private void showBooks(List<Book> allBooks) {
         tileBooks.getChildren().clear();
 
@@ -91,6 +119,13 @@ public class MainBookStoreController {
         }
     }
 
+    /**
+     * Aplica la lógica de filtrado sobre la lista maestra de libros. Comprueba
+     * si el texto de búsqueda coincide con el título, el autor o el ISBN.
+     *
+     * * @param busqueda Texto de búsqueda en minúsculas.
+     * @return Una sublista de libros que coinciden con el criterio.
+     */
     private List<Book> filterBook(String busqueda) {
         List<Book> resultados = new ArrayList<>();
 
@@ -107,12 +142,16 @@ public class MainBookStoreController {
         return resultados;
     }
 
+    /**
+     * Configura e inicializa el menú contextual (clic derecho) de la ventana
+     * principal. Define las opciones disponibles y delega las acciones a
+     * {@link UtilGeneric}.
+     */
     private void initContexMenu() {
         // 1. Inicializamos el menú
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
-
-        // --- Opción 1: Añadir al Carrito ---
+        // --- Opción 1: Limpiar Búsqueda ---
         MenuItem searchClear = new MenuItem("Limpiar Busqueda");
         searchClear.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -120,10 +159,7 @@ public class MainBookStoreController {
                 headerController.clearSearch();
             }
         });
-
-        // =========================================================
-        // --- NUEVO: OPCIÓN INFORME TÉCNICO (JASPER) ---
-        // =========================================================
+        // --- Opción 2: Informe Técnico ---
         MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
         itemInforme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -131,8 +167,7 @@ public class MainBookStoreController {
                 handleJasperReport(event);
             }
         });
-        // =========================================================
-
+        // --- Opción 3: Salir ---
         MenuItem itemExit = new MenuItem("Salir");
         itemExit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -140,7 +175,7 @@ public class MainBookStoreController {
                 handleExit(event);
             }
         });
-
+        // --- Opción 4: Manual ---
         MenuItem itemManual = new MenuItem("Manual de Usuario");
         itemManual.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -148,8 +183,8 @@ public class MainBookStoreController {
                 handleHelpAction(event);
             }
         });
-
-        MenuItem itemAbout = new MenuItem("Acerca de...");
+        // --- Opción 5: Acerca De nosotros ---
+        MenuItem itemAbout = new MenuItem("Acerca de Nosotros");
         itemAbout.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -159,13 +194,13 @@ public class MainBookStoreController {
 
         // 2. AÑADIR TODO AL MENÚ EN ORDEN
         globalMenu.getItems().addAll(
-                searchClear, // 1. Comprar
-                itemInforme, // 2. Informe Técnico (NUEVO)
-                new SeparatorMenuItem(), // Línea separadora
-                itemExit, // 4. Salir
-                new SeparatorMenuItem(), // Línea separadora
-                itemManual, // 5. Ayuda
-                itemAbout // 6. About
+                searchClear,
+                itemInforme,
+                new SeparatorMenuItem(),
+                itemExit,
+                new SeparatorMenuItem(),
+                itemManual,
+                itemAbout
         );
 
         // 3. Asignar eventos al panel principal (rootPane)
@@ -191,40 +226,81 @@ public class MainBookStoreController {
         }
     }
 
+    /**
+     * Cierra la aplicación de forma segura utilizando la utilidad genérica.
+     *
+     * * @param event El evento que disparó la acción.
+     * @see UtilGeneric#exit()
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         UtilGeneric.getInstance().exit();
     }
 
-    // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
+    /**
+     * Genera el informe técnico de JasperReports. Utiliza la configuración
+     * centralizada de conexión y reporte.
+     *
+     * @param event El evento de menú.
+     * @see UtilGeneric#getJasperReport()
+     */
     @FXML
     private void handleJasperReport(ActionEvent event) {
         UtilGeneric.getInstance().getJasperReport();
     }
 
+    /**
+     * Maneja la acción del botón de ayuda. Delega la apertura del PDF a la
+     * clase de utilidad.
+     *
+     * @param event El evento de acción.
+     * @see util.UtilGeneric#helpAction()
+     */
     private void handleHelpAction(ActionEvent event) {
         UtilGeneric.getInstance().helpAction();
     }
 
+    /**
+     * Muestra la ventana modal "Acerca de Nosotros".
+     *
+     * * @param event El evento de acción.
+     * @see UtilGeneric#aboutAction()
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         UtilGeneric.getInstance().aboutAction();
     }
 
+    /**
+     * Maneja la acción del menú superior "Manual de Usuario". Delega la
+     * apertura del PDF a la clase de utilidad.
+     *
+     * @param event El evento de acción.
+     * @see UtilGeneric#helpAction()
+     */
     @FXML
     private void handleReportAction(ActionEvent event) {
         UtilGeneric.getInstance().helpAction();
     }
 
+    /**
+     * Inicializa la carga de libros desde la base de datos y configura el
+     * listener de búsqueda.
+     * <p>
+     * Configura un {@link PauseTransition} para crear un efecto de "debounce"
+     * (retardo) al escribir en la barra de búsqueda, evitando consultas
+     * excesivas a la base de datos mientras el usuario teclea.
+     * </p>
+     */
     private void initRenderBooks() {
         allBooks = dao.getAllBooks();
+        LogInfo.getInstance().logInfo("Carga inicial: " + allBooks.size() + " libros recuperados de la BD.");
 
         showBooks(allBooks);
-        // 2. CONFIGURAR EL DELAY (Por ejemplo, 0.5 segundos)
-        // Esto crea un timer que espera 500ms antes de disparar su acción.
+        // Configurar el delay (0.5 segundos)
         pause = new PauseTransition(Duration.seconds(0.5));
 
-        // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
+        // Acción al terminar el delay
         pause.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -235,15 +311,11 @@ public class MainBookStoreController {
             }
         });
 
-        // 3. CONECTAR EL LISTENER
+        // Conectar el listener al campo de texto del Header
         if (headerController != null) {
             headerController.getSearchTextField().textProperty().addListener((obs, oldVal, newVal) -> {
-                // MAGIA: Cada vez que escribes una letra...
-
-                // A. Reiniciamos el timer desde cero (si estaba contando, se para y vuelve a empezar)
+                // Reiniciamos el timer cada vez que se escribe una letra
                 pause.playFromStart();
-
-                // Resultado: Si escribes rápido "Harry", el timer se reinicia 5 veces
             });
         }
     }

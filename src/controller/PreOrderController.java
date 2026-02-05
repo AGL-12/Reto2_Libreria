@@ -38,13 +38,12 @@ public class PreOrderController {
     private Label lblTitle;
     @FXML
     private Label lblPrice;
-
-    private Book libro;
-    private ShoppingCartController shoppingCartController;
     @FXML
     private HBox rootPreOrder;
     @FXML
     private Button btnDelete;
+    private Book libro;
+    private ShoppingCartController shoppingCartController;
 
     
     /**

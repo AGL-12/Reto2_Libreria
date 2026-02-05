@@ -384,10 +384,11 @@ public class BookViewController {
     }
 
     /**
-     * Abre el Manual de Usuario en formato PDF. Extrae el recurso del JAR a un
-     * archivo temporal para que el sistema operativo pueda abrirlo.
+     * Maneja la acción del botón de ayuda. Delega la apertura del PDF a la
+     * clase de utilidad.
      *
-     * * @param event Evento del menú de ayuda.
+     * @param event El evento de acción.
+     * @see util.UtilGeneric#helpAction()
      */
     @FXML
     private void handleReportAction(ActionEvent event) {
@@ -428,24 +429,45 @@ public class BookViewController {
     }
 
     /**
-     * Genera un informe técnico de stock utilizando JasperReports. Conecta
-     * directamente a la base de datos y lanza el visor de informes.
+     * Genera el informe técnico de JasperReports. Utiliza la configuración
+     * centralizada de conexión y reporte.
+     *
+     * @param event El evento de menú.
+     * @see UtilGeneric#getJasperReport()
      */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
         UtilGeneric.getInstance().getJasperReport();
     }
 
+    /**
+     * Maneja la acción del botón de ayuda desde el menú contextual. Delega la
+     * apertura del PDF a la clase de utilidad.
+     *
+     * @param event El evento de acción.
+     * @see UtilGeneric#helpAction()
+     */
     @FXML
     private void handleHelpAction(ActionEvent event) {
         UtilGeneric.getInstance().helpAction();
     }
-
+    /**
+     * Muestra la ventana modal "Acerca de Nosotros".
+     *
+     * * @param event El evento de acción.
+     * @see UtilGeneric#aboutAction()
+     */
     @FXML
     private void handleAboutAction(ActionEvent event) {
         UtilGeneric.getInstance().aboutAction();
     }
 
+    /**
+     * Cierra la aplicación de forma segura utilizando la utilidad genérica.
+     *
+     * * @param event El evento que disparó la acción.
+     * @see UtilGeneric#exit()
+     */
     @FXML
     private void handleExit(ActionEvent event) {
         UtilGeneric.getInstance().exit();
