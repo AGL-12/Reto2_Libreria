@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller;
 
 import java.awt.Desktop;
@@ -17,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -26,11 +22,14 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.Book;
 import model.ClassDAO;
@@ -41,6 +40,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
+import util.UtilGeneric;
 
 /**
  *
@@ -60,7 +60,7 @@ public class MainBookStoreController {
 
     // El temporizador para el delay
     private PauseTransition pause;
-    
+
     private ContextMenu globalMenu;
     @FXML
     private Menu menuArchivo;
@@ -79,40 +79,11 @@ public class MainBookStoreController {
 
     public void initialize() {
         initContexMenu();
-        allBooks = dao.getAllBooks();
-
-        showBooks(allBooks);
-        // 2. CONFIGURAR EL DELAY (Por ejemplo, 0.5 segundos)
-        // Esto crea un timer que espera 500ms antes de disparar su acción.
-        pause = new PauseTransition(Duration.seconds(0.5));
-
-        // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
-        pause.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                // Obtenemos el texto actual del header y buscamos
-                String textoABuscar = headerController.getSearchTextField().getText().trim();
-                LogInfo.getInstance().logInfo("Buscando en BD: " + textoABuscar);
-                searchBooks(textoABuscar);
-            }
-        });
-
-        // 3. CONECTAR EL LISTENER
-        if (headerController != null) {
-            headerController.getSearchTextField().textProperty().addListener((obs, oldVal, newVal) -> {
-                // MAGIA: Cada vez que escribes una letra...
-
-                // A. Reiniciamos el timer desde cero (si estaba contando, se para y vuelve a empezar)
-                pause.playFromStart();
-
-                // Resultado: Si escribes rápido "Harry", el timer se reinicia 5 veces
-            });
-        }
+        initRenderBooks();
     }
 
     private void searchBooks(String text) {
         if (text == null || text.trim().isEmpty()) {
-            // Si borran el texto, mostramos la lista maestra entera
             showBooks(allBooks);
             return;
         }
@@ -131,12 +102,8 @@ public class MainBookStoreController {
             for (Book lib : allBooks) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/BookItem.fxml"));
                 VBox libroBox = fxmlLoader.load();
-
                 BookItemController itemController = fxmlLoader.getController();
-
-                // Aquí 'lib' ya viene con el avgValuation calculado desde el DAO
                 itemController.setData(lib);
-
                 tileBooks.getChildren().add(libroBox);
             }
         } catch (IOException ex) {
@@ -181,7 +148,7 @@ public class MainBookStoreController {
         itemInforme.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                handleInformeTecnico(event);
+                handleJasperReport(event);
             }
         });
         // =========================================================
@@ -246,89 +213,22 @@ public class MainBookStoreController {
 
     @FXML
     private void handleExit(ActionEvent event) {
-        // Cierra la aplicación completamente
-        javafx.application.Platform.exit();
-        System.exit(0);
+        UtilGeneric.getInstance().exit();
     }
 
     // --- MÉTODO NUEVO: GENERAR INFORME JASPER ---
     @FXML
-    private void handleInformeTecnico(ActionEvent event) {
-        Connection con = null;
-        try {
-            // 1. CONEXIÓN A BASE DE DATOS
-            // Ajusta el usuario y contraseña a los tuyos de MySQL
-            String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
-            String user = "root";
-            String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
-
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(url, user, pass);
-
-            // 2. CARGAR EL ARCHIVO .JRXML
-            // Busca en el paquete 'reports' que creamos anteriormente
-            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-
-            if (reportStream == null) {
-                showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
-                return;
-            }
-
-            // 3. COMPILAR Y LLENAR EL INFORME
-            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-
-            // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
-
-            // 4. MOSTRAR VISOR
-            JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
-        } finally {
-            try {
-                if (con != null) {
-                    con.close();
-                }
-            } catch (SQLException ex) {
-            }
-        }
+    private void handleJasperReport(ActionEvent event) {
+        UtilGeneric.getInstance().getJasperReport();
     }
 
     private void handleHelpAction(ActionEvent event) {
-        try {
-            // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
-            String resourcePath = "/documents/Manual_Usuario.pdf";
-
-            // 2. Cargar archivo
-            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
-
-            if (pdfStream == null) {
-                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
-                return;
-            }
-
-            // 3. Crear temporal y abrir
-            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
-            tempFile.deleteOnExit();
-            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(tempFile);
-            } else {
-                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
+        UtilGeneric.getInstance().helpAction();
     }
 
     @FXML
     private void handleAboutAction(ActionEvent event) {
-        showAlert("BookStore App v1.0\nDesarrollado por Mikel\nProyecto Reto 2", Alert.AlertType.INFORMATION);
+        UtilGeneric.getInstance().aboutAction();
     }
 
     private void showAlert(String message, Alert.AlertType type) {
@@ -341,7 +241,6 @@ public class MainBookStoreController {
 
     @FXML
     private void handleReportAction(ActionEvent event) {
-
         // --- HEMOS BORRADO EL BLOQUE IF DE SEGURIDAD ---
         // Ahora entra cualquier usuario (Admin o Normal)
         try {
@@ -369,6 +268,38 @@ public class MainBookStoreController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void initRenderBooks() {
+        allBooks = dao.getAllBooks();
+
+        showBooks(allBooks);
+        // 2. CONFIGURAR EL DELAY (Por ejemplo, 0.5 segundos)
+        // Esto crea un timer que espera 500ms antes de disparar su acción.
+        pause = new PauseTransition(Duration.seconds(0.5));
+
+        // Qué pasa cuando el timer termina (se acabó el tiempo de espera)
+        pause.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // Obtenemos el texto actual del header y buscamos
+                String textoABuscar = headerController.getSearchTextField().getText().trim();
+                LogInfo.getInstance().logInfo("Buscando en BD: " + textoABuscar);
+                searchBooks(textoABuscar);
+            }
+        });
+
+        // 3. CONECTAR EL LISTENER
+        if (headerController != null) {
+            headerController.getSearchTextField().textProperty().addListener((obs, oldVal, newVal) -> {
+                // MAGIA: Cada vez que escribes una letra...
+
+                // A. Reiniciamos el timer desde cero (si estaba contando, se para y vuelve a empezar)
+                pause.playFromStart();
+
+                // Resultado: Si escribes rápido "Harry", el timer se reinicia 5 veces
+            });
         }
     }
 }

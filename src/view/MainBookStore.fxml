@@ -25,7 +25,7 @@
                         <Menu fx:id="menuAcciones" mnemonicParsing="true" text="Acciones">
                             <items>
                                 <MenuItem fx:id="iManual" accelerator="Ctrl+P" onAction="#handleReportAction" text="Manual De Usuario" />
-                                <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleInformeTecnico" text="Informe Técnico de Stock" />
+                                <MenuItem fx:id="iJasper" accelerator="Ctrl+I" onAction="#handleJasperReport" text="Informe Técnico de Stock" />
                             </items>
                         </Menu>
 
