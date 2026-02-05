@@ -66,7 +66,6 @@ import javafx.stage.Stage;
 public class BookViewController {
 
     private static final Logger LOGGER = Logger.getLogger(BookViewController.class.getName());
-
     @FXML
     private ImageView coverBook;
     @FXML
@@ -181,6 +180,7 @@ public class BookViewController {
 
                 CommentViewController con = fxmlLoader.getController();
                 con.setData(coment);
+                con.setParent(this);
 
                 commentsContainer.getChildren().add(commentBox);
             }
@@ -363,6 +363,7 @@ public class BookViewController {
             Parent tarjeta = loader.load();
             CommentViewController controller = loader.getController();
             controller.setData(newComment);
+            controller.setParent(this);
 
             // Añadir arriba del todo
             commentsContainer.getChildren().add(0, tarjeta);
@@ -581,53 +582,53 @@ public class BookViewController {
         }
     }
 
-@FXML
+    @FXML
     private void handleAboutAction(ActionEvent event) {
         LOGGER.info("Mostrando ventana 'Acerca de...'."); // Log de inicio
 
         String mensaje = "Book&Bugs - Gestión de Librería v1.0\n\n"
-                       + "Desarrollado por el equipo de desarrollo:\n"
-                       + "• Alex\n"
-                       + "• Unai\n"
-                       + "• Ander\n"
-                       + "• Mikel\n\n"
-                       + "Proyecto Reto 2 - 2025";
-        
+                + "Desarrollado por el equipo de desarrollo:\n"
+                + "• Alex\n"
+                + "• Unai\n"
+                + "• Ander\n"
+                + "• Mikel\n\n"
+                + "Proyecto Reto 2 - 2025";
+
         // Creamos la alerta
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Acerca de...");
         alert.setHeaderText("Información del Proyecto");
         alert.setContentText(mensaje);
-        
+
         // --- AÑADIR LOGO ---
         try {
             String imagePath = "/images/Book&Bugs_Logo.png";
             // Usar getResourceAsStream es más seguro para comprobar nulos antes de crear la Image
             java.io.InputStream imageStream = getClass().getResourceAsStream(imagePath);
-            
+
             if (imageStream != null) {
                 Image logo = new Image(imageStream);
                 ImageView imageView = new ImageView(logo);
-                
+
                 // Ajustar tamaño para que no salga gigante
-                imageView.setFitHeight(80); 
+                imageView.setFitHeight(80);
                 imageView.setPreserveRatio(true);
-                
+
                 // Poner la imagen a la izquierda del texto
                 alert.setGraphic(imageView);
-                
+
                 // Opcional: Poner el logo también en el icono de la ventana de la alerta
                 Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
                 stage.getIcons().add(logo);
             } else {
                 LOGGER.warning("No se encontró la imagen del logo en la ruta: " + imagePath);
             }
-            
+
         } catch (Exception e) {
             // Si falla la imagen, registramos el warning pero la alerta sigue funcionando
             LOGGER.log(Level.WARNING, "Error no crítico al cargar el logo en About: " + e.getMessage(), e);
         }
-        
+
         alert.showAndWait();
     }
 
@@ -714,6 +715,26 @@ public class BookViewController {
                     globalMenu.hide();
                 }
             });
+        }
+    }
+
+    /**
+     * Método público que llamará el hijo (comentario) cuando se borre. Vuelve a
+     * mostrar y habilitar el botón de escribir opinión.
+     */
+    public void onCommentDeleted() {
+        LOGGER.info("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
+
+        if (btnAddComment != null) {
+            // 1. Lo hacemos visible de nuevo
+            btnAddComment.setVisible(true);
+            btnAddComment.setManaged(true);
+
+            // 2. IMPORTANTE: Lo rehabilitamos (estaba en setDisable(true) tras publicar)
+            btnAddComment.setDisable(false);
+
+            // 3. Opcional: Solicitar foco para que el usuario vea que ha vuelto
+            btnAddComment.requestFocus();
         }
     }
 }

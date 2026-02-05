@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 public class CommentViewController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(CommentViewController.class.getName());
-
+    private BookViewController parentController;
     @FXML
     private Label lblUsuario;
     @FXML
@@ -61,6 +61,10 @@ public class CommentViewController implements Initializable {
     private Commentate currentComment;
     private final ClassDAO dao = new DBImplementation();
     private boolean isEditing = false;
+
+    public void setParent(BookViewController parent) {
+        this.parentController = parent;
+    }
 
     /**
      * Inicializa la clase controladora. Se ejecuta automáticamente al cargar el
@@ -264,8 +268,7 @@ public class CommentViewController implements Initializable {
             finalizarEdicion();
 
         } else {
-            // Modo para borrar comentario
-            LOGGER.info("Solicitando confirmación para borrar comentario...");
+// Lógica de borrar comentario
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Borrar");
             alert.setHeaderText("¿Seguro que quieres borrarlo?");
@@ -274,14 +277,24 @@ public class CommentViewController implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 try {
+                    // 1. Borrar de la base de datos
                     dao.deleteComment(currentComment);
 
-                    // Borrar visualmente
-                    if (buttonBox != null && buttonBox.getParent() != null) {
-                        Node tarjeta = buttonBox.getParent();
-                        tarjeta.setVisible(false);
-                        tarjeta.setManaged(false);
+                    // 2. Borrar visualmente (Método seguro)
+                    Node source = (Node) event.getSource();
+                    Node fichaComentario = source.getParent().getParent();
+                    if (fichaComentario != null && fichaComentario.getParent() != null) {
+                        ((javafx.scene.layout.Pane) fichaComentario.getParent()).getChildren().remove(fichaComentario);
                     }
+
+                    // 3. AVISAR AL PADRE (BookViewController)
+                    if (parentController != null) {
+                        System.out.println("Enviando aviso al padre para habilitar botón...");
+                        parentController.onCommentDeleted();
+                    } else {
+                        System.err.println("Error: parentController es NULL. No se puede avisar.");
+                    }
+
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Error crítico al borrar comentario", e);
                     showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR);
