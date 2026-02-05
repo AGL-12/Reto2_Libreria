@@ -6,8 +6,6 @@
 package controller;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,30 +28,15 @@ import model.User;
 import model.UserSession;
 import model.Admin;
 
-// Imports necesarios para jasper
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.view.JasperViewer;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-// --------------------------------------
-
-//Imports para el informe
-import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 
 //Imports para click derecho
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.stage.Stage;
+
 import util.LogInfo;
 import util.UtilGeneric;
 
@@ -69,7 +52,6 @@ import util.UtilGeneric;
  */
 public class BookViewController {
 
-    private static final Logger LOGGER = Logger.getLogger(BookViewController.class.getName());
     @FXML
     private ImageView coverBook;
     @FXML
@@ -126,7 +108,7 @@ public class BookViewController {
      * cargar la vista. Configura los menús contextuales.
      */
     public void initialize() {
-        LOGGER.info("Inicializando BookViewController...");
+        LogInfo.getInstance().logInfo("Inicializando BookViewController...");
         initGlobalContextMenu();
     }
 
@@ -137,7 +119,7 @@ public class BookViewController {
     private void initContextMenu() {
         if (currentUser instanceof Admin) {
             btnAddComment.setVisible(false);
-            LOGGER.info("Usuario es Admin: Botón de comentar oculto.");
+            LogInfo.getInstance().logInfo("Usuario es Admin: Botón de comentar oculto.");
         }
         initGlobalContextMenu();
     }
@@ -149,83 +131,83 @@ public class BookViewController {
      * las tarjetas de comentario.
      */
     private void refreshList() {
-        LOGGER.info("Refrescando lista de comentarios...");
+        LogInfo.getInstance().logInfo("Refrescando lista de comentarios...");
         commentsContainer.getChildren().clear();
         try {
-            // currentBook es el libro que estás visualizando
             List<Commentate> comentarios = dao.getCommentsByBook(currentBook.getISBN());
 
-            LOGGER.info("Se han recuperado " + comentarios.size() + " comentarios.");
-            // Obtiene el usuario actual
-            Profile currentUser = UserSession.getInstance().getUser();
+            // 1. COMPROBACIÓN: ¿El usuario ya ha comentado?
+            Profile userActual = UserSession.getInstance().getUser();
+            boolean yaComento = false;
 
-            // Ordena la lista de comentarios
-            if (currentUser != null) {
+            if (userActual != null) {
+                for (Commentate c : comentarios) {
+                    if (c.getUser().getUserCode() == userActual.getUserCode()) {
+                        yaComento = true;
+                        break;
+                    }
+                }
+            }
+            // Bloqueamos el botón si ya existe un comentario del usuario
+            btnAddComment.setDisable(yaComento);
+
+            // 2. Ordenación
+            if (userActual != null) {
                 comentarios.sort((c1, c2) -> {
-                    int myId = currentUser.getUserCode();
+                    int myId = userActual.getUserCode();
                     boolean c1IsMine = c1.getUser().getUserCode() == myId;
                     boolean c2IsMine = c2.getUser().getUserCode() == myId;
-
-                    // Si c1 es mío, va antes
                     if (c1IsMine && !c2IsMine) {
                         return -1;
                     }
-                    // Si c2 es mío, c2 va antes
                     if (!c1IsMine && c2IsMine) {
                         return 1;
                     }
-                    // Si no, se quedan igual
                     return 0;
                 });
             }
+
+            // 3. Carga visual
             for (Commentate coment : comentarios) {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
                 Parent commentBox = fxmlLoader.load();
-
                 CommentViewController con = fxmlLoader.getController();
                 con.setData(coment);
                 con.setParent(this);
-
                 commentsContainer.getChildren().add(commentBox);
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "Error al cargar la vista de un comentario.", ex);
+            LogInfo.getInstance().logSevere("Error al cargar la vista dinámica de comentarios (FXML)", ex);
         }
     }
 
     /**
-     * Muestra una ventana de alerta emergente.
-     *
-     * * @param message El mensaje a mostrar.
-     * @param type El tipo de alerta (ERROR, WARNING, INFORMATION).
+     * Muestra una ventana de alerta emergente utilizando UtilGeneric.
      */
     private void showAlert(String message, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        UtilGeneric.getInstance().showAlert(message, type, "Book&Bugs");
     }
 
     /**
      * Carga los datos de un libro específico en la vista. Rellena todos los
      * campos visuales (título, precio, sinopsis), procesa la imagen de portada
-     * y determina si el botón "Añadir al Carrito" debe mostrarse (oculto para
-     * Admins).
+     * y determina si el botón "Añadir al Carrito" debe mostrarse.
      *
      * * @param book El objeto libro con la información a mostrar.
      */
     void setData(Book book) {
         this.currentBook = book;
         LogInfo.getInstance().logInfo("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
-        // 1. Cargar la imagen (con protección por si falla el archivo)
+
+        // 1. Cargar la imagen
         try {
             if (book.getCover() != null && !book.getCover().isEmpty()) {
                 Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
-                UtilGeneric.getInstance().cutOutImage(coverBook, originalImage, 140, 210);
+                // Usamos el método local cutOutImage para asegurar el recorte correcto
+                cutOutImage(coverBook, originalImage, 140, 210);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al procesar imagen del libro", e);
+            LogInfo.getInstance().logSevere("Error al procesar imagen del libro: " + book.getCover(), e);
         }
 
         // Rellenar textos
@@ -238,7 +220,7 @@ public class BookViewController {
         // Cargar comentarios
         refreshList();
 
-        // Logica boton comprar
+        // Lógica botón comprar
         Profile user = UserSession.getInstance().getUser();
 
         if (user instanceof Admin) {
@@ -254,7 +236,7 @@ public class BookViewController {
                 btnAddToCart.setManaged(true);
             } else {
                 // No hay stock (0) -> Botón OCULTO (Desaparece)
-                LOGGER.info("Libro sin stock, ocultando botón de compra.");
+                LogInfo.getInstance().logInfo("Libro sin stock, ocultando botón de compra.");
                 btnAddToCart.setVisible(false);
                 btnAddToCart.setManaged(false);
             }
@@ -263,47 +245,35 @@ public class BookViewController {
 
     /**
      * Maneja la acción de pulsar el botón "+ Escribir opinión".
-     * <p>
-     * Verifica que el usuario esté logueado y no haya comentado antes. Si todo
-     * es correcto, muestra el formulario de escritura.
-     * </p>
-     *
-     * * @param event Evento del botón.
      */
     @FXML
     private void handleNewComment(ActionEvent event) {
-        LOGGER.info("Intento de añadir nuevo comentario.");
+        LogInfo.getInstance().logInfo("Intento de añadir nuevo comentario.");
         // Validaciones
         if (currentUser == null) {
-            LOGGER.warning("Intento de comentar sin sesión iniciada.");
+            LogInfo.getInstance().logWarning("Intento de comentar sin sesión iniciada.");
             showAlert("Debes iniciar sesión para comentar", Alert.AlertType.ERROR);
             return;
         }
-        // Comprobar si el usuario ya ha comentado
+        // Comprobar si el usuario ya ha comentado (redundancia de seguridad)
         try {
             List<Commentate> comentariosExistentes = dao.getCommentsByBook(currentBook.getISBN());
             for (Commentate c : comentariosExistentes) {
                 if (c.getUser().getUserCode() == currentUser.getUserCode()) {
-                    LOGGER.warning("El usuario ya ha comentado este libro.");
+                    LogInfo.getInstance().logWarning("El usuario ya ha comentado este libro.");
                     showAlert("¡Ya has opinado sobre este libro!", Alert.AlertType.WARNING);
                     return;
                 }
             }
         } catch (Exception e) {
-            LOGGER.severe("Error comprobando comentarios existentes: " + e.getMessage());
+            LogInfo.getInstance().logSevere("Error comprobando comentarios existentes: " + e.getMessage(), e);
         }
 
-        // Muestra la caja mostrando el nombre
+        // Muestra la caja de escritura
         cajaEscribir.setVisible(true);
         cajaEscribir.setManaged(true);
 
         // Ocultar botón principal
-        btnAddComment.setVisible(false);
-        btnAddComment.setManaged(false);
-
-        //  Muestra la caja entera
-        cajaEscribir.setVisible(true);
-        cajaEscribir.setManaged(true);
         btnAddComment.setVisible(false);
         btnAddComment.setManaged(false);
 
@@ -318,12 +288,10 @@ public class BookViewController {
     /**
      * Cancela la creación de un comentario, limpiando el formulario y
      * ocultándolo.
-     *
-     * * @param event Evento del botón Cancelar.
      */
     @FXML
     private void handleCancelar(ActionEvent event) {
-        LOGGER.info("Cancelando escritura de comentario.");
+        LogInfo.getInstance().logInfo("Cancelando escritura de comentario.");
         txtNuevoComentario.clear();
         cajaEscribir.setVisible(false);
         cajaEscribir.setManaged(false);
@@ -333,85 +301,148 @@ public class BookViewController {
     }
 
     /**
-     * Guarda el nuevo comentario en la base de datos. Recoge el texto y la
-     * valoración (estrellas), valida que no esté vacío, guarda el objeto
-     * {@link Commentate} mediante el DAO y actualiza la lista visual.
-     *
-     * * @param event Evento del botón Publicar.
+     * Guarda el nuevo comentario en la base de datos usando un Hilo secundario.
      */
     @FXML
     private void handlePublicar(ActionEvent event) {
         String texto = txtNuevoComentario.getText().trim();
-        LOGGER.info("Publicando comentario...");
-
         if (texto.isEmpty()) {
-            LOGGER.warning("Intento de publicar comentario vacío.");
             showAlert("El comentario no puede estar vacío", Alert.AlertType.WARNING);
             return;
         }
 
-        try {
-            Profile currentUser = UserSession.getInstance().getUser();
-            // Ahora cogemos el valor real:
-            float puntuacion = 0;
-            if (estrellasController != null) {
-                puntuacion = (float) estrellasController.getValueUser();
+        // Bloqueamos el botón para que el usuario no haga doble clic
+        btnPublicar.setDisable(true);
+
+        // Creamos el hilo
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 1. Preparamos el objeto
+                    Profile user = UserSession.getInstance().getUser();
+                    float puntuacion = (estrellasController != null) ? (float) estrellasController.getValueUser() : 0;
+                    final Commentate newComment = new Commentate((User) user, currentBook, texto, puntuacion);
+
+                    // 2. Guardamos en la base de datos (Operación pesada)
+                    dao.addComment(newComment);
+
+                    // 3. Volvemos al hilo de la interfaz para actualizar la pantalla
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
+                                Parent tarjeta = loader.load();
+                                CommentViewController conHijo = loader.getController();
+
+                                conHijo.setData(newComment);
+                                conHijo.setParent(BookViewController.this); // IMPORTANTE: Pasamos el padre
+
+                                commentsContainer.getChildren().add(0, tarjeta);
+                                handleCancelar(null); // Limpia los campos
+
+                                btnAddComment.setDisable(true); // Ya ha comentado, deshabilitamos
+                                btnPublicar.setDisable(false);
+                                showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
+                            } catch (IOException ex) {
+                                LogInfo.getInstance().logSevere("Error al cargar la tarjeta visual del comentario", ex);
+                            }
+                        }
+                    });
+                } catch (final Exception ex) {
+                    // Si hay error en la BD, avisamos al usuario
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            LogInfo.getInstance().logSevere("Error crítico al publicar en la base de datos", ex);
+                            btnPublicar.setDisable(false);
+                            showAlert("Error: " + ex.getMessage(), Alert.AlertType.ERROR);
+                        }
+                    });
+                }
             }
-
-            // Creamos el comentario con la puntuación real
-            Commentate newComment = new Commentate((User) currentUser, currentBook, texto, puntuacion);
-            dao.addComment(newComment);
-
-            // Crear tarjeta visual
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/CommentView.fxml"));
-            Parent tarjeta = loader.load();
-            CommentViewController controller = loader.getController();
-            controller.setData(newComment);
-            controller.setParent(this);
-
-            // Añadir arriba del todo
-            commentsContainer.getChildren().add(0, tarjeta);
-
-            // Cerrar y limpiar
-            handleCancelar(null);
-            btnAddComment.setDisable(true);
-
-            showAlert("¡Comentario publicado!", Alert.AlertType.INFORMATION);
-
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error crítico al guardar comentario", ex);
-            showAlert("Error al guardar: " + ex.getMessage(), Alert.AlertType.ERROR);
-        }
+        }).start();
     }
 
     /**
-     * Maneja la acción del botón de ayuda. Delega la apertura del PDF a la
-     * clase de utilidad.
-     *
-     * @param event El evento de acción.
-     * @see util.UtilGeneric#helpAction()
+     * Maneja la acción del menú "Informe Técnico" usando UtilGeneric.
      */
+    @FXML
+    private void handleInformeTecnico(ActionEvent event) {
+        UtilGeneric.getInstance().getJasperReport();
+    }
+
+    /**
+     * Maneja la acción del menú "Manual de Usuario" usando UtilGeneric.
+     */
+    @FXML
+    private void handleHelpAction(ActionEvent event) {
+        UtilGeneric.getInstance().helpAction();
+    }
+
+    /**
+     * Maneja la acción del menú "Acerca de..." usando UtilGeneric.
+     */
+    @FXML
+    private void handleAboutAction(ActionEvent event) {
+        UtilGeneric.getInstance().aboutAction();
+    }
+
+    /**
+     * Maneja la acción del menú "Salir" usando UtilGeneric.
+     */
+    @FXML
+    private void handleExit(ActionEvent event) {
+        UtilGeneric.getInstance().exit();
+    }
+
+    // Método repetido en tu XML original, lo dejamos mapeado al mismo de ayuda
     @FXML
     private void handleReportAction(ActionEvent event) {
         UtilGeneric.getInstance().helpAction();
     }
 
     /**
-     * Añade el libro actual al carrito de compras de la sesión. Valida que haya
-     * un libro seleccionado y que el usuario esté logueado.
-     *
-     * * @param event Evento del botón de añadir.
+     * Método auxiliar para recortar y escalar la imagen de portada.
+     */
+    private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
+        imageView.setFitWidth(targetWidth);
+        imageView.setFitHeight(targetHeight);
+
+        double originalWidth = image.getWidth();
+        double originalHeight = image.getHeight();
+
+        double scaleX = targetWidth / originalWidth;
+        double scaleY = targetHeight / originalHeight;
+        double scale = Math.max(scaleX, scaleY);
+
+        double scaledWidth = originalWidth * scale;
+        double scaledHeight = originalHeight * scale;
+
+        double viewportWidth = targetWidth / scale;
+        double viewportHeight = targetHeight / scale;
+
+        double viewportX = (originalWidth - viewportWidth) / 2;
+        double viewportY = (originalHeight - viewportHeight) / 2;
+
+        imageView.setImage(image);
+        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
+        imageView.setSmooth(true);
+        imageView.setPreserveRatio(false);
+    }
+
+    /**
+     * Añade el libro actual al carrito de compras de la sesión.
      */
     @FXML
     private void handleAddToCart(ActionEvent event) {
-        //Verifica que hay un libro seleccionado
         if (currentBook == null) {
             LogInfo.getInstance().logWarning("Error: currentBook es NULL.");
             showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
             return;
         }
 
-        // Validar que el usuario puede comprar
         if (!UserSession.getInstance().isLoggedIn()) {
             LogInfo.getInstance().logWarning("Intento de compra sin login.");
             showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
@@ -422,117 +453,38 @@ public class BookViewController {
             UserSession.getInstance().addToCart(currentBook);
             LogInfo.getInstance().logInfo("Libro añadido al carrito exitosamente.");
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
-
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error al añadir al carrito", e);
+            LogInfo.getInstance().logSevere("Error crítico al añadir al carrito", e);
             showAlert("Error al añadir al carrito: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     /**
-     * Genera el informe técnico de JasperReports. Utiliza la configuración
-     * centralizada de conexión y reporte.
-     *
-     * @param event El evento de menú.
-     * @see UtilGeneric#getJasperReport()
-     */
-    @FXML
-    private void handleInformeTecnico(ActionEvent event) {
-        UtilGeneric.getInstance().getJasperReport();
-    }
-
-    /**
-     * Maneja la acción del botón de ayuda desde el menú contextual. Delega la
-     * apertura del PDF a la clase de utilidad.
-     *
-     * @param event El evento de acción.
-     * @see UtilGeneric#helpAction()
-     */
-    @FXML
-    private void handleHelpAction(ActionEvent event) {
-        UtilGeneric.getInstance().helpAction();
-    }
-    /**
-     * Muestra la ventana modal "Acerca de Nosotros".
-     *
-     * * @param event El evento de acción.
-     * @see UtilGeneric#aboutAction()
-     */
-    @FXML
-    private void handleAboutAction(ActionEvent event) {
-        UtilGeneric.getInstance().aboutAction();
-    }
-
-    /**
-     * Cierra la aplicación de forma segura utilizando la utilidad genérica.
-     *
-     * * @param event El evento que disparó la acción.
-     * @see UtilGeneric#exit()
-     */
-    @FXML
-    private void handleExit(ActionEvent event) {
-        UtilGeneric.getInstance().exit();
-    }
-
-    /**
-     * Configura el menú global de clic derecho (Context Menu) para toda la
-     * ventana. Ofrece accesos directos a Comprar, Informes, Cerrar Sesión y
-     * Ayuda.
+     * Configura el menú global de clic derecho (Context Menu).
      */
     private void initGlobalContextMenu() {
-        // Inicializamos el menú
         globalMenu = new ContextMenu();
         globalMenu.setAutoHide(true);
 
-        //Opción de añadir al carrito
         MenuItem itemAddCart = new MenuItem("Añadir al Carrito");
-        itemAddCart.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                handleAddToCart(event);
-            }
-        });
+        itemAddCart.setOnAction(event -> handleAddToCart(null));
 
-        // Si es Admin, deshabilitamos esta opción ya que no puede comprar
         if (UserSession.getInstance().getUser() instanceof Admin) {
             itemAddCart.setDisable(true);
         }
 
-        // Opción para el informe tecnico JASPER
         MenuItem itemInforme = new MenuItem("Generar Informe Técnico");
-        itemInforme.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                handleInformeTecnico(event);
-            }
-        });
+        itemInforme.setOnAction(event -> handleInformeTecnico(event));
 
-        // El resto de opciones "sencillas"
         MenuItem itemExit = new MenuItem("Salir");
-        itemExit.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                handleExit(event);
-            }
-        });
+        itemExit.setOnAction(event -> handleExit(event));
 
         MenuItem itemManual = new MenuItem("Manual de Usuario");
-        itemManual.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                handleHelpAction(event);
-            }
-        });
+        itemManual.setOnAction(event -> handleHelpAction(event));
 
         MenuItem itemAbout = new MenuItem("Acerca de...");
-        itemAbout.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                handleAboutAction(event);
-            }
-        });
+        itemAbout.setOnAction(event -> handleAboutAction(event));
 
-        // Añadimos el menú
         globalMenu.getItems().addAll(
                 itemAddCart,
                 itemInforme,
@@ -543,15 +495,12 @@ public class BookViewController {
                 itemAbout
         );
 
-        // Asignamos los eventos al panel
         if (rootPane != null) {
             rootPane.setOnContextMenuRequested(event -> {
-                // Mostrar el menú donde se ha hecho clic
                 globalMenu.show(rootPane, event.getScreenX(), event.getScreenY());
                 event.consume();
             });
 
-            // Con esto ocultamos el menú si se hace click izquierdo fuera
             rootPane.setOnMousePressed(event -> {
                 if (event.isPrimaryButtonDown() && globalMenu.isShowing()) {
                     globalMenu.hide();
@@ -565,17 +514,12 @@ public class BookViewController {
      * mostrar y habilitar el botón de escribir opinión.
      */
     public void onCommentDeleted() {
-        LOGGER.info("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
+        LogInfo.getInstance().logInfo("Notificación recibida: Comentario borrado. Reactivando botón de opinar.");
 
         if (btnAddComment != null) {
-            // 1. Lo hacemos visible de nuevo
             btnAddComment.setVisible(true);
             btnAddComment.setManaged(true);
-
-            // 2. IMPORTANTE: Lo rehabilitamos (estaba en setDisable(true) tras publicar)
             btnAddComment.setDisable(false);
-
-            // 3. Opcional: Solicitar foco para que el usuario vea que ha vuelto
             btnAddComment.requestFocus();
         }
     }

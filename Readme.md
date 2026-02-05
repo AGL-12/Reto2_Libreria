@@ -66,7 +66,7 @@ Proyecto realizado para el Reto 2 (2026). Distribución de responsabilidades:
 
 * **Alex:** Ventana Principal, Componente Header y Componente de Estrellas (Valoración).
 * **Ander:** Lógica del Carrito de Compra, Historial de Pedidos y Detalle de Pedido.
-* **Mikel:** Gestión de Comentarios (`BookViewController`, `CommentViewController`) y Lógica de Opiniones.
+* **Mikel:** Gestión de Comentarios (`BookViewController`, `CommentViewController`), Lógica de Opiniones, menú, click derecho y jasper.
 * **Unai:** Panel de Administración (Gestión de Libros y Usuarios).
 
 

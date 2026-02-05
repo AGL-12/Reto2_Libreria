@@ -29,13 +29,18 @@ import model.Profile;
 import model.UserSession;
 import util.LogInfo;
 import util.UtilGeneric;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
 /**
  * Controlador para la vista individual de un comentario (CommentView.fxml).
+ * <p>
  * Esta clase gestiona la visualización de cada comentario en la lista,
  * permitiendo ver la información del autor, la fecha y el contenido. También
  * controla la lógica para editar o eliminar el comentario si el usuario actual
  * es el propietario o un administrador.
+ * </p>
  *
  * * @author mikel
  */
@@ -61,6 +66,12 @@ public class CommentViewController implements Initializable {
     private final ClassDAO dao = new DBImplementation();
     private boolean isEditing = false;
 
+    /**
+     * Establece el controlador padre (BookViewController) para poder
+     * comunicarle cambios, como la eliminación de un comentario.
+     *
+     * * @param parent El controlador de la vista de libro.
+     */
     public void setParent(BookViewController parent) {
         this.parentController = parent;
     }
@@ -193,58 +204,83 @@ public class CommentViewController implements Initializable {
     }
 
     /**
-     * Maneja el evento del botón "Editar" (o "Guardar"). Si no se está
-     * editando, activa el modo edición (habilita texto y estrellas). Si ya se
-     * está editando, guarda los cambios en la base de datos y actualiza la
-     * vista.
+     * Maneja el evento del botón "Editar" (o "Guardar").
+     * <p>
+     * Si no se está editando, activa el modo edición (habilita texto y
+     * estrellas). Si ya se está editando, guarda los cambios en la base de
+     * datos y actualiza la vista.
+     * </p>
      *
      * * @param event El evento de acción generado por el botón.
      */
     @FXML
     private void handleEdit(ActionEvent event) {
         if (!isEditing) {
-            // Modo para empezar a editar
+            // --- ACTIVAR MODO EDICIÓN ---
             LogInfo.getInstance().logInfo("Usuario inició edición del comentario.");
             isEditing = true;
-
-            // Habilitamos la escritura para que se pueda editar
             txtComment.setEditable(true);
             txtComment.requestFocus();
+
             if (!txtComment.getStyleClass().contains("comment-edit-mode")) {
                 txtComment.getStyleClass().add("comment-edit-mode");
             }
-            // Habilitamos edición de estrellas
+
             if (starRateController != null) {
                 starRateController.setEditable(true);
             }
 
-            // Cambiamos los botones
             btnEdit.setText("Guardar");
             btnDelete.setText("Cancelar");
 
         } else {
-            // Guardamos cambios
+            // --- GUARDAR CAMBIOS ---
             LogInfo.getInstance().logInfo("Intentando guardar cambios del comentario...");
             String nuevoTexto = txtComment.getText();
 
             if (nuevoTexto.trim().isEmpty()) {
-                UtilGeneric.getInstance().showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING,"Error");
+                UtilGeneric.getInstance().showAlert("El comentario no puede estar vacío.", Alert.AlertType.WARNING, "Error");
                 return;
             }
+
+            // Bloqueamos botón para evitar doble clic
+            btnEdit.setDisable(true);
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        // Actualizar base de datos y el objeto
+                        // 1. Actualizamos el objeto con los datos de la interfaz
                         currentComment.setCommentary(nuevoTexto);
+
+                        // IMPORTANTE: Recogemos la valoración de las estrellas
+                        if (starRateController != null) {
+                            float nuevaNota = (float) starRateController.getValueUser();
+                            currentComment.setValuation(nuevaNota);
+                        }
+
+                        // 2. Guardamos en Base de Datos
                         dao.updateComment(currentComment);
 
-                        // Vuelve al estado normal
-                        Platform.runLater(() -> finalizarEdicion());
+                        // 3. Volvemos al hilo de UI para cerrar la edición
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                btnEdit.setDisable(false);
+                                finalizarEdicion();
+                                showAlert("Cambios guardados correctamente.", Alert.AlertType.INFORMATION);
+                            }
+                        });
 
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LogInfo.getInstance().logSevere("Error al guardar el comentario en BD", e);
-                        Platform.runLater(() -> UtilGeneric.getInstance().showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR, "Error"));
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                UtilGeneric.getInstance().showAlert("Error al guardar: " + e.getMessage(), Alert.AlertType.ERROR, "Error");
+                                btnEdit.setDisable(false);
+                            }
+                        });
                     }
                 }
             }).start();
@@ -252,52 +288,80 @@ public class CommentViewController implements Initializable {
     }
 
     /**
-     * Maneja el evento del botón "Borrar" (o "Cancelar"). Si se está en modo
-     * edición, funciona como botón "Cancelar" y revierte los cambios. Si está
-     * en modo normal, pide confirmación para eliminar el comentario de la BD.
+     * Maneja el evento del botón "Borrar" (o "Cancelar").
+     * <p>
+     * Si se está en modo edición, funciona como botón "Cancelar" y revierte los
+     * cambios. Si está en modo normal, pide confirmación para eliminar el
+     * comentario de la BD.
+     * </p>
      *
      * * @param event El evento de acción generado por el botón.
      */
     @FXML
-    private void handleDelete(ActionEvent event) {
+    private void handleDelete(final ActionEvent event) {
         if (isEditing) {
             // Modo para cancelar la edición
             LogInfo.getInstance().logInfo("Edición cancelada por el usuario.");
             txtComment.setText(currentComment.getCommentary());
             finalizarEdicion();
-
         } else {
-            // Lógica de borrar comentario
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Borrar");
-            alert.setHeaderText("¿Seguro que quieres borrarlo?");
-            alert.setContentText("No se puede deshacer.");
+            LogInfo.getInstance().logInfo("Iniciando proceso de borrado de comentario.");
+            // 1. Alerta de confirmación personalizada con logo
+            Alert conf = new Alert(Alert.AlertType.CONFIRMATION);
+            conf.setTitle("Borrar");
+            conf.setHeaderText(null);
+            conf.setContentText("¿Seguro que quieres borrarlo? No se puede deshacer.");
 
-            Optional<ButtonType> result = alert.showAndWait();
+            try {
+                Image logo = new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"));
+                ImageView view = new ImageView(logo);
+                view.setFitHeight(50);
+                view.setPreserveRatio(true);
+                conf.setGraphic(view);
+                ((Stage) conf.getDialogPane().getScene().getWindow()).getIcons().add(logo);
+            } catch (Exception e) {
+                LogInfo.getInstance().logWarning("No se pudo cargar el logo en la alerta de confirmación.");
+            }
+
+            Optional<ButtonType> result = conf.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                try {
-                    // 1. Borrar de la base de datos
-                    dao.deleteComment(currentComment);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Operación de Base de Datos
+                            dao.deleteComment(currentComment);
 
-                    // 2. Borrar visualmente (Método seguro)
-                    Node source = (Node) event.getSource();
-                    Node fichaComentario = source.getParent().getParent();
-                    if (fichaComentario != null && fichaComentario.getParent() != null) {
-                        ((javafx.scene.layout.Pane) fichaComentario.getParent()).getChildren().remove(fichaComentario);
+                            // Actualización de la Interfaz
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Node source = (Node) event.getSource();
+                                    Node tarjetaEntera = source.getParent().getParent();
+
+                                    if (tarjetaEntera.getParent() != null) {
+                                        ((javafx.scene.layout.Pane) tarjetaEntera.getParent()).getChildren().remove(tarjetaEntera);
+                                    }
+
+                                    // Avisar al padre si existe
+                                    if (parentController != null) {
+                                        parentController.onCommentDeleted();
+                                    }
+
+                                    UtilGeneric.getInstance().showAlert("Comentario borrado correctamente.", Alert.AlertType.INFORMATION, "Exito");
+                                }
+                            });
+                        } catch (final Exception e) {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    LogInfo.getInstance().logSevere("Error crítico al intentar borrar el comentario", e);
+                                    UtilGeneric.getInstance().showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR, "Error");
+                                }
+                            });
+                        }
                     }
-
-                    // 3. AVISAR AL PADRE (BookViewController)
-                    if (parentController != null) {
-                        System.out.println("Enviando aviso al padre para habilitar botón...");
-                        parentController.onCommentDeleted();
-                    } else {
-                        System.err.println("Error: parentController es NULL. No se puede avisar.");
-                    }
-
-                } catch (Exception e) {
-                    LogInfo.getInstance().logSevere("Error crítico al borrar comentario", e);
-                    UtilGeneric.getInstance().showAlert("Error al borrar: " + e.getMessage(), Alert.AlertType.ERROR, "Error");
-                }
+                }).start();
             }
         }
     }
@@ -314,4 +378,30 @@ public class CommentViewController implements Initializable {
         btnDelete.setText("Borrar"); // O pon tu icono "🗑️"
     }
 
+    /**
+     * Muestra una alerta simple al usuario, intentando cargar el logo
+     * corporativo.
+     *
+     * * @param message El mensaje a mostrar.
+     * @param type El tipo de alerta (ERROR, WARNING, INFORMATION).
+     */
+    private void showAlert(String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.setTitle("Book&Bugs");
+
+        try {
+            Image logo = new Image(getClass().getResourceAsStream("/images/Book&Bugs_Logo.png"));
+            ImageView view = new ImageView(logo);
+            view.setFitHeight(50);
+            view.setPreserveRatio(true);
+            alert.setGraphic(view);
+            ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(logo);
+        } catch (Exception e) {
+            LogInfo.getInstance().logWarning("Error no crítico al cargar la imagen en showAlert: " + e.getMessage());
+        }
+
+        alert.showAndWait();
+    }
 }
