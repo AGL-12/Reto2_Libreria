@@ -8,7 +8,6 @@ import javax.persistence.*;
 /**
  * Representa un comentario y valoración realizado por un usuario sobre un libro.
  * Esta entidad utiliza una clave primaria compuesta definida en {@link CommentateId}.
- * * @author reto din/adt
  */
 @Entity
 @Table(name = "commentate")

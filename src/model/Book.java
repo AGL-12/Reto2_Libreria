@@ -8,7 +8,6 @@ import javax.persistence.*;
  * Representa la entidad Libro en el sistema.
  * Esta clase almacena toda la información relativa a un libro, incluyendo su 
  * relación con autores y los comentarios realizados por los usuarios.
- * * @author reto din/adt
  */
 @Entity
 @Table(name = "book")

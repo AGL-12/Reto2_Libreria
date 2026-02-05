@@ -7,7 +7,6 @@ import java.util.List;
  * Gestiona la sesión del usuario actual y su carrito de la compra.
  * Implementa el patrón Singleton para asegurar que solo exista una instancia 
  * de la sesión durante la ejecución de la aplicación.
- * * @author reto din/adt
  */
 public class UserSession {
 
