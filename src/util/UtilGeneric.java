@@ -59,13 +59,37 @@ public class UtilGeneric {
      * @param type El tipo de alerta (ERROR, INFORMATION, WARNING, etc.).
      * @param title El título de la cabecera de la alerta.
      */
-    public void showAlert(String message, Alert.AlertType type, String title) {
-        Alert alert = new Alert(type);
-        alert.setTitle("Gestión de librería");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
-        alert.showAndWait();
+public void showAlert(String message, Alert.AlertType type, String title) {
+    Alert alert = new Alert(type);
+    alert.setTitle("Book&Bugs - " + title);
+    alert.setHeaderText(null); // Limpio para que quede más profesional
+    alert.setContentText(message);
+
+    // --- LÓGICA DEL LOGO ---
+    try {
+        String imagePath = "/images/Book&Bugs_Logo.png";
+        java.io.InputStream imageStream = getClass().getResourceAsStream(imagePath);
+
+        if (imageStream != null) {
+            Image logo = new Image(imageStream);
+            ImageView imageView = new ImageView(logo);
+
+            // Ajustar tamaño para la alerta
+            imageView.setFitHeight(50);
+            imageView.setPreserveRatio(true);
+            alert.setGraphic(imageView);
+
+            // Poner el logo también en el icono de la barra de la ventana de la alerta
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(logo);
+        }
+    } catch (Exception e) {
+        // Si falla el logo, al menos sale la alerta normal
+        LogInfo.getInstance().logWarning("No se pudo cargar el logo en la alerta: " + e.getMessage());
     }
+
+    alert.showAndWait();
+}
 
     /**
      * Cierra la aplicación de forma segura. Registra el evento en el log,
