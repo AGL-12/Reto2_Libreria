@@ -46,12 +46,16 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 
 //Imports para click derecho
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
+import util.LogInfo;
+import util.UtilGeneric;
 
 /**
  * Controlador principal para la vista detallada de un libro (BookView.fxml).
@@ -213,12 +217,12 @@ public class BookViewController {
      */
     void setData(Book book) {
         this.currentBook = book;
-        LOGGER.info("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
+        LogInfo.getInstance().logInfo("Cargando datos del libro: " + (book != null ? book.getTitle() : "NULL"));
         // 1. Cargar la imagen (con protección por si falla el archivo)
         try {
             if (book.getCover() != null && !book.getCover().isEmpty()) {
                 Image originalImage = new Image(getClass().getResourceAsStream("/images/" + book.getCover()));
-                cutOutImage(coverBook, originalImage, 140, 210);
+                UtilGeneric.getInstance().cutOutImage(coverBook, originalImage, 140, 210);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error al procesar imagen del libro", e);
@@ -387,76 +391,7 @@ public class BookViewController {
      */
     @FXML
     private void handleReportAction(ActionEvent event) {
-        LOGGER.info("Abriendo Manual de Usuario (PDF)...");
-
-        try {
-            String resourcePath = "/documents/Manual_Usuario.pdf";
-
-            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
-
-            if (pdfStream == null) {
-                LOGGER.severe("No se encontró el manual en: " + resourcePath);
-                showAlert("Error: No se encuentra el archivo en: " + resourcePath, Alert.AlertType.ERROR);
-                return;
-            }
-
-            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
-            tempFile.deleteOnExit();
-
-            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(tempFile);
-            } else {
-                showAlert("Error: No se puede abrir el visor de PDF.", Alert.AlertType.ERROR);
-            }
-
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Excepción al abrir manual PDF", e);
-            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
-    }
-
-    /**
-     * Método auxiliar para recortar y escalar la imagen de portada. Aplica un
-     * recorte "Center Crop" para que la imagen llene el espacio sin deformarse.
-     *
-     * * @param imageView El componente visual donde irá la imagen.
-     * @param image La imagen original.
-     * @param targetWidth Ancho deseado.
-     * @param targetHeight Alto deseado.
-     */
-    private void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
-        // Establecemos el tamaño final que tendrá el ImageView
-        imageView.setFitWidth(targetWidth);
-        imageView.setFitHeight(targetHeight);
-
-        double originalWidth = image.getWidth();
-        double originalHeight = image.getHeight();
-
-        double scaleX = targetWidth / originalWidth;
-        double scaleY = targetHeight / originalHeight;
-
-        // Elegimos el factor de escala mayor asi se rellenara todo el huecos
-        double scale = Math.max(scaleX, scaleY);
-
-        // Calculamos el tamaño que tendría la imagen
-        double scaledWidth = originalWidth * scale;
-        double scaledHeight = originalHeight * scale;
-
-        // Calculamos el la ventana de recorte sobre la imagen original
-        double viewportWidth = targetWidth / scale;
-        double viewportHeight = targetHeight / scale;
-
-        // Centramos el recorte
-        double viewportX = (originalWidth - viewportWidth) / 2;
-        double viewportY = (originalHeight - viewportHeight) / 2;
-
-        // Aplicamos la imagen y el recorte
-        imageView.setImage(image);
-        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
-        imageView.setSmooth(true);
-        imageView.setPreserveRatio(false); // Se desactiva para que haga caso a viewport
+        UtilGeneric.getInstance().helpAction();
     }
 
     /**
@@ -469,21 +404,21 @@ public class BookViewController {
     private void handleAddToCart(ActionEvent event) {
         //Verifica que hay un libro seleccionado
         if (currentBook == null) {
-            LOGGER.severe("Error: currentBook es NULL.");
+            LogInfo.getInstance().logWarning("Error: currentBook es NULL.");
             showAlert("Error: No se ha cargado ningún libro.", Alert.AlertType.ERROR);
             return;
         }
 
         // Validar que el usuario puede comprar
         if (!UserSession.getInstance().isLoggedIn()) {
-            LOGGER.warning("Intento de compra sin login.");
+            LogInfo.getInstance().logWarning("Intento de compra sin login.");
             showAlert("Debes iniciar sesión para comprar.", Alert.AlertType.WARNING);
             return;
         }
 
         try {
             UserSession.getInstance().addToCart(currentBook);
-            LOGGER.info("Libro añadido al carrito exitosamente.");
+            LogInfo.getInstance().logInfo("Libro añadido al carrito exitosamente.");
             showAlert("¡Libro añadido al carrito!", Alert.AlertType.INFORMATION);
 
         } catch (Exception e) {
@@ -492,143 +427,28 @@ public class BookViewController {
         }
     }
 
-    @FXML
-    private void handleExit(ActionEvent event) {
-        LOGGER.info("Cerrando aplicación desde el menú.");
-        javafx.application.Platform.exit();
-        System.exit(0);
-    }
-
     /**
      * Genera un informe técnico de stock utilizando JasperReports. Conecta
      * directamente a la base de datos y lanza el visor de informes.
-     *
-     * * @param event Evento del menú.
      */
     @FXML
     private void handleInformeTecnico(ActionEvent event) {
-        LOGGER.info("Generando informe técnico JasperReports...");
-        Connection con = null;
-        try {
-            // Conecta a la base de datos
-            String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
-            String user = "root";
-            String pass = "abcd*1234";
-
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(url, user, pass);
-
-            //Cargamos el archivo.JRXML
-            InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
-
-            if (reportStream == null) {
-                LOGGER.severe("No se encuentra el archivo .jrxml");
-                showAlert("Error: No se encuentra /reports/InformeTecnicoDB.jrxml", Alert.AlertType.ERROR);
-                return;
-            }
-
-            // Compilamos
-            JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
-
-            // Llenamos el informe pasando la conexión 'con' para que ejecute la Query que hemos puesto
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
-
-            //Lo mostramos
-            JasperViewer.viewReport(jasperPrint, false);
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error generando informe Jasper", e);
-            showAlert("Error al generar informe: " + e.getMessage(), Alert.AlertType.ERROR);
-        } finally {
-            try {
-                if (con != null) {
-                    con.close();
-                }
-            } catch (SQLException ex) {
-            }
-        }
+        UtilGeneric.getInstance().getJasperReport();
     }
 
     @FXML
     private void handleHelpAction(ActionEvent event) {
-        LOGGER.info("Cerrando sesión de usuario...");
-        try {
-            //Ruta para el pdf del manual
-            String resourcePath = "/documents/Manual_Usuario.pdf";
-
-            // Cargamos el archivo
-            InputStream pdfStream = getClass().getResourceAsStream(resourcePath);
-
-            if (pdfStream == null) {
-                showAlert("Error: No se encuentra el manual en: " + resourcePath, Alert.AlertType.ERROR);
-                return;
-            }
-
-            // Creamos archivo temporal y abrimos
-            File tempFile = File.createTempFile("Manual_Usuario", ".pdf");
-            tempFile.deleteOnExit();
-            Files.copy(pdfStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(tempFile);
-            } else {
-                showAlert("No se puede abrir el PDF automáticamente.", Alert.AlertType.ERROR);
-            }
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Excepción al intentar abrir el Manual de Usuario", e);
-            showAlert("Error al abrir el manual: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
+        UtilGeneric.getInstance().helpAction();
     }
 
-@FXML
+    @FXML
     private void handleAboutAction(ActionEvent event) {
-        LOGGER.info("Mostrando ventana 'Acerca de...'."); // Log de inicio
+        UtilGeneric.getInstance().aboutAction();
+    }
 
-        String mensaje = "Book&Bugs - Gestión de Librería v1.0\n\n"
-                       + "Desarrollado por el equipo de desarrollo:\n"
-                       + "• Alex\n"
-                       + "• Unai\n"
-                       + "• Ander\n"
-                       + "• Mikel\n\n"
-                       + "Proyecto Reto 2 - 2025";
-        
-        // Creamos la alerta
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Acerca de...");
-        alert.setHeaderText("Información del Proyecto");
-        alert.setContentText(mensaje);
-        
-        // --- AÑADIR LOGO ---
-        try {
-            String imagePath = "/images/Book&Bugs_Logo.png";
-            // Usar getResourceAsStream es más seguro para comprobar nulos antes de crear la Image
-            java.io.InputStream imageStream = getClass().getResourceAsStream(imagePath);
-            
-            if (imageStream != null) {
-                Image logo = new Image(imageStream);
-                ImageView imageView = new ImageView(logo);
-                
-                // Ajustar tamaño para que no salga gigante
-                imageView.setFitHeight(80); 
-                imageView.setPreserveRatio(true);
-                
-                // Poner la imagen a la izquierda del texto
-                alert.setGraphic(imageView);
-                
-                // Opcional: Poner el logo también en el icono de la ventana de la alerta
-                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-                stage.getIcons().add(logo);
-            } else {
-                LOGGER.warning("No se encontró la imagen del logo en la ruta: " + imagePath);
-            }
-            
-        } catch (Exception e) {
-            // Si falla la imagen, registramos el warning pero la alerta sigue funcionando
-            LOGGER.log(Level.WARNING, "Error no crítico al cargar el logo en About: " + e.getMessage(), e);
-        }
-        
-        alert.showAndWait();
+    @FXML
+    private void handleExit(ActionEvent event) {
+        UtilGeneric.getInstance().exit();
     }
 
     /**
@@ -646,7 +466,7 @@ public class BookViewController {
         itemAddCart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                handleAddToCart(null);
+                handleAddToCart(event);
             }
         });
 

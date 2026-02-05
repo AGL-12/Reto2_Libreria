@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,10 +20,31 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.view.JasperViewer;
 
+/**
+ * Clase de utilidad genérica que centraliza funciones comunes para toda la
+ * aplicación. Implementa el patrón Singleton para asegurar una única instancia
+ * y acceso global a utilidades como alertas, cierre de aplicación, manuales y
+ * reportes.
+ *
+ * @version 1.0
+ */
 public class UtilGeneric {
 
     private static UtilGeneric instance;
 
+    /**
+     * Constructor privado para evitar la instanciación directa (Patrón
+     * Singleton).
+     */
+    private UtilGeneric() {
+    }
+
+    /**
+     * Obtiene la instancia única de la clase UtilGeneric. Si no existe, la
+     * crea; si existe, devuelve la actual.
+     *
+     * * @return La instancia única de UtilGeneric.
+     */
     public static UtilGeneric getInstance() {
         if (instance == null) {
             instance = new UtilGeneric();
@@ -30,6 +52,13 @@ public class UtilGeneric {
         return instance;
     }
 
+    /**
+     * Muestra una ventana de alerta genérica de JavaFX.
+     *
+     * * @param message El contenido del mensaje a mostrar.
+     * @param type El tipo de alerta (ERROR, INFORMATION, WARNING, etc.).
+     * @param title El título de la cabecera de la alerta.
+     */
     public void showAlert(String message, Alert.AlertType type, String title) {
         Alert alert = new Alert(type);
         alert.setTitle("Gestión de librería");
@@ -38,12 +67,21 @@ public class UtilGeneric {
         alert.showAndWait();
     }
 
+    /**
+     * Cierra la aplicación de forma segura. Registra el evento en el log,
+     * cierra la plataforma JavaFX y termina el proceso de la JVM.
+     */
     public void exit() {
         LogInfo.getInstance().logInfo("Cerrando Aplicacion.");
         Platform.exit();
         System.exit(0);
     }
 
+    /**
+     * Muestra la ventana emergente "Acerca de Nosotros". Incluye información
+     * sobre los desarrolladores del proyecto y carga el logo corporativo desde
+     * los recursos.
+     */
     public void aboutAction() {
         LogInfo.getInstance().logInfo("Mostrando ventana Acerca de Nosotros.");
 
@@ -92,7 +130,16 @@ public class UtilGeneric {
         alert.showAndWait();
     }
 
-        public void helpAction() {
+    /**
+     * Abre el Manual de Usuario en el visor de PDF predeterminado del sistema.
+     * <p>
+     * El método extrae el archivo PDF desde los recursos del JAR, lo copia a un
+     * archivo temporal y utiliza la clase {@link java.awt.Desktop} para
+     * abrirlo.
+     * </p>
+     */
+    public void helpAction() {
+        LogInfo.getInstance().logInfo("Iniciando proceso de apertura del Manual de Usuario...");
         try {
             // 1. Ruta al PDF del Manual (Asegúrate de que el archivo se llame así en src/documents)
             String resourcePath = "/documents/Manual_Usuario.pdf";
@@ -124,19 +171,25 @@ public class UtilGeneric {
         }
     }
 
+    /**
+     * Genera y visualiza un informe técnico de stock utilizando JasperReports.
+     * <p>
+     * Establece una conexión JDBC directa con la base de datos, compila el
+     * archivo fuente del reporte (.jrxml) y lanza el visor JasperViewer.
+     * </p>
+     */
     public void getJasperReport() {
+        LogInfo.getInstance().logInfo("Generando informe técnico JasperReports...");
         Connection con = null;
         try {
-            // 1. CONEXIÓN A BASE DE DATOS
-            // Ajusta el usuario y contraseña a los tuyos de MySQL
             String url = "jdbc:mysql://localhost:3306/bookstore?useSSL=false&serverTimezone=UTC";
             String user = "root";
-            String pass = "abcd*1234"; // <--- ¡PON TU CONTRASEÑA AQUÍ!
+            String pass = "abcd*1234";
 
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(url, user, pass);
 
-            // 2. CARGAR EL ARCHIVO .JRXML
+            // CARGAR EL ARCHIVO .JRXML
             // Busca en el paquete 'reports' que creamos anteriormente
             InputStream reportStream = getClass().getResourceAsStream("/reports/InformeTecnico.jrxml");
 
@@ -146,13 +199,13 @@ public class UtilGeneric {
                 return;
             }
 
-            // 3. COMPILAR Y LLENAR EL INFORME
+            // COMPILAR Y LLENAR EL INFORME
             JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
 
             // Llenamos el informe pasando la conexión 'con' para que ejecute la Query SQL
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
 
-            // 4. MOSTRAR VISOR
+            // MOSTRAR VISOR
             JasperViewer.viewReport(jasperPrint, false); // false = no cerrar la app al salir
 
         } catch (Exception e) {
@@ -166,5 +219,44 @@ public class UtilGeneric {
             } catch (SQLException ex) {
             }
         }
+    }
+
+    /**
+     * Ajusta el tamaño de la portada del libro y aplica un recorte centrado
+     * (Center Crop) para mantener la estética de la interfaz.
+     *
+     * * @param imageView El contenedor donde se mostrará la imagen.
+     * @param image La imagen original del libro.
+     * @param targetWidth Ancho objetivo.
+     * @param targetHeight Alto objetivo.
+     */
+    public void cutOutImage(ImageView imageView, Image image, double targetWidth, double targetHeight) {
+        // Establecemos el tamaño final que tendrá el ImageView
+        imageView.setFitWidth(targetWidth);
+        imageView.setFitHeight(targetHeight);
+
+        // Algoritmo "Center Crop"
+        double originalWidth = image.getWidth();
+        double originalHeight = image.getHeight();
+
+        double scaleX = targetWidth / originalWidth;
+        double scaleY = targetHeight / originalHeight;
+
+        // Elegimos el factor de escala mayor para asegurar que llenamos todo el hueco
+        double scale = Math.max(scaleX, scaleY);
+
+        // Calculamos el Viewport (la ventana de recorte sobre la imagen original)
+        double viewportWidth = targetWidth / scale;
+        double viewportHeight = targetHeight / scale;
+
+        // Centramos el recorte (x, y)
+        double viewportX = (originalWidth - viewportWidth) / 2;
+        double viewportY = (originalHeight - viewportHeight) / 2;
+
+        // Aplicamos la imagen y el recorte
+        imageView.setImage(image);
+        imageView.setViewport(new Rectangle2D(viewportX, viewportY, viewportWidth, viewportHeight));
+        imageView.setSmooth(true); // Suavizado para mejor calidad
+        imageView.setPreserveRatio(false); // Importante: desactivar para que obedezca al viewport
     }
 }
