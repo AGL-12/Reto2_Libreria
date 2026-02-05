@@ -42,8 +42,11 @@ import net.sf.jasperreports.view.JasperViewer;
 import util.LogInfo;
 
 /**
- * Controlador para la gestión de Libros. 
- * Corregido para asegurar vinculación con BookCRUDWindow.fxml.
+ * Controlador de la ventana de gestión de libros.
+ * Hace la operación de crear y modificar libros.
+ * Ventana solo accesible para el administrador.
+ * * @author unai azkorra
+ * @version 1.2
  */
 public class BookCRUDWindowController implements Initializable {
 
@@ -58,23 +61,29 @@ public class BookCRUDWindowController implements Initializable {
     private Book libroActual;
     private final String RUTA_IMAGENES = "src/images/";
     private ContextMenu globalMenu;
+    
+    // Bandera para evitar que la alerta de búsqueda se dispare múltiples veces (foco + enter)
+    private boolean buscando = false;
 
+    /**
+     * Metodo para inicializar la ventana con la configuración necesaria.
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Enlazar acciones de botones principales
         btnConfirm.setOnAction(this::confirmAction);
         btnReturn.setOnAction(this::returnAction);
         
         initGlobalContextMenu();
 
-        // Lógica de búsqueda automática en el ISBN
+        // Lógica de búsqueda unificada para evitar duplicidad de alertas
         txtISBN.setOnAction(event -> {
-            if (!"create".equals(modo)) buscarLibro();
+            if (!"create".equals(modo)) ejecutarBusquedaSegura();
         });
 
         txtISBN.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            // Si pierde el foco (newVal == false), no está vacío y no estamos en modo crear
             if (!newVal && !txtISBN.getText().isEmpty() && !"create".equals(modo)) {
-                buscarLibro();
+                ejecutarBusquedaSegura();
             }
         });
 
@@ -84,11 +93,25 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     /**
-     * Configura el estado de la ventana.
+     * Evita que la alerta se abra varias veces sincronizando los eventos de Foco y Action.
+     */
+    private void ejecutarBusquedaSegura() {
+        if (buscando) return;
+        buscando = true;
+        
+        Platform.runLater(() -> {
+            buscarLibro();
+            buscando = false;
+        });
+    }
+
+    /**
+     * Establece el modo de la ventana.
+     * @param modo "create" o "modify"
      */
     public void setModo(String modo) {
         this.modo = modo;
-        limpiarCampos(); 
+        limpiarCampos();
 
         if ("create".equals(modo)) {
             btnConfirm.setText("Añadir Libro");
@@ -96,12 +119,10 @@ public class BookCRUDWindowController implements Initializable {
             txtISBN.setDisable(false); 
         } else if ("modify".equals(modo)) {
             btnConfirm.setText("Modificar Libro");
-            habilitarCampos(false); 
+            habilitarCampos(false);
             txtISBN.setDisable(false);
         }
     }
-
-    // --- MÉTODOS VINCULADOS AL FXML ---
 
     @FXML
     private void handleExit(ActionEvent event) { 
@@ -109,7 +130,7 @@ public class BookCRUDWindowController implements Initializable {
         Platform.exit();
         System.exit(0);
     }
-
+    
     @FXML
     private void handleCreateAction(ActionEvent event) {
         setModo("create");
@@ -159,15 +180,15 @@ public class BookCRUDWindowController implements Initializable {
             String nombrePortada = (archivoPortada != null) ? guardarImagenEnDisco(archivoPortada) : (libroActual != null ? libroActual.getCover() : "default.png");
 
             Book libro = new Book(
-                Long.parseLong(txtISBN.getText()), 
-                nombrePortada, 
-                txtTitle.getText(), 
-                autor, 
-                Integer.parseInt(txtPages.getText()), 
-                Integer.parseInt(txtStock.getText()), 
-                txtSinopsis.getText(), 
-                Float.parseFloat(txtPrice.getText()), 
-                txtEditorial.getText(), 
+                Long.parseLong(txtISBN.getText()),
+                nombrePortada,
+                txtTitle.getText(),
+                autor,
+                Integer.parseInt(txtPages.getText()),
+                Integer.parseInt(txtStock.getText()),
+                txtSinopsis.getText(),
+                Float.parseFloat(txtPrice.getText()),
+                txtEditorial.getText(),
                 0f
             );
 
@@ -179,7 +200,7 @@ public class BookCRUDWindowController implements Initializable {
                 mostrarAlerta("Éxito", "Libro actualizado correctamente.", Alert.AlertType.INFORMATION);
             }
             
-            setModo(this.modo); // Reinicia el modo actual (limpia y habilita)
+            setModo(this.modo); 
             
         } catch (NumberFormatException e) {
             mostrarAlerta("Error de formato", "Páginas, Stock y Precio deben ser números.", Alert.AlertType.ERROR);
@@ -199,8 +220,6 @@ public class BookCRUDWindowController implements Initializable {
             LogInfo.getInstance().logSevere("Error al volver al menú principal", ex);
         }
     }
-
-    // --- LÓGICA DE APOYO ---
 
     private void buscarLibro() {
         try {
@@ -280,6 +299,7 @@ public class BookCRUDWindowController implements Initializable {
     }
 
     @FXML private void dragOver(DragEvent e) { if (e.getDragboard().hasFiles()) e.acceptTransferModes(TransferMode.COPY); e.consume(); }
+    
     @FXML private void dropImage(DragEvent e) { 
         Dragboard db = e.getDragboard(); 
         if (db.hasFiles()) { 
@@ -288,6 +308,7 @@ public class BookCRUDWindowController implements Initializable {
         }
         e.setDropCompleted(db.hasFiles()); e.consume(); 
     }
+    
     @FXML private void uploadFrontPage(ActionEvent e) {
         FileChooser fc = new FileChooser(); 
         File f = fc.showOpenDialog(btnUploadFile.getScene().getWindow());
