@@ -22,7 +22,7 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public Profile logIn(String username, String password) throws MyFormException{
+    public Profile logIn(String username, String password) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         Profile userFound = null;
@@ -33,16 +33,20 @@ public class DBImplementation implements ClassDAO {
                     .setParameter("user", username)
                     .setParameter("pass", password)
                     .uniqueResult();
-            new SessionHolderThread(session,tx).start();
+            new SessionHolderThread(session, tx).start();
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
                 throw new MyFormException("El servidor está ocupado (Timeout).");
             }
-            
+
             LogInfo.getInstance().logSevere("Error en login DAO", e);
             throw new MyFormException("Error en el inicio de sesión.");
         }
@@ -56,22 +60,26 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public void signUp(Profile profile) throws MyFormException{
+    public void signUp(Profile profile) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
             session.save(profile);
-            new SessionHolderThread(session,tx).start();
+            new SessionHolderThread(session, tx).start();
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
                 throw new MyFormException("El servidor está ocupado (Timeout).");
             }
-            
+
             LogInfo.getInstance().logSevere("Error en login DAO", e);
             throw new MyFormException("Error en el inicio de sesión.");
         }
@@ -236,9 +244,10 @@ public class DBImplementation implements ClassDAO {
      * metodo para obtener todos los libros de la base de datos
      *
      * @return una lista con todos los libros
+     * @throws exception.MyFormException Para el controlador
      */
     @Override
-    public List<Book> getAllBooks() {
+    public List<Book> getAllBooks() throws MyFormException{
         Session session = HibernateUtil.getSessionFactory().openSession();
         List<Book> libros = new ArrayList<>();
         try {
@@ -256,7 +265,17 @@ public class DBImplementation implements ClassDAO {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (session.isOpen()) {
+                session.close();
+            }
+
+            if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
+                throw new MyFormException("El servidor está ocupado (Timeout).");
+            }
+
+            LogInfo.getInstance().logSevere("Error en login DAO", e);
+            throw new MyFormException("Error en el inicio de sesión.");
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -443,24 +462,32 @@ public class DBImplementation implements ClassDAO {
      * @throws exception.MyFormException para el controlador
      */
     @Override
-    public void updateComment(Commentate comment) throws MyFormException{
+    public void updateComment(Commentate comment) throws MyFormException {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
             session.update(comment);
-            new SessionHolderThread(session,tx).start();
+            tx.commit();
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
-            if (session.isOpen()) session.close();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) {
+                session.close();
+            }
 
             if (e.getCause() != null && e.getCause().toString().contains("TimeoutException")) {
-                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.",e);
+                LogInfo.getInstance().logSevere("¡POOL SATURADO! Timeout alcanzado.", e);
                 throw new MyFormException("El servidor está ocupado (Timeout).");
             }
-            
+
             LogInfo.getInstance().logSevere("Error en login DAO", e);
             throw new MyFormException("Error en el inicio de sesión.");
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 

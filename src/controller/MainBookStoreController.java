@@ -1,13 +1,17 @@
 package controller;
 
+import exception.MyFormException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -293,7 +297,12 @@ public class MainBookStoreController {
      * </p>
      */
     private void initRenderBooks() {
-        allBooks = dao.getAllBooks();
+        try {
+            allBooks = dao.getAllBooks();
+        } catch (MyFormException ex) {
+            LogInfo.getInstance().logSevere("Carga inicial: " + allBooks.size() + " libros recuperados de la BD.", ex);
+            UtilGeneric.getInstance().showAlert(ex.getMessage(), Alert.AlertType.ERROR, "Error");
+        }
         LogInfo.getInstance().logInfo("Carga inicial: " + allBooks.size() + " libros recuperados de la BD.");
 
         showBooks(allBooks);

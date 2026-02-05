@@ -1,8 +1,6 @@
 package controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import javafx.geometry.VerticalDirection;
+import exception.MyFormException;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -12,17 +10,13 @@ import javafx.stage.Stage;
 import main.Main;
 import model.Book;
 import model.ClassDAO;
-import model.Contain;
 import model.DBImplementation;
 import model.Order;
 import model.Profile;
 import model.User; // Importa tu modelo User
-import model.UserSession;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
@@ -41,7 +35,7 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     private Order testOrder;
 
     @BeforeClass
-    public static void setupSpec() {
+    public static void setupSpec() throws MyFormException {
         // 1. Limpieza preventiva
         Profile existente = dao.logIn(TEST_USER, TEST_PASS);
         if (existente != null) {
@@ -63,7 +57,7 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
     }
 
     @AfterClass
-    public static void tearDownSpec() {
+    public static void tearDownSpec() throws MyFormException {
         // Eliminación final tras todos los tests
         Profile existente = dao.logIn(TEST_USER, TEST_PASS);
         if (existente != null) {

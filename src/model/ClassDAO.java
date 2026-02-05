@@ -84,8 +84,9 @@ public interface ClassDAO {
      * Lista todos los libros disponibles en el catálogo.
      *
      * @return Lista de objetos Book.
+     * @throws exception.MyFormException Para el controlador
      */
-    public List<Book> getAllBooks();
+    public List<Book> getAllBooks() throws MyFormException;
 
     // --- GESTIÓN DE COMENTARIOS --
     /**
