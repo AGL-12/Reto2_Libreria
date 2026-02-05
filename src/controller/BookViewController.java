@@ -127,7 +127,6 @@ public class BookViewController {
     public void initialize() {
         LOGGER.logInfo("Inicializando BookViewController...");
         initContextMenu();
-        //initGlobalContextMenu();
     }
 
     /**
@@ -271,9 +270,13 @@ public class BookViewController {
             // Es Administrador -> NUNCA puede comprar
             btnAddToCart.setVisible(false);
             btnAddToCart.setManaged(false);
+            btnAddComment.setVisible(false);
+            btnAddComment.setManaged(false);
 
         } else {
             // Es Usuario Normal (o invitado) -> Depende del Stock
+            btnAddComment.setVisible(true);
+            btnAddComment.setManaged(true);
             if (book.getStock() > 0) {
                 // Hay stock -> Botón VISIBLE
                 btnAddToCart.setVisible(true);
