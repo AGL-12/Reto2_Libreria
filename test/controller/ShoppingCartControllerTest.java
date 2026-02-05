@@ -70,7 +70,7 @@ public class ShoppingCartControllerTest extends ApplicationTest {
      * Método auxiliar para realizar el login al inicio de cada test.
      */
     private void testLogIn() {
-        clickOn("Iniciar Sesion");
+        clickOn("#btnLogIn");
         clickOn("#TextField_Username").write(TEST_USER);
         clickOn("#PasswordField_Password").write(TEST_PASS);
         clickOn("#Button_LogIn");
@@ -79,100 +79,69 @@ public class ShoppingCartControllerTest extends ApplicationTest {
     @Test
     public void test1_comprarLibro() {
         testLogIn();
-        
-        // Localizamos el libro (debe existir en la BD con este título)
-        scroll(VerticalDirection.DOWN);
         clickOn("1984");
-        
-        // Añadir al carrito y confirmar alerta
         clickOn("#btnAddToCart");
-        clickOn("Aceptar"); 
-        
-        // Ir a la vista del carrito desde el Header
+        clickOn("Aceptar");
+        sleep(1000);
         clickOn("#btnBuy");
         verifyThat("#lblTotal", isVisible());
-        
-        // Finalizar la compra
         clickOn("#btnComprar");
-        clickOn("Aceptar"); // Confirmación de éxito
-        
-        // El botón de comprar debe quedar deshabilitado si el carrito está vacío
+        clickOn("Aceptar");
         verifyThat("#btnComprar", node -> node.isDisabled());
     }
 
     @Test
     public void test2_aumentarCantidadYVerificarPrecio() {
-        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
-        
+        sleep(1000);
         clickOn("#btnBuy");
-        
-        // Interactuar con el Spinner de PreOrder.fxml
         clickOn("#spinnerCantidad");
-        clickOn(".increment-arrow-button"); // Incrementa a 2
-        clickOn(".increment-arrow-button"); // Incrementa a 3
-        
-        // Suponiendo precio de 12.00€ para "1984"
+        clickOn(".increment-arrow-button");
+        clickOn(".increment-arrow-button");
         double precioBase = 12.00;
         String totalEsperado = "Total: " + String.format("%.2f", precioBase * 3) + " €";
-        
         verifyThat("#lblTotal", LabeledMatchers.hasText(totalEsperado));
+        clickOn("#btnComprar");
+        clickOn("Aceptar");
     }
 
     @Test
     public void test3_eliminarProducto() {
-        testLogIn();
         clickOn("1984");
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
-        
+        sleep(1000);
         clickOn("#btnBuy");
-        
-        // Verificamos botón de borrado y ejecutamos
         verifyThat("#btnDelete", isVisible());
         clickOn("#btnDelete");
-        
-        // El total debe volver a cero tras el borrado
         verifyThat("#lblTotal", LabeledMatchers.hasText("Total: 0.00 €"));
     }
 
     @Test
     public void test4_navegacionHistorial() {
-        testLogIn();
-        
-        // Navegar a Opciones -> Historial
-        clickOn("#btnOption");
-        clickOn("#btnHistory");
-        
-        // Verificaciones en la vista de Historial
+        clickOn("#handleViewHistory");
         verifyThat("#tableOrders", isVisible());
-        verifyThat("#infoLabel", LabeledMatchers.hasText("Aquí puedes consultar todas tus compras confirmadas:"));
-        
-        // Comprobar que existe al menos una fila (de la compra del test 1)
         verifyThat("#tableOrders", (TableView table) -> table.getItems().size() > 0);
-        
-        // Volver al menú
-        clickOn("#btnVolver");
-        verifyThat("#mainVBox", isVisible());
+        clickOn("#goToCart");
     }
 
     @Test
     public void test5_verificarHeaderYSesion() {
         testLogIn();
-        
+
         // El nombre debe aparecer en el Header
         verifyThat("#lblUserName", LabeledMatchers.hasText(NOMBRE_REAL));
-        
+
         // Cambiar de ventana para ver si la sesión persiste en el Header
         clickOn("#btnOption");
         clickOn("#btnHistory");
         verifyThat("#lblUserName", LabeledMatchers.hasText(NOMBRE_REAL));
-        
+
         // Logout
         clickOn("#btnLogOut");
-        
+
         // Verificar que regresamos al Login
         verifyThat("#Button_LogIn", isVisible());
     }

@@ -104,23 +104,22 @@ public class ShoppingHistoryControllerTest extends ApplicationTest {
 
     @Test
     public void verificarHistorilaLleno() {
-
+        TableView<Order> tabla = lookup("#tableOrders").queryAs(TableView.class);
         String tituloLibro = "1984";
-        scroll(VerticalDirection.DOWN);
         clickOn(tituloLibro);
-        WaitForAsyncUtils.waitForFxEvents();
+        sleep(1000);
         clickOn("#btnAddToCart");
         clickOn("Aceptar");
         sleep(1000);
         clickOn("#btnBuy");
+        sleep(1000);
         clickOn("#btnComprar");
         clickOn("Aceptar");
         testNavegarAHistorial();
-        /*tabla = lookup("#tableOrders").queryAs(TableView.class);
-        assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());*/
+        tabla = lookup("#tableOrders").queryAs(TableView.class);
+        assertTrue("La tabla no debe estar vacía tras la compra", !tabla.getItems().isEmpty());
     }
 
-   
     private void testLogIn() {
         // Al empezar, el usuario ya existe gracias al @BeforeClass
         clickOn("#btnLogIn");
